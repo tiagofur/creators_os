@@ -1,0 +1,27 @@
+# Backend
+backend/
+
+# Frontend
+frontend/
+
+# Claude local settings (contains permissions for other projects)
+.claude/settings.local.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Env files
+.env
+.env.local
+*.env.local
+
+# Logs
+*.log
+logs/

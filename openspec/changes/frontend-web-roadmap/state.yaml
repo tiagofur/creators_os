@@ -1,0 +1,84 @@
+change: frontend-web-roadmap
+created: "2026-03-10"
+updated: "2026-03-10T14:00:00Z"
+
+artifacts:
+  explore: null
+  proposal:
+    path: openspec/changes/frontend-web-roadmap/proposal.md
+    status: complete
+    created: "2026-03-10"
+  spec:
+    path: openspec/changes/frontend-web-roadmap/spec.md
+    status: complete
+    created: "2026-03-10"
+  design:
+    path: openspec/changes/frontend-web-roadmap/design.md
+    status: complete
+    created: "2026-03-10"
+  tasks:
+    path: openspec/changes/frontend-web-roadmap/tasks.md
+    status: complete
+    created: "2026-03-10"
+  apply_progress:
+    path: openspec/changes/frontend-web-roadmap/apply-phase-1.md
+    status: complete
+    created: "2026-03-10"
+    phases_complete:
+      - phase: 1
+        tasks: TASK-101 through TASK-134
+        files_created: 130+
+        notes: >
+          Full Phase 1 implementation. Turborepo monorepo with 9 packages
+          (config, types, validations, core, i18n, api-client, stores, hooks, ui).
+          Next.js 15 App Router with next-intl i18n, OKLCH design system,
+          auth flows (login/register/forgot/reset/OAuth), app shell, onboarding wizard,
+          TanStack Query setup, MSW smoke tests.
+  verify_report: null
+  archive_report: null
+
+current_phase: apply-phase-1
+next_recommended: sdd-apply Phase 2
+
+summary: >
+  Phased 6-phase, 24-week frontend web roadmap for Ordo Creator OS.
+  Backend is complete. Frontend needs to be built from scratch using
+  Next.js 15 App Router, Turborepo monorepo, Tailwind CSS, shadcn/ui,
+  Zustand + React Query, and next-intl. Phases: (1) Foundation + Auth,
+  (2) Ideas + Pipeline, (3) AI Studio, (4) Analytics + Gamification +
+  Sponsorships, (5) Billing + Settings + Polish, (6) Performance + Testing
+  + Deployment. MVP (Phases 1-2) deliverable at week 9.
+
+risks:
+  - id: R1
+    title: Monorepo complexity overhead
+    likelihood: HIGH
+    impact: MEDIUM
+  - id: R2
+    title: API contract drift
+    likelihood: MEDIUM
+    impact: HIGH
+  - id: R3
+    title: Drag-and-drop performance on large boards
+    likelihood: MEDIUM
+    impact: MEDIUM
+  - id: R4
+    title: WebSocket reliability in serverless deployment
+    likelihood: MEDIUM
+    impact: HIGH
+  - id: R5
+    title: Stripe integration complexity
+    likelihood: LOW
+    impact: HIGH
+  - id: R6
+    title: i18n coverage gaps
+    likelihood: MEDIUM
+    impact: MEDIUM
+  - id: R7
+    title: Free tier gate consistency
+    likelihood: MEDIUM
+    impact: MEDIUM
+  - id: R8
+    title: Team bandwidth
+    likelihood: MEDIUM
+    impact: HIGH
