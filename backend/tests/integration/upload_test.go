@@ -18,12 +18,7 @@ import (
 	"github.com/ordo/creators-os/internal/server"
 	"github.com/ordo/creators-os/internal/service"
 	"github.com/ordo/creators-os/internal/storage"
-	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-
-	tcpostgres "github.com/testcontainers/testcontainers-go/modules/postgres"
-	tcredis "github.com/testcontainers/testcontainers-go/modules/redis"
 )
 
 // mockStorageClient is a test double for the StorageClient.
@@ -54,45 +49,12 @@ type uploadTestEnv struct {
 
 func setupUploadTestEnv(t *testing.T) *uploadTestEnv {
 	t.Helper()
-	ctx := context.Background()
 
-	pgContainer, err := tcpostgres.Run(ctx,
-		"postgres:16-alpine",
-		tcpostgres.WithDatabase("testdb"),
-		tcpostgres.WithUsername("test"),
-		tcpostgres.WithPassword("test"),
-		tcpostgres.WithInitScripts(
-			"../../db/migrations/000001_create_extensions.up.sql",
-			"../../db/migrations/000002_create_enums.up.sql",
-			"../../db/migrations/000003_create_users.up.sql",
-			"../../db/migrations/000004_create_user_sessions.up.sql",
-		),
-	)
-	require.NoError(t, err)
-	t.Cleanup(func() { _ = pgContainer.Terminate(ctx) })
-
-	pgURL, err := pgContainer.ConnectionString(ctx, "sslmode=disable")
-	require.NoError(t, err)
-
-	pool, err := pgxpool.New(ctx, pgURL)
-	require.NoError(t, err)
-	t.Cleanup(pool.Close)
-
-	redisContainer, err := tcredis.Run(ctx, "redis:7-alpine")
-	require.NoError(t, err)
-	t.Cleanup(func() { _ = redisContainer.Terminate(ctx) })
-
-	redisURL, err := redisContainer.ConnectionString(ctx)
-	require.NoError(t, err)
-
-	opts, err := redis.ParseURL(redisURL)
-	require.NoError(t, err)
-	redisClient := redis.NewClient(opts)
-	t.Cleanup(func() { _ = redisClient.Close() })
+	pool, redisClient, _ := startContainers(t)
 
 	jwtManager := buildEphemeralJWTManager(t)
 
-	asynqClient := asynq.NewClient(asynq.RedisClientOpt{Addr: opts.Addr})
+	asynqClient := asynq.NewClient(asynq.RedisClientOpt{Addr: redisClient.Options().Addr})
 	t.Cleanup(func() { _ = asynqClient.Close() })
 
 	userRepo := repository.NewUserRepository(pool)

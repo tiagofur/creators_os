@@ -3,41 +3,20 @@
 package integration_test
 
 import (
-	"context"
 	"encoding/json"
 	"net/http"
-	"net/http/httptest"
 	"testing"
 
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/ordo/creators-os/internal/domain"
-	"github.com/ordo/creators-os/internal/handler"
-	"github.com/ordo/creators-os/internal/repository"
-	"github.com/ordo/creators-os/internal/server"
-	"github.com/ordo/creators-os/internal/service"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-type searchTestEnv struct {
-	server *httptest.Server
-	pool   *pgxpool.Pool
-	env    *testEnv
-}
-
-func setupSearchTestEnv(t *testing.T) *searchTestEnv {
-	t.Helper()
-	base := setupTestEnv(t)
-	return &searchTestEnv{server: base.server, env: base}
-}
 
 func TestSearch_ReturnsRankedResults(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration test")
 	}
-
-	ctx := context.Background()
-	_ = ctx
 
 	// This test verifies the search endpoint responds correctly.
 	// Full seed + FTS requires the FTS migration (000030) applied.
@@ -131,13 +110,3 @@ func TestSearch_TypesFilter(t *testing.T) {
 	}
 }
 
-// Ensure that the SearchRepository and SearchService can be constructed standalone.
-func TestSearchRepository_CompileCheck(t *testing.T) {
-	// This confirms the types are wired correctly without needing a DB.
-	var _ repository.SearchRepository = (*struct {
-		repository.SearchRepository
-	}{})
-	var _ *service.SearchService = (*service.SearchService)(nil)
-	var _ *handler.SearchHandler = (*handler.SearchHandler)(nil)
-	_ = server.NewRouter // ensure package is referenced
-}

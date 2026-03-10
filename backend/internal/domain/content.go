@@ -60,30 +60,30 @@ const (
 
 // Content is the core content aggregate.
 type Content struct {
-	ID             uuid.UUID
-	WorkspaceID    uuid.UUID
-	CreatedBy      uuid.UUID
-	Title          string
-	Description    *string
-	Status         ContentStatus
-	ContentType    ContentType
-	PlatformTarget *PlatformType
-	ScheduledAt    *time.Time
-	PublishedAt    *time.Time
-	DueDate        *time.Time
-	Metadata       map[string]any
-	CreatedAt      time.Time
-	UpdatedAt      time.Time
-	DeletedAt      *time.Time
+	ID             uuid.UUID      `json:"id"`
+	WorkspaceID    uuid.UUID      `json:"workspace_id"`
+	CreatedBy      uuid.UUID      `json:"created_by"`
+	Title          string         `json:"title"`
+	Description    *string        `json:"description,omitempty"`
+	Status         ContentStatus  `json:"status"`
+	ContentType    ContentType    `json:"content_type"`
+	PlatformTarget *PlatformType  `json:"platform_target,omitempty"`
+	ScheduledAt    *time.Time     `json:"scheduled_at,omitempty"`
+	PublishedAt    *time.Time     `json:"published_at,omitempty"`
+	DueDate        *time.Time     `json:"due_date,omitempty"`
+	Metadata       map[string]any `json:"metadata,omitempty"`
+	CreatedAt      time.Time      `json:"created_at"`
+	UpdatedAt      time.Time      `json:"updated_at"`
+	DeletedAt      *time.Time     `json:"deleted_at,omitempty"`
 }
 
 // ContentAssignment links a user to a content item with a role.
 type ContentAssignment struct {
-	ID         uuid.UUID
-	ContentID  uuid.UUID
-	UserID     uuid.UUID
-	Role       string
-	AssignedAt time.Time
+	ID         uuid.UUID `json:"id"`
+	ContentID  uuid.UUID `json:"content_id"`
+	UserID     uuid.UUID `json:"user_id"`
+	Role       string    `json:"role"`
+	AssignedAt time.Time `json:"assigned_at"`
 }
 
 // ContentFilter holds optional filtering parameters for listing content.

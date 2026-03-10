@@ -1,5 +1,3 @@
-CREATE TYPE sponsorship_status AS ENUM ('lead', 'negotiating', 'active', 'completed', 'rejected');
-
 CREATE TABLE sponsorships (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     workspace_id UUID NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,

@@ -34,39 +34,39 @@ func RoleRank(r WorkspaceRole) int {
 
 // Workspace is the core workspace aggregate.
 type Workspace struct {
-	ID          uuid.UUID
-	OwnerID     uuid.UUID
-	Name        string
-	Slug        string
-	Description *string
-	AvatarURL   *string
-	Settings    map[string]any
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	DeletedAt   *time.Time
+	ID          uuid.UUID      `json:"id"`
+	OwnerID     uuid.UUID      `json:"owner_id"`
+	Name        string         `json:"name"`
+	Slug        string         `json:"slug"`
+	Description *string        `json:"description,omitempty"`
+	AvatarURL   *string        `json:"avatar_url,omitempty"`
+	Settings    map[string]any `json:"settings,omitempty"`
+	CreatedAt   time.Time      `json:"created_at"`
+	UpdatedAt   time.Time      `json:"updated_at"`
+	DeletedAt   *time.Time     `json:"deleted_at,omitempty"`
 }
 
 // WorkspaceMember represents a user's membership in a workspace.
 type WorkspaceMember struct {
-	ID          uuid.UUID
-	WorkspaceID uuid.UUID
-	UserID      uuid.UUID
-	Role        WorkspaceRole
-	JoinedAt    time.Time
+	ID          uuid.UUID     `json:"id"`
+	WorkspaceID uuid.UUID     `json:"workspace_id"`
+	UserID      uuid.UUID     `json:"user_id"`
+	Role        WorkspaceRole `json:"role"`
+	JoinedAt    time.Time     `json:"joined_at"`
 	// Denormalized for convenience
-	UserEmail string
-	UserName  string
+	UserEmail string `json:"user_email"`
+	UserName  string `json:"user_name"`
 }
 
 // WorkspaceInvitation represents a pending invitation to join a workspace.
 type WorkspaceInvitation struct {
-	ID          uuid.UUID
-	WorkspaceID uuid.UUID
-	InvitedBy   uuid.UUID
-	Email       string
-	Role        WorkspaceRole
-	Token       string
-	AcceptedAt  *time.Time
-	ExpiresAt   time.Time
-	CreatedAt   time.Time
+	ID          uuid.UUID     `json:"id"`
+	WorkspaceID uuid.UUID     `json:"workspace_id"`
+	InvitedBy   uuid.UUID     `json:"invited_by"`
+	Email       string        `json:"email"`
+	Role        WorkspaceRole `json:"role"`
+	Token       string        `json:"token"`
+	AcceptedAt  *time.Time    `json:"accepted_at,omitempty"`
+	ExpiresAt   time.Time     `json:"expires_at"`
+	CreatedAt   time.Time     `json:"created_at"`
 }
