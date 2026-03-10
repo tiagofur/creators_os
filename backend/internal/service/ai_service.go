@@ -1,0 +1,204 @@
+package service
+
+import (
+	"context"
+	"fmt"
+	"io"
+	"log/slog"
+
+	"github.com/google/uuid"
+	"github.com/ordo/creators-os/internal/ai"
+	"github.com/ordo/creators-os/internal/domain"
+	"github.com/ordo/creators-os/internal/repository"
+)
+
+// aiService implements AIService.
+type aiService struct {
+	aiRouter *ai.Router
+	aiRepo   repository.AIRepository
+	userRepo repository.UserRepository
+	logger   *slog.Logger
+}
+
+// NewAIService creates a new AIService with the required dependencies.
+func NewAIService(
+	aiRouter *ai.Router,
+	aiRepo repository.AIRepository,
+	userRepo repository.UserRepository,
+	logger *slog.Logger,
+) AIService {
+	if logger == nil {
+		logger = slog.Default()
+	}
+	return &aiService{
+		aiRouter: aiRouter,
+		aiRepo:   aiRepo,
+		userRepo: userRepo,
+		logger:   logger,
+	}
+}
+
+// CheckAndDeductCredits atomically deducts credits. Returns AI_002 (402) if insufficient.
+func (s *aiService) CheckAndDeductCredits(ctx context.Context, userID uuid.UUID, cost int) error {
+	return s.userRepo.DecrementAICredits(ctx, userID, cost)
+}
+
+// SendMessage streams the AI response into w, persisting both messages.
+func (s *aiService) SendMessage(ctx context.Context, conversationID uuid.UUID, userID uuid.UUID, content string, w io.Writer) error {
+	// Fetch conversation to verify ownership / existence
+	_, err := s.aiRepo.GetConversation(ctx, conversationID)
+	if err != nil {
+		return fmt.Errorf("ai_service: get conversation: %w", err)
+	}
+
+	// Estimate token cost for the user message
+	estimatedCost := s.aiRouter.EstimateTokens(content)
+	if estimatedCost < 1 {
+		estimatedCost = 1
+	}
+
+	// Deduct credits before calling the AI
+	if err := s.CheckAndDeductCredits(ctx, userID, estimatedCost); err != nil {
+		return err
+	}
+
+	// Persist the user message
+	userMsg := &domain.AIMessage{
+		ConversationID: conversationID,
+		Role:           "user",
+		Content:        content,
+		TokensUsed:     estimatedCost,
+	}
+	if _, err := s.aiRepo.AddMessage(ctx, userMsg); err != nil {
+		s.logger.WarnContext(ctx, "failed to persist user message", "err", err)
+	}
+
+	// Load conversation history for context
+	history, err := s.aiRepo.ListMessages(ctx, conversationID)
+	if err != nil {
+		s.logger.WarnContext(ctx, "failed to load conversation history", "err", err)
+	}
+
+	// Build message list from history (excluding the just-saved user message,
+	// which we'll pass as the final user turn)
+	msgs := make([]ai.Message, 0, len(history))
+	for _, m := range history {
+		msgs = append(msgs, ai.Message{Role: m.Role, Content: m.Content})
+	}
+
+	req := ai.CompletionRequest{
+		Messages:     msgs,
+		SystemPrompt: "You are a helpful AI assistant for content creators.",
+		MaxTokens:    2048,
+	}
+
+	// Capture streamed content for persistence
+	captureWriter := &capturingWriter{underlying: w}
+	if err := s.aiRouter.Stream(ctx, req, captureWriter); err != nil {
+		return fmt.Errorf("ai_service: stream: %w", err)
+	}
+
+	// Persist the assistant message with actual token count
+	actualOutputTokens := s.aiRouter.EstimateTokens(captureWriter.captured)
+	modelName := s.aiRouter.Name()
+	assistantMsg := &domain.AIMessage{
+		ConversationID: conversationID,
+		Role:           "assistant",
+		Content:        captureWriter.captured,
+		TokensUsed:     actualOutputTokens,
+		Model:          &modelName,
+	}
+	if _, err := s.aiRepo.AddMessage(ctx, assistantMsg); err != nil {
+		s.logger.WarnContext(ctx, "failed to persist assistant message", "err", err)
+	}
+
+	// Log discrepancy if actual tokens significantly exceed estimate
+	if actualOutputTokens > estimatedCost*3 {
+		s.logger.WarnContext(ctx, "token discrepancy: actual significantly exceeds estimate",
+			"estimated", estimatedCost,
+			"actual_output", actualOutputTokens,
+		)
+	}
+
+	return nil
+}
+
+// Brainstorm returns a non-streaming brainstorm completion for the given topic.
+func (s *aiService) Brainstorm(ctx context.Context, userID uuid.UUID, topic string) (string, error) {
+	prompt := fmt.Sprintf("Brainstorm content ideas about: %s\n\nProvide 5 creative, engaging ideas.", topic)
+	estimatedCost := s.aiRouter.EstimateTokens(prompt)
+	if estimatedCost < 1 {
+		estimatedCost = 1
+	}
+
+	if err := s.CheckAndDeductCredits(ctx, userID, estimatedCost); err != nil {
+		return "", err
+	}
+
+	req := ai.CompletionRequest{
+		Messages: []ai.Message{
+			{Role: "user", Content: prompt},
+		},
+		SystemPrompt: "You are a creative content strategy assistant for content creators.",
+		MaxTokens:    1024,
+	}
+
+	resp, err := s.aiRouter.Complete(ctx, req)
+	if err != nil {
+		return "", fmt.Errorf("ai_service: brainstorm: %w", err)
+	}
+	return resp.Content, nil
+}
+
+// GenerateScript returns a non-streaming script for the given title and description.
+func (s *aiService) GenerateScript(ctx context.Context, userID uuid.UUID, title, description string) (string, error) {
+	prompt := fmt.Sprintf("Write a detailed content script.\n\nTitle: %s\n\nDescription: %s\n\nInclude introduction, main sections, and a strong call-to-action.", title, description)
+	estimatedCost := s.aiRouter.EstimateTokens(prompt)
+	if estimatedCost < 1 {
+		estimatedCost = 1
+	}
+
+	if err := s.CheckAndDeductCredits(ctx, userID, estimatedCost); err != nil {
+		return "", err
+	}
+
+	req := ai.CompletionRequest{
+		Messages: []ai.Message{
+			{Role: "user", Content: prompt},
+		},
+		SystemPrompt: "You are an expert scriptwriter for digital content creators.",
+		MaxTokens:    2048,
+	}
+
+	resp, err := s.aiRouter.Complete(ctx, req)
+	if err != nil {
+		return "", fmt.Errorf("ai_service: generate script: %w", err)
+	}
+	return resp.Content, nil
+}
+
+// GetCreditBalance returns the AI credit balance for the given user.
+func (s *aiService) GetCreditBalance(ctx context.Context, userID uuid.UUID) (int, error) {
+	return s.userRepo.GetAICreditsBalance(ctx, userID)
+}
+
+// capturingWriter wraps an io.Writer and captures all written bytes for later use.
+type capturingWriter struct {
+	underlying io.Writer
+	captured   string
+}
+
+func (cw *capturingWriter) Write(p []byte) (int, error) {
+	cw.captured += string(p)
+	return cw.underlying.Write(p)
+}
+
+// Flush implements http.Flusher if the underlying writer supports it.
+func (cw *capturingWriter) Flush() {
+	if f, ok := cw.underlying.(interface{ Flush() }); ok {
+		f.Flush()
+	}
+}
+
+// Ensure aiService implements AIService at compile time.
+var _ AIService = (*aiService)(nil)

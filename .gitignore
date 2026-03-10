@@ -1,9 +1,3 @@
-# Backend
-backend/
-
-# Frontend
-frontend/
-
 # Claude local settings (contains permissions for other projects)
 .claude/settings.local.json
 

@@ -1,0 +1,213 @@
+openapi: "3.0.3"
+info:
+  title: Ordo Creator OS API
+  description: Backend API for the Ordo Creator OS platform.
+  version: "1.0.0"
+servers:
+  - url: http://localhost:8080
+    description: Local development
+  - url: https://staging-api.ordocreator.com
+    description: Staging
+  - url: https://api.ordo.app
+    description: Production
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+    AuthTokens:
+      type: object
+      properties:
+        access_token:
+          type: string
+        refresh_token:
+          type: string
+        expires_in:
+          type: integer
+    Workspace:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        slug:
+          type: string
+        description:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+    SearchResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              type:
+                type: string
+                enum: [idea, content, series, sponsorship]
+              title:
+                type: string
+              description:
+                type: string
+              rank:
+                type: number
+        total_count:
+          type: integer
+        query:
+          type: string
+security:
+  - BearerAuth: []
+paths:
+  /health:
+    get:
+      summary: Health check
+      security: []
+      responses:
+        "200":
+          description: Healthy
+  /api/v1/auth/register:
+    post:
+      summary: Register a new user
+      security: []
+      responses:
+        "201":
+          description: Registered
+  /api/v1/auth/login:
+    post:
+      summary: Login
+      security: []
+      responses:
+        "200":
+          description: Authenticated
+  /api/v1/workspaces:
+    get:
+      summary: List user workspaces
+      responses:
+        "200":
+          description: OK
+    post:
+      summary: Create workspace
+      responses:
+        "201":
+          description: Created
+  /api/v1/workspaces/{workspaceId}/search:
+    get:
+      summary: Full-text search across workspace resources
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: types
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchResponse"
+  /api/v1/workspaces/{workspaceId}/ideas:
+    get:
+      summary: List ideas
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+    post:
+      summary: Create idea
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "201":
+          description: Created
+  /api/v1/workspaces/{workspaceId}/contents:
+    get:
+      summary: List contents
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+    post:
+      summary: Create content
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "201":
+          description: Created
+  /api/v1/workspaces/{workspaceId}/audit-logs:
+    get:
+      summary: List audit logs (owner/admin only)
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 25
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: OK
+        "403":
+          description: Forbidden

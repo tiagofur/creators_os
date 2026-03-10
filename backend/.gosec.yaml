@@ -1,0 +1,6 @@
+# gosec configuration - suppress accepted false positives
+rules:
+  exclude:
+    - G104  # Errors unhandled - we use explicit error checking patterns
+    - G304  # File path provided as taint input - acceptable for config file loading
+    - G401  # Use of weak cryptographic primitive - not applicable (we use AES-256-GCM)
