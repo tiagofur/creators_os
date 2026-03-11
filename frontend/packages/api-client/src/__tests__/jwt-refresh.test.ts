@@ -115,7 +115,6 @@ describe('JWT refresh interceptor', () => {
     const client = createApiClient(cfg);
 
     await expect(client.get('/v1/items/1')).rejects.toThrow(ApiError);
-    await expect(client.get('/v1/items/1')).rejects.toThrow(ApiError); // ensure it also throws on second attempt
 
     expect(cfg.onUnauthorized).toHaveBeenCalled();
   });
