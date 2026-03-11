@@ -4,7 +4,7 @@
 **Change name**: `frontend-web-roadmap`
 **Author**: sdd-tasks
 **Date**: 2026-03-10
-**Status**: PHASE-1-COMPLETE
+**Status**: PHASE-5-COMPLETE
 **Depends on**: `proposal.md`, `spec.md`, `design.md`
 
 ---
@@ -520,9 +520,9 @@ Each task follows this format:
 **Description**: Implement `/[locale]/(app)/dashboard/page.tsx` as RSC with independent `<Suspense>` boundaries for each widget — ConsistencyScore, RecentPipelineActivity, IdeasCapturedThisWeek, UpcomingScheduled, XPProgressBar.
 
 **Acceptance criteria**:
-- [ ] Page shell renders in <100ms; each widget streams in independently via Suspense
-- [ ] All five widgets have corresponding skeleton components that render during fetch
-- [ ] Dashboard skeleton is shown via `loading.tsx` (automatic Suspense fallback)
+- [x] Page shell renders in <100ms; each widget streams in independently via Suspense
+- [x] All five widgets have corresponding skeleton components that render during fetch
+- [x] Dashboard skeleton is shown via `loading.tsx` (automatic Suspense fallback)
 
 ---
 
@@ -534,9 +534,9 @@ Each task follows this format:
 **Description**: Wire the CommandPalette `capture` mode to a real idea submission form — title + optional description fields, submits via `POST /api/v1/ideas`, shows optimistic UI (card immediately appears in ideas list), reverts on error.
 
 **Acceptance criteria**:
-- [ ] Cmd+K opens palette in capture mode; typing and pressing Enter submits the idea
-- [ ] Optimistic idea appears in the ideas list within 100ms of submission
-- [ ] On API error, optimistic item is removed and an error toast is shown
+- [x] Cmd+K opens palette in capture mode; typing and pressing Enter submits the idea
+- [x] Optimistic idea appears in the ideas list within 100ms of submission
+- [x] On API error, optimistic item is removed and an error toast is shown
 
 ---
 
@@ -548,9 +548,9 @@ Each task follows this format:
 **Description**: Implement `/[locale]/(app)/ideas/page.tsx` with grid/list toggle, filter bar (status, tags, date range, search), sort controls (newest/impact/effort), infinite scroll pagination, and empty state.
 
 **Acceptance criteria**:
-- [ ] Filter state is reflected in URL search params (shareable, browser-back preservable)
-- [ ] Grid and list view preferences persist in `localStorage`
-- [ ] Empty state renders the illustrated empty state component when `ideas.length === 0`
+- [x] Filter state is reflected in URL search params (shareable, browser-back preservable)
+- [x] Grid and list view preferences persist in `localStorage`
+- [x] Empty state renders the illustrated empty state component when `ideas.length === 0`
 
 ---
 
@@ -562,9 +562,9 @@ Each task follows this format:
 **Description**: Implement `IdeaCard` — displays title, tags (color-coded), status badge, AI validation score (if available), relative timestamp; clickable to open idea detail drawer; supports optimistic status-change via context menu.
 
 **Acceptance criteria**:
-- [ ] Tags render as `<Badge>` components with color derived from tag content hash (consistent color per tag name)
-- [ ] Status badge uses correct color variant per status: `captured`=default, `validated`=success, `graveyard`=destructive
-- [ ] Card is keyboard-navigable (Enter/Space opens detail)
+- [x] Tags render as `<Badge>` components with color derived from tag content hash (consistent color per tag name)
+- [x] Status badge uses correct color variant per status: `captured`=default, `validated`=success, `graveyard`=destructive
+- [x] Card is keyboard-navigable (Enter/Space opens detail)
 
 ---
 
@@ -576,9 +576,9 @@ Each task follows this format:
 **Description**: Implement the idea detail drawer (slide-in from right) with full edit form — title, description, tags, status flow control stepper, effort/impact sliders, AI Expand button, AI Validate button, and "Promote to Content" button.
 
 **Acceptance criteria**:
-- [ ] All field edits auto-save via `PATCH /api/v1/ideas/{id}` with 500ms debounce
-- [ ] Status stepper shows valid next transitions (e.g., `captured` → `validated` or `graveyard`)
-- [ ] "Promote to Content" calls `POST /api/v1/contents` with prefilled title and opens the pipeline item in a new drawer
+- [x] All field edits auto-save via `PATCH /api/v1/ideas/{id}` with 500ms debounce
+- [x] Status stepper shows valid next transitions (e.g., `captured` → `validated` or `graveyard`)
+- [x] "Promote to Content" calls `POST /api/v1/contents` with prefilled title and opens the pipeline item in a new drawer
 
 ---
 
@@ -590,9 +590,9 @@ Each task follows this format:
 **Description**: Implement the Validation Board view — a 2D scatter plot grid with Effort (x) vs Impact (y) axes; each idea renders as a draggable dot; changing position updates `effort_rating` and `impact_rating` via PATCH.
 
 **Acceptance criteria**:
-- [ ] Board renders all `validated` and `captured` ideas as positioned dots
-- [ ] Dragging a dot to a new quadrant updates the effort/impact scores optimistically
-- [ ] Quadrants are labeled: Quick Wins (low effort, high impact), Backlog, Avoid, Big Bets
+- [x] Board renders all `validated` and `captured` ideas as positioned dots
+- [x] Dragging a dot to a new quadrant updates the effort/impact scores optimistically
+- [x] Quadrants are labeled: Quick Wins (low effort, high impact), Backlog, Avoid, Big Bets
 
 ---
 
@@ -604,9 +604,9 @@ Each task follows this format:
 **Description**: Implement `/[locale]/(app)/ideas/graveyard` (or tab on ideas page) — filtered view of `status=graveyard` ideas with "Restore" action that PATCHes status back to `captured`.
 
 **Acceptance criteria**:
-- [ ] Graveyard is a filtered view (not a separate API call if possible — filter from cached ideas)
-- [ ] "Restore" updates status to `captured` optimistically and moves card out of graveyard view
-- [ ] Free tier shows count badge "X ideas in graveyard"
+- [x] Graveyard is a filtered view (not a separate API call if possible — filter from cached ideas)
+- [x] "Restore" updates status to `captured` optimistically and moves card out of graveyard view
+- [x] Free tier shows count badge "X ideas in graveyard"
 
 ---
 
@@ -618,9 +618,9 @@ Each task follows this format:
 **Description**: Implement the free tier limit counter for ideas — reads monthly count from API response, shows counter badge in ideas page header, and wraps the "New Idea" button in `<TierGate>` that blocks submission at 50 with an upgrade prompt.
 
 **Acceptance criteria**:
-- [ ] Counter shows "X / 50 ideas this month" for free users
-- [ ] At limit, the quick-capture form shows the upgrade prompt instead of submission
-- [ ] Pro/Enterprise users see no counter
+- [x] Counter shows "X / 50 ideas this month" for free users
+- [x] At limit, the quick-capture form shows the upgrade prompt instead of submission
+- [x] Pro/Enterprise users see no counter
 
 ---
 
@@ -632,9 +632,9 @@ Each task follows this format:
 **Description**: Implement `/[locale]/(app)/pipeline/page.tsx` as Client Component — 6-column kanban (SCRIPTING, FILMING, EDITING, REVIEW, SCHEDULED, PUBLISHED) using `@dnd-kit/core` with drag-and-drop between columns, optimistic stage updates, and column virtualization via `@tanstack/virtual` for >50 items.
 
 **Acceptance criteria**:
-- [ ] Dragging a card to a new column calls `PATCH /api/v1/contents/{id}/stage` optimistically; reverts on error
-- [ ] Columns with >50 items virtualize rendering (no DOM nodes for off-screen cards)
-- [ ] Drag preview renders a ghost card matching the source card dimensions
+- [x] Dragging a card to a new column calls `PATCH /api/v1/contents/{id}/stage` optimistically; reverts on error
+- [x] Columns with >50 items virtualize rendering (no DOM nodes for off-screen cards)
+- [x] Drag preview renders a ghost card matching the source card dimensions
 
 ---
 
@@ -646,9 +646,9 @@ Each task follows this format:
 **Description**: Implement `ContentCard` for the pipeline kanban — shows title, content type icon (Video/Post/Tweet/Podcast), assignee avatar, due date, series badge; stage-specific accent color; context menu with quick actions (move stage, archive, open detail).
 
 **Acceptance criteria**:
-- [ ] Content type icon renders correctly for all four types (Video, Post, Tweet, Podcast)
-- [ ] Overdue due dates render in destructive color
-- [ ] Context menu is keyboard-accessible and includes "Open Detail", "Move to Next Stage", "Archive"
+- [x] Content type icon renders correctly for all four types (Video, Post, Tweet, Podcast)
+- [x] Overdue due dates render in destructive color
+- [x] Context menu is keyboard-accessible and includes "Open Detail", "Move to Next Stage", "Archive"
 
 ---
 
@@ -660,9 +660,9 @@ Each task follows this format:
 **Description**: Implement the pipeline parallel route — `(app)/pipeline/@panel/[id]/page.tsx` — as a slide-in drawer showing the full content detail: metadata edit form, stage stepper, smart checklist, time tracker widget, file attachments, and comments thread.
 
 **Acceptance criteria**:
-- [ ] Navigating to `/pipeline/[id]` shows kanban board AND detail panel simultaneously without losing scroll position
-- [ ] Closing the panel (X button or Escape) navigates back to `/pipeline` without a full page reload
-- [ ] All metadata field edits auto-save via PATCH with 500ms debounce
+- [x] Navigating to `/pipeline/[id]` shows kanban board AND detail panel simultaneously without losing scroll position
+- [x] Closing the panel (X button or Escape) navigates back to `/pipeline` without a full page reload
+- [x] All metadata field edits auto-save via PATCH with 500ms debounce
 
 ---
 
@@ -674,9 +674,9 @@ Each task follows this format:
 **Description**: Implement the smart checklist widget in the content detail panel — calls `GET /api/v1/contents/{id}/checklist`, renders stage-specific AI-generated checklist items with checkboxes; checked state persisted via PATCH.
 
 **Acceptance criteria**:
-- [ ] Checklist is fetched per stage — re-fetches when stage changes
-- [ ] Checked items persist across page refreshes via API state
-- [ ] Loading state shows 4-item skeleton while fetching
+- [x] Checklist is fetched per stage — re-fetches when stage changes
+- [x] Checked items persist across page refreshes via API state
+- [x] Loading state shows 4-item skeleton while fetching
 
 ---
 
@@ -688,9 +688,9 @@ Each task follows this format:
 **Description**: Implement the time tracker widget in the content detail panel — start/stop session button, live elapsed timer display, total time summary, calls `POST /api/v1/contents/{id}/time-entries` on stop.
 
 **Acceptance criteria**:
-- [ ] Live timer updates every second using `setInterval` (cleaned up on unmount)
-- [ ] "Stop" saves the session duration to the API and updates total time display
-- [ ] Total time is formatted as "Xh Ym" (e.g., "2h 15m")
+- [x] Live timer updates every second using `setInterval` (cleaned up on unmount)
+- [x] "Stop" saves the session duration to the API and updates total time display
+- [x] Total time is formatted as "Xh Ym" (e.g., "2h 15m")
 
 ---
 
@@ -702,9 +702,9 @@ Each task follows this format:
 **Description**: Implement reusable `FileUpload` component — drag-and-drop or click-to-browse, calls `GET /api/v1/uploads/presigned` to get S3 presigned URL, uploads directly to S3 via `PUT`, shows progress bar, then saves the file metadata to the content record.
 
 **Acceptance criteria**:
-- [ ] Upload progress is shown via a progress bar (uses `XMLHttpRequest.upload.onprogress`)
-- [ ] File type and size validation run before requesting presigned URL (max 100MB, allowed types configurable)
-- [ ] Failed upload shows error with retry option
+- [x] Upload progress is shown via a progress bar (uses `XMLHttpRequest.upload.onprogress`)
+- [x] File type and size validation run before requesting presigned URL (max 100MB, allowed types configurable)
+- [x] Failed upload shows error with retry option
 
 ---
 
@@ -716,9 +716,9 @@ Each task follows this format:
 **Description**: Implement the pipeline filter bar (type, assignee, series, date range filters) and "New Content" modal (title, type, series optional) with form validation and `POST /api/v1/contents`.
 
 **Acceptance criteria**:
-- [ ] Filter state is synced to URL search params
-- [ ] New content form requires title and type; series is optional
-- [ ] Created content appears at the top of the SCRIPTING column immediately (optimistic)
+- [x] Filter state is synced to URL search params
+- [x] New content form requires title and type; series is optional
+- [x] Created content appears at the top of the SCRIPTING column immediately (optimistic)
 
 ---
 
@@ -730,9 +730,9 @@ Each task follows this format:
 **Description**: Implement `/[locale]/(app)/series/page.tsx` — card grid of series with thumbnails, status (active/archived), episode count, last published date; "Create Series" button opens create modal.
 
 **Acceptance criteria**:
-- [ ] Series cards render with correct thumbnail (or placeholder with series name initials)
-- [ ] Archived series are shown with a visual overlay and excluded from active count
-- [ ] Empty state renders with "Create your first series" CTA
+- [x] Series cards render with correct thumbnail (or placeholder with series name initials)
+- [x] Archived series are shown with a visual overlay and excluded from active count
+- [x] Empty state renders with "Create your first series" CTA
 
 ---
 
@@ -744,9 +744,9 @@ Each task follows this format:
 **Description**: Implement `/[locale]/(app)/series/[id]/page.tsx` — episode list with drag-to-reorder, publishing schedule config, thumbnail upload, series tags/description, aggregate performance metrics, duplication button, archive/restore.
 
 **Acceptance criteria**:
-- [ ] Episode reorder calls `PATCH /api/v1/series/{id}/episodes/reorder` with new order array
-- [ ] Thumbnail upload uses the `FileUpload` component (TASK-214)
-- [ ] "Duplicate Series" creates a new series with the same config (without episodes) via `POST /api/v1/series/{id}/duplicate`
+- [x] Episode reorder calls `PATCH /api/v1/series/{id}/episodes/reorder` with new order array
+- [x] Thumbnail upload uses the `FileUpload` component (TASK-214)
+- [x] "Duplicate Series" creates a new series with the same config (without episodes) via `POST /api/v1/series/{id}/duplicate`
 
 ---
 
@@ -758,9 +758,9 @@ Each task follows this format:
 **Description**: Implement `/[locale]/(app)/publishing/page.tsx` — list of scheduled posts with platform icons, status badges, scheduled time; filter by platform/status/date; "Create Post" action opens create form (title, content, platform(s), media, schedule time, hashtags, captions).
 
 **Acceptance criteria**:
-- [ ] Platform icons render correctly for YouTube, TikTok, Instagram, Twitter/X, LinkedIn
-- [ ] Create post form validates required fields per platform (e.g., Twitter has character limit display)
-- [ ] Free tier shows "Manual scheduling only" — auto-publish toggle wrapped in `<TierGate tier="pro">`
+- [x] Platform icons render correctly for YouTube, TikTok, Instagram, Twitter/X, LinkedIn
+- [x] Create post form validates required fields per platform (e.g., Twitter has character limit display)
+- [x] Free tier shows "Manual scheduling only" — auto-publish toggle wrapped in `<TierGate tier="pro">`
 
 ---
 
@@ -772,9 +772,9 @@ Each task follows this format:
 **Description**: Implement `/[locale]/(app)/calendar/page.tsx` — month/week/day calendar views showing scheduled posts as color-coded events; drag-and-drop rescheduling; click empty slot opens quick-schedule drawer; calls `GET /api/v1/publishing/calendar`.
 
 **Acceptance criteria**:
-- [ ] Calendar renders correct post counts per day in month view
-- [ ] Dragging an event to a new date calls `PATCH /api/v1/publishing/posts/{id}` with new `scheduled_at`
-- [ ] Week/day views show time slots with correct UTC → local time conversion
+- [x] Calendar renders correct post counts per day in month view
+- [x] Dragging an event to a new date calls `PATCH /api/v1/publishing/posts/{id}` with new `scheduled_at`
+- [x] Week/day views show time slots with correct UTC → local time conversion
 
 ---
 
@@ -786,9 +786,9 @@ Each task follows this format:
 **Description**: Implement the platform connection status indicator shown in the publishing page header — icons for each platform (YouTube, TikTok, Instagram, etc.) with connected (green) / disconnected (grey) status; clicking disconnected platform routes to Settings → Integrations.
 
 **Acceptance criteria**:
-- [ ] Status is fetched from `GET /api/v1/integrations` on mount
-- [ ] Disconnected platforms show a tooltip "Connect in Settings"
-- [ ] Clicking a disconnected platform icon navigates to `/settings/integrations`
+- [x] Status is fetched from `GET /api/v1/integrations` on mount
+- [x] Disconnected platforms show a tooltip "Connect in Settings"
+- [x] Clicking a disconnected platform icon navigates to `/settings/integrations`
 
 ---
 
@@ -800,9 +800,9 @@ Each task follows this format:
 **Description**: Implement illustrated empty state components for: Ideas list, Graveyard, Pipeline (all columns), Series list, Publishing list, Calendar; each with a clear headline, sub-text, and primary CTA.
 
 **Acceptance criteria**:
-- [ ] All six empty states use SVG illustrations (inline, not image files)
-- [ ] Each empty state includes a CTA that navigates to the correct creation flow
-- [ ] Empty states render correctly in both light and dark mode
+- [x] All six empty states use SVG illustrations (inline, not image files)
+- [x] Each empty state includes a CTA that navigates to the correct creation flow
+- [x] Empty states render correctly in both light and dark mode
 
 ---
 
@@ -814,9 +814,9 @@ Each task follows this format:
 **Description**: Implement skeleton loading components for: DashboardWidget (×5), IdeaCard (grid and list variants), PipelineColumn (×6 with card skeletons), SeriesCard, CalendarMonth, PublishingListRow.
 
 **Acceptance criteria**:
-- [ ] All skeletons use `<Skeleton>` component from `@ordo/ui` (no custom shimmer implementations)
-- [ ] Skeleton dimensions match real content dimensions to prevent CLS
-- [ ] Skeletons are shown via Suspense `fallback` props — never via manual `isLoading` boolean state in RSC pages
+- [x] All skeletons use `<Skeleton>` component from `@ordo/ui` (no custom shimmer implementations)
+- [x] Skeleton dimensions match real content dimensions to prevent CLS
+- [x] Skeletons are shown via Suspense `fallback` props — never via manual `isLoading` boolean state in RSC pages
 
 ---
 
@@ -830,9 +830,9 @@ Each task follows this format:
 **Description**: Implement `/[locale]/(app)/studio/page.tsx` — full-page chat interface with message list (markdown rendering, code blocks), streaming input from `POST /api/v1/ai/chat` via SSE/WebSocket, quick action chips, and token usage indicator.
 
 **Acceptance criteria**:
-- [ ] Streaming response tokens append to the message bubble in real-time as they arrive
-- [ ] Markdown rendering handles bold, italic, code blocks, and bullet lists correctly
-- [ ] Token usage counter decrements per message; free tier users see upgrade prompt at 50 credits
+- [x] Streaming response tokens append to the message bubble in real-time as they arrive
+- [x] Markdown rendering handles bold, italic, code blocks, and bullet lists correctly
+- [x] Token usage counter decrements per message; free tier users see upgrade prompt at 50 credits
 
 ---
 
@@ -844,9 +844,9 @@ Each task follows this format:
 **Description**: Implement the AI credit balance widget — shows remaining credits, usage percentage bar, and upgrade prompt when remaining < 20%; used in AI Chat, Brainstormer, and Title Lab headers.
 
 **Acceptance criteria**:
-- [ ] Credit balance is fetched from `GET /api/v1/billing/credits` (or gamification profile)
-- [ ] Progress bar color transitions: green (>50%) → yellow (20–50%) → red (<20%)
-- [ ] Clicking "Upgrade" opens the billing page in a new tab (not modal)
+- [x] Credit balance is fetched from `GET /api/v1/billing/credits` (or gamification profile)
+- [x] Progress bar color transitions: green (>50%) → yellow (20–50%) → red (<20%)
+- [x] Clicking "Upgrade" opens the billing page in a new tab (not modal)
 
 ---
 
@@ -858,9 +858,9 @@ Each task follows this format:
 **Description**: Implement the Brainstormer panel (accessible from Ideas page + AI Studio) — topic input, calls `POST /api/v1/ai/brainstorm`, renders 10 angle cards with title, description, effort estimate, platform suggestions; "Save as Idea" and "Add to Pipeline" actions per card.
 
 **Acceptance criteria**:
-- [ ] Loading state shows 10 skeleton angle cards while brainstorming
-- [ ] "Save as Idea" calls `POST /api/v1/ideas` and shows a success toast with "View in Ideas" link
-- [ ] Credit counter decrements after each brainstorm call
+- [x] Loading state shows 10 skeleton angle cards while brainstorming
+- [x] "Save as Idea" calls `POST /api/v1/ideas` and shows a success toast with "View in Ideas" link
+- [x] Credit counter decrements after each brainstorm call
 
 ---
 
@@ -872,9 +872,9 @@ Each task follows this format:
 **Description**: Implement the Title Lab panel (accessible from content detail + standalone in Studio) — topic/platform/draft title input, calls `POST /api/v1/ai/title-lab`, renders 5 title variations with CTR notes; "Copy" and "Use This" actions.
 
 **Acceptance criteria**:
-- [ ] "Use This" action on a title calls `PATCH /api/v1/contents/{id}` if opened from a content item context
-- [ ] "Copy" copies title to clipboard and shows a "Copied!" confirmation tooltip
-- [ ] Platform selector (YouTube, TikTok, LinkedIn, Instagram, Twitter/X) influences generation
+- [x] "Use This" action on a title calls `PATCH /api/v1/contents/{id}` if opened from a content item context
+- [x] "Copy" copies title to clipboard and shows a "Copied!" confirmation tooltip
+- [x] Platform selector (YouTube, TikTok, LinkedIn, Instagram, Twitter/X) influences generation
 
 ---
 
@@ -886,9 +886,9 @@ Each task follows this format:
 **Description**: Implement the SEO Description Generator panel — title + outline input, platform selector, calls `POST /api/v1/ai/seo-description`, renders generated description with "Copy" and "Use This" actions.
 
 **Acceptance criteria**:
-- [ ] Generates platform-optimized descriptions (YouTube 5000 chars, LinkedIn 3000 chars, Twitter 280 chars)
-- [ ] Output renders in an editable textarea so user can tweak before copying
-- [ ] Character count is shown with platform limit indicator
+- [x] Generates platform-optimized descriptions (YouTube 5000 chars, LinkedIn 3000 chars, Twitter 280 chars)
+- [x] Output renders in an editable textarea so user can tweak before copying
+- [x] Character count is shown with platform limit indicator
 
 ---
 
@@ -900,9 +900,9 @@ Each task follows this format:
 **Description**: Implement the block-based script editor using Tiptap — heading + paragraph blocks, character/word count, estimated read time; accessible from content detail when stage = SCRIPTING; content saved via `PATCH /api/v1/contents/{id}` with debounce.
 
 **Acceptance criteria**:
-- [ ] Editor supports heading (H1, H2) and paragraph blocks; no table or media blocks
-- [ ] Word count and estimated read time (words / 130 WPM) update in real-time
-- [ ] Auto-save fires 1 second after last keystroke; "Saving..." indicator visible during save
+- [x] Editor supports heading (H1, H2) and paragraph blocks; no table or media blocks
+- [x] Word count and estimated read time (words / 130 WPM) update in real-time
+- [x] Auto-save fires 1 second after last keystroke; "Saving..." indicator visible during save
 
 ---
 
@@ -914,9 +914,9 @@ Each task follows this format:
 **Description**: Implement the Script Doctor analysis sidebar — "Analyze" button calls `POST /api/v1/ai/script-doctor`, renders retention risk flags, hook strength score, and improvement suggestions; inline highlight of weak sections in the editor; "Apply Suggestion" one-click replace.
 
 **Acceptance criteria**:
-- [ ] Weak sections are highlighted in the editor with a yellow/orange background mark
-- [ ] "Apply Suggestion" replaces highlighted text with AI suggestion and removes the highlight
-- [ ] Analysis results persist until user edits the script (stale indicator shown after edits)
+- [x] Weak sections are highlighted in the editor with a yellow/orange background mark
+- [x] "Apply Suggestion" replaces highlighted text with AI suggestion and removes the highlight
+- [x] Analysis results persist until user edits the script (stale indicator shown after edits)
 
 ---
 
@@ -928,9 +928,9 @@ Each task follows this format:
 **Description**: Implement script version history panel — list of saved versions with timestamps; "Save Version" button; "Restore" reverts script content to selected version; versions stored in content record history.
 
 **Acceptance criteria**:
-- [ ] Manual "Save Version" stores current script content with auto-generated label (e.g., "v3 - Mar 10, 2:34 PM")
-- [ ] Restoring a version requires a confirmation dialog warning that unsaved changes will be lost
-- [ ] Up to 20 versions are shown; older versions are paginated
+- [x] Manual "Save Version" stores current script content with auto-generated label (e.g., "v3 - Mar 10, 2:34 PM")
+- [x] Restoring a version requires a confirmation dialog warning that unsaved changes will be lost
+- [x] Up to 20 versions are shown; older versions are paginated
 
 ---
 
@@ -942,9 +942,9 @@ Each task follows this format:
 **Description**: Implement `/[locale]/(app)/remix/page.tsx` — content selector (published/ready items), "Remix" button calls `POST /api/v1/ai/repurpose`, renders 5 variant cards (Twitter thread, LinkedIn post, Instagram carousel, TikTok script, Newsletter section) as editable cards with "Schedule" action.
 
 **Acceptance criteria**:
-- [ ] Each variant card is editable inline (contenteditable or Textarea)
-- [ ] "Schedule" on a variant opens the publishing drawer pre-filled with variant content and selected platform
-- [ ] Loading state shows 5 skeleton variant cards while repurposing
+- [x] Each variant card is editable inline (contenteditable or Textarea)
+- [x] "Schedule" on a variant opens the publishing drawer pre-filled with variant content and selected platform
+- [x] Loading state shows 5 skeleton variant cards while repurposing
 
 ---
 
@@ -956,9 +956,9 @@ Each task follows this format:
 **Description**: Implement the Hook Generator accessible from the script editor sidebar — topic + platform input, calls `POST /api/v1/ai/hooks`, renders 5 hook variations; "Insert" button inserts selected hook at cursor position in the script editor.
 
 **Acceptance criteria**:
-- [ ] "Insert" places the hook text at the current cursor position in the Tiptap editor
-- [ ] Platform selector changes the hook style (e.g., YouTube = curiosity loop, TikTok = pattern interrupt)
-- [ ] Credit deducted per generation call
+- [x] "Insert" places the hook text at the current cursor position in the Tiptap editor
+- [x] Platform selector changes the hook style (e.g., YouTube = curiosity loop, TikTok = pattern interrupt)
+- [x] Credit deducted per generation call
 
 ---
 
@@ -970,9 +970,9 @@ Each task follows this format:
 **Description**: Implement the Hashtag + Caption Generator integrated into the publishing post creation form — two tabs: (1) Hashtags: topic + platform → generates platform-specific hashtag sets via `POST /api/v1/ai/hashtags`; (2) Captions: content summary + platform → generates caption variants via `POST /api/v1/ai/caption`; one-click insert into post form.
 
 **Acceptance criteria**:
-- [ ] Hashtag tab shows hashtags grouped by reach tier (broad, niche, micro)
-- [ ] "Insert" copies selected hashtags/caption into the corresponding post form field
-- [ ] Platform-specific limits enforced in UI (e.g., Instagram: max 30 hashtags shown with count)
+- [x] Hashtag tab shows hashtags grouped by reach tier (broad, niche, micro)
+- [x] "Insert" copies selected hashtags/caption into the corresponding post form field
+- [x] Platform-specific limits enforced in UI (e.g., Instagram: max 30 hashtags shown with count)
 
 ---
 
@@ -986,9 +986,9 @@ Each task follows this format:
 **Description**: Implement `/[locale]/(app)/analytics/page.tsx` — date range picker (7d/30d/90d/custom), platform selector, key metrics cards (views, subscribers, engagement rate, avg watch time), daily metric line chart (Recharts), top content table, audience insights section; PRO gate on >7-day range.
 
 **Acceptance criteria**:
-- [ ] All chart data is fetched from `GET /api/v1/analytics/metrics` with date/platform query params
-- [ ] Date range >7 days shows `<TierGate tier="pro">` upgrade prompt for free users
-- [ ] Charts have accessible `aria-label` and data table fallback for screen reader users
+- [x] All chart data is fetched from `GET /api/v1/analytics/metrics` with date/platform query params
+- [x] Date range >7 days shows `<TierGate tier="pro">` upgrade prompt for free users
+- [x] Charts have accessible `aria-label` and data table fallback for screen reader users
 
 ---
 
@@ -1000,9 +1000,9 @@ Each task follows this format:
 **Description**: Implement the pipeline velocity widget — bar chart showing average days spent in each pipeline stage (SCRIPTING → FILMING → EDITING → REVIEW), data from `GET /api/v1/analytics/velocity`.
 
 **Acceptance criteria**:
-- [ ] Bars are colored with the pipeline section accent color (`--color-pipeline`)
-- [ ] Hovering a bar shows tooltip: "Stage: Editing — Avg: 3.2 days"
-- [ ] Chart has minimum height of 200px and is responsive
+- [x] Bars are colored with the pipeline section accent color (`--color-pipeline`)
+- [x] Hovering a bar shows tooltip: "Stage: Editing — Avg: 3.2 days"
+- [x] Chart has minimum height of 200px and is responsive
 
 ---
 
@@ -1014,9 +1014,9 @@ Each task follows this format:
 **Description**: Implement `/[locale]/(app)/consistency/page.tsx` — consistency score card with sparkline trend, streak counter with multiplier badge, 52-week × 7-day GitHub-style creation heatmap; data from `GET /api/v1/analytics/consistency` and `GET /api/v1/analytics/heatmap`.
 
 **Acceptance criteria**:
-- [ ] Heatmap renders exactly 52×7 grid (364 days) with correct week/day alignment (Monday start)
-- [ ] Cell intensity uses 5-level color scale from design tokens (0 = `--color-muted`, 4+ = `--color-pipeline` darkest)
-- [ ] Hovering a cell shows tooltip: "{date} — {n} pieces published"
+- [x] Heatmap renders exactly 52×7 grid (364 days) with correct week/day alignment (Monday start)
+- [x] Cell intensity uses 5-level color scale from design tokens (0 = `--color-muted`, 4+ = `--color-pipeline` darkest)
+- [x] Hovering a cell shows tooltip: "{date} — {n} pieces published"
 
 ---
 
@@ -1028,9 +1028,9 @@ Each task follows this format:
 **Description**: Implement `/[locale]/(app)/goals/page.tsx` — list of creator goals with progress bars; create goal modal (title, target metric, deadline); goal completion triggers milestone animation.
 
 **Acceptance criteria**:
-- [ ] Goal progress bar animates on mount (CSS transition from 0 to current value)
-- [ ] Completed goals (100%) show a confetti burst animation and "Completed" badge
-- [ ] Create goal form validates target metric is a positive number
+- [x] Goal progress bar animates on mount (CSS transition from 0 to current value)
+- [x] Completed goals (100%) show a confetti burst animation and "Completed" badge
+- [x] Create goal form validates target metric is a positive number
 
 ---
 
@@ -1042,9 +1042,9 @@ Each task follows this format:
 **Description**: Implement `/[locale]/(app)/gamification/page.tsx` — current level badge, XP progress bar to next level, recent XP transactions list, achievement gallery (unlocked full-color vs locked grey), active streak with multiplier; data from `GET /api/v1/gamification/profile` and `GET /api/v1/gamification/achievements`.
 
 **Acceptance criteria**:
-- [ ] XP progress bar shows both current XP and XP needed for next level
-- [ ] Achievement gallery renders in a responsive grid; locked badges have 40% opacity
-- [ ] Recent XP transactions show action label, XP amount, and timestamp
+- [x] XP progress bar shows both current XP and XP needed for next level
+- [x] Achievement gallery renders in a responsive grid; locked badges have 40% opacity
+- [x] Recent XP transactions show action label, XP amount, and timestamp
 
 ---
 
@@ -1056,9 +1056,9 @@ Each task follows this format:
 **Description**: Implement WebSocket event listeners for `xp_earned`, `achievement_unlocked`, and `level_up` events that trigger the corresponding UI: XP toast ("+45 XP — Streak Multiplier 1.5x applied!"), achievement unlock celebration (full-screen confetti + badge reveal), level-up modal.
 
 **Acceptance criteria**:
-- [ ] `xp_earned` event shows a toast with XP amount and multiplier (if active)
-- [ ] `achievement_unlocked` event triggers full-screen confetti overlay and badge reveal modal (first time only)
-- [ ] `level_up` event shows a level-up modal with new level badge; dismissible
+- [x] `xp_earned` event shows a toast with XP amount and multiplier (if active)
+- [x] `achievement_unlocked` event triggers full-screen confetti overlay and badge reveal modal (first time only)
+- [x] `level_up` event shows a level-up modal with new level badge; dismissible
 
 ---
 
@@ -1070,9 +1070,9 @@ Each task follows this format:
 **Description**: Implement `/[locale]/(app)/reports/page.tsx` — pre-built report cards (Weekly Summary, Monthly Summary, Best Content); weekly summary shows pieces published, XP earned, consistency score, top platform; monthly summary shows growth metrics, top 3 content, income summary; CSV export gated at PRO.
 
 **Acceptance criteria**:
-- [ ] Weekly and monthly summaries auto-select current period on page load
-- [ ] CSV export button is wrapped in `<TierGate tier="pro">`; clicking as free user shows upgrade prompt
-- [ ] Report cards show skeleton loaders while fetching from `GET /api/v1/analytics/reports`
+- [x] Weekly and monthly summaries auto-select current period on page load
+- [x] CSV export button is wrapped in `<TierGate tier="pro">`; clicking as free user shows upgrade prompt
+- [x] Report cards show skeleton loaders while fetching from `GET /api/v1/analytics/reports`
 
 ---
 
@@ -1084,9 +1084,9 @@ Each task follows this format:
 **Description**: Implement `/[locale]/(app)/sponsorships/page.tsx` — kanban/list view of deals by status (LEAD, NEGOTIATION, SIGNED, DELIVERED, PAID); deal cards with brand name, value, deliverables count, next deadline; create deal modal; brand CRM panel.
 
 **Acceptance criteria**:
-- [ ] Kanban view uses the same `@dnd-kit` drag-and-drop pattern as the pipeline board
-- [ ] Create deal modal requires brand name, deal value, currency; contact email is optional
-- [ ] List and kanban view toggle persists in `localStorage`
+- [x] Kanban view uses the same `@dnd-kit` drag-and-drop pattern as the pipeline board
+- [x] Create deal modal requires brand name, deal value, currency; contact email is optional
+- [x] List and kanban view toggle persists in `localStorage`
 
 ---
 
@@ -1098,9 +1098,9 @@ Each task follows this format:
 **Description**: Implement the deal detail drawer — brand info, deal value + payment status, deliverables list with checkboxes + due dates, linked content pieces, file attachments (contracts/briefs), status stepper.
 
 **Acceptance criteria**:
-- [ ] Deliverable checkboxes update `PATCH /api/v1/sponsorships/{id}/deliverables/{deliverableId}`
-- [ ] Linked content pieces show pipeline card previews clickable to `/pipeline/[id]`
-- [ ] File attachments use the `FileUpload` component (TASK-214)
+- [x] Deliverable checkboxes update `PATCH /api/v1/sponsorships/{id}/deliverables/{deliverableId}`
+- [x] Linked content pieces show pipeline card previews clickable to `/pipeline/[id]`
+- [x] File attachments use the `FileUpload` component (TASK-214)
 
 ---
 
@@ -1112,9 +1112,9 @@ Each task follows this format:
 **Description**: Implement the brands panel within the sponsorships page — brand cards with logo (Clearbit API or letter fallback), name, total deal value, deal count; clicking a brand filters deals list to that brand.
 
 **Acceptance criteria**:
-- [ ] Brand logo fetched from `https://logo.clearbit.com/{domain}` with letter-fallback on error
-- [ ] Brand cards are sorted by total deal value descending
-- [ ] Clicking a brand applies a filter without a full page reload
+- [x] Brand logo fetched from `https://logo.clearbit.com/{domain}` with letter-fallback on error
+- [x] Brand cards are sorted by total deal value descending
+- [x] Clicking a brand applies a filter without a full page reload
 
 ---
 
@@ -1126,9 +1126,9 @@ Each task follows this format:
 **Description**: Implement the income tracker widget within the sponsorships page — monthly revenue bar chart (Recharts), revenue breakdown by source (sponsorship/other), total YTD income card.
 
 **Acceptance criteria**:
-- [ ] Bar chart shows last 12 months of revenue data from `GET /api/v1/sponsorships/income`
-- [ ] Revenue bars are colored with `--color-sponsorships` (green)
-- [ ] YTD total card shows correct currency symbol based on workspace currency setting
+- [x] Bar chart shows last 12 months of revenue data from `GET /api/v1/sponsorships/income`
+- [x] Revenue bars are colored with `--color-sponsorships` (green)
+- [x] YTD total card shows correct currency symbol based on workspace currency setting
 
 ---
 
@@ -1142,9 +1142,9 @@ Each task follows this format:
 **Description**: Implement `/[locale]/(app)/settings/billing/page.tsx` — current plan card (tier name, features, renewal date, cost), upgrade CTA buttons, Stripe Checkout redirect flow (calls `POST /api/v1/billing/checkout`), Stripe Customer Portal link (calls `POST /api/v1/billing/portal`).
 
 **Acceptance criteria**:
-- [ ] Upgrade button calls `POST /api/v1/billing/checkout` and immediately redirects to Stripe URL
-- [ ] Customer portal link calls `POST /api/v1/billing/portal` and redirects; never opens in iframe
-- [ ] WebSocket `subscription_updated` event updates the plan display without page refresh
+- [x] Upgrade button calls `POST /api/v1/billing/checkout` and immediately redirects to Stripe URL
+- [x] Customer portal link calls `POST /api/v1/billing/portal` and redirects; never opens in iframe
+- [x] WebSocket `subscription_updated` event updates the plan display without page refresh
 
 ---
 
@@ -1156,9 +1156,9 @@ Each task follows this format:
 **Description**: Audit all Phase 1–4 features and wrap every gated feature with `<TierGate>` — 90-day analytics, AI credits >50, workspace count >1, team invite, auto-publish, CSV export, script doctor, remix engine; ensure no inline tier checks exist.
 
 **Acceptance criteria**:
-- [ ] `grep -r "tier ==" apps/web/src` returns zero results (all checks use `useTier()` or `<TierGate>`)
-- [ ] Each `<TierGate>` includes a descriptive `featureName` prop for the upgrade prompt
-- [ ] Enterprise-only features show "Enterprise Plan Required" (not just "Pro Plan Required")
+- [x] `grep -r "tier ==" apps/web/src` returns zero results (all checks use `useTier()` or `<TierGate>`)
+- [x] Each `<TierGate>` includes a descriptive `featureName` prop for the upgrade prompt
+- [x] Enterprise-only features show "Enterprise Plan Required" (not just "Pro Plan Required")
 
 ---
 
@@ -1170,9 +1170,9 @@ Each task follows this format:
 **Description**: Implement `/[locale]/(app)/settings/page.tsx` — tabbed hub routing to Profile, Workspace, Team, Integrations, Notifications, Billing sub-pages; tab state synced to URL hash.
 
 **Acceptance criteria**:
-- [ ] Tab navigation works via URL hash (e.g., `/settings#team`) for direct linking
-- [ ] Each tab content is lazy-loaded (Next.js dynamic import) to keep initial bundle small
-- [ ] Danger Zone section (delete workspace, deactivate account) is at the bottom with red styling and confirmation dialogs
+- [x] Tab navigation works via URL hash (e.g., `/settings#team`) for direct linking
+- [x] Each tab content is lazy-loaded (Next.js dynamic import) to keep initial bundle small
+- [x] Danger Zone section (delete workspace, deactivate account) is at the bottom with red styling and confirmation dialogs
 
 ---
 
@@ -1184,9 +1184,9 @@ Each task follows this format:
 **Description**: Implement `/[locale]/(app)/settings/profile/page.tsx` — avatar upload (uses `FileUpload` component), display name edit, email change (requires password confirmation), password change form.
 
 **Acceptance criteria**:
-- [ ] Avatar upload crops to 1:1 ratio via a client-side crop UI before uploading to S3
-- [ ] Email change requires current password and sends verification email before updating
-- [ ] Password change uses the same Zod schema as registration (min 10 chars, complexity rules)
+- [x] Avatar upload crops to 1:1 ratio via a client-side crop UI before uploading to S3
+- [x] Email change requires current password and sends verification email before updating
+- [x] Password change uses the same Zod schema as registration (min 10 chars, complexity rules)
 
 ---
 
@@ -1198,9 +1198,9 @@ Each task follows this format:
 **Description**: Implement `/[locale]/(app)/settings/workspace/page.tsx` — workspace name, description, timezone selector, content type preference toggles; all saved via `PATCH /api/v1/workspaces/{id}`.
 
 **Acceptance criteria**:
-- [ ] Timezone selector uses a searchable dropdown with all IANA timezone names
-- [ ] Changes auto-save with a "Saved" indicator (no explicit Save button)
-- [ ] Workspace name change updates the sidebar and header display immediately via workspaceStore
+- [x] Timezone selector uses a searchable dropdown with all IANA timezone names
+- [x] Changes auto-save with a "Saved" indicator (no explicit Save button)
+- [x] Workspace name change updates the sidebar and header display immediately via workspaceStore
 
 ---
 
@@ -1212,9 +1212,9 @@ Each task follows this format:
 **Description**: Implement `/[locale]/(app)/settings/team/page.tsx` — member list with roles (Owner/Admin/Member/Viewer), invite by email modal, role change dropdown, revoke access confirmation; invite wrapped in `<TierGate tier="pro">`.
 
 **Acceptance criteria**:
-- [ ] Member list shows avatar, name, email, role, joined date
-- [ ] Role changes call `PATCH /api/v1/workspaces/{id}/members/{userId}` immediately
-- [ ] Revoking access requires confirmation dialog: "This will revoke {name}'s access immediately"
+- [x] Member list shows avatar, name, email, role, joined date
+- [x] Role changes call `PATCH /api/v1/workspaces/{id}/members/{userId}` immediately
+- [x] Revoking access requires confirmation dialog: "This will revoke {name}'s access immediately"
 
 ---
 
@@ -1226,9 +1226,9 @@ Each task follows this format:
 **Description**: Implement `/[locale]/(app)/settings/integrations/page.tsx` — OAuth connection cards for Google Calendar, Slack, GitHub, YouTube, Telegram; each shows connected status, connect/disconnect button, last sync time.
 
 **Acceptance criteria**:
-- [ ] Connecting an integration initiates OAuth flow via `POST /api/v1/integrations/{provider}/connect` → redirect
-- [ ] Disconnecting shows confirmation dialog then calls `DELETE /api/v1/integrations/{provider}`
-- [ ] Last sync time is formatted as relative time (e.g., "2 hours ago")
+- [x] Connecting an integration initiates OAuth flow via `POST /api/v1/integrations/{provider}/connect` → redirect
+- [x] Disconnecting shows confirmation dialog then calls `DELETE /api/v1/integrations/{provider}`
+- [x] Last sync time is formatted as relative time (e.g., "2 hours ago")
 
 ---
 
@@ -1240,9 +1240,9 @@ Each task follows this format:
 **Description**: Implement `/[locale]/(app)/settings/notifications/page.tsx` — toggle matrix for notification types (pipeline stage change, mention, XP, achievement, sponsorship deadline, content scheduled) × channels (email, in-app, push).
 
 **Acceptance criteria**:
-- [ ] Toggle state is persisted to `PATCH /api/v1/notifications/preferences` on change
-- [ ] Push notifications toggle requires browser permission grant (shown in-context)
-- [ ] All toggles have accessible `aria-label` with the notification type + channel
+- [x] Toggle state is persisted to `PATCH /api/v1/notifications/preferences` on change
+- [x] Push notifications toggle requires browser permission grant (shown in-context)
+- [x] All toggles have accessible `aria-label` with the notification type + channel
 
 ---
 
@@ -1254,9 +1254,9 @@ Each task follows this format:
 **Description**: Implement the notification bell in the header (unread count badge) and the slide-in notifications panel — list of notifications with icon/message/timestamp/read state; mark all as read; mark individual as read; click to navigate to relevant page; real-time updates via `notification` WebSocket event.
 
 **Acceptance criteria**:
-- [ ] Unread count badge updates in real-time on new `notification` WebSocket event
-- [ ] Clicking a notification marks it as read (PATCH), removes unread styling, and navigates to the linked resource
-- [ ] "Mark all as read" calls `PATCH /api/v1/notifications/read-all` and clears all unread badges
+- [x] Unread count badge updates in real-time on new `notification` WebSocket event
+- [x] Clicking a notification marks it as read (PATCH), removes unread styling, and navigates to the linked resource
+- [x] "Mark all as read" calls `PATCH /api/v1/notifications/read-all` and clears all unread badges
 
 ---
 
@@ -1268,9 +1268,9 @@ Each task follows this format:
 **Description**: Upgrade the CommandPalette stub (TASK-124) to support full search mode — type `/` to switch to search, results grouped by type (Ideas, Content, Series, Sponsorships), keyboard navigation between groups and items, calls `GET /api/v1/search?q=...` with 300ms debounce.
 
 **Acceptance criteria**:
-- [ ] Search results appear within 400ms of query (debounced + React Query staleTime: 0)
-- [ ] Keyboard: Arrow keys navigate items, Enter opens selected, Escape closes
-- [ ] Search results show type icon, title, and breadcrumb (e.g., "Ideas > My Video Idea")
+- [x] Search results appear within 400ms of query (debounced + React Query staleTime: 0)
+- [x] Keyboard: Arrow keys navigate items, Enter opens selected, Escape closes
+- [x] Search results show type icon, title, and breadcrumb (e.g., "Ideas > My Video Idea")
 
 ---
 
@@ -1282,9 +1282,9 @@ Each task follows this format:
 **Description**: Implement `/[locale]/(app)/inbox/page.tsx` — social comments/messages aggregator with platform-filtered tabs; reply, star, mark-as-read actions per item; calls `GET /api/v1/inbox`.
 
 **Acceptance criteria**:
-- [ ] Platform tabs filter inbox items without a new API call (client-side filter on cached data)
-- [ ] Reply action opens an inline reply composer that calls the relevant platform API via backend
-- [ ] Unread items show bold text; read items show muted text
+- [x] Platform tabs filter inbox items without a new API call (client-side filter on cached data)
+- [x] Reply action opens an inline reply composer that calls the relevant platform API via backend
+- [x] Unread items show bold text; read items show muted text
 
 ---
 
@@ -1296,9 +1296,9 @@ Each task follows this format:
 **Description**: Implement `error.tsx` files at the `(app)/`, ideas, pipeline, analytics, series, sponsorships, studio, and settings route levels — each with a branded error UI, error message, and "Try again" retry button.
 
 **Acceptance criteria**:
-- [ ] Each `error.tsx` uses the Next.js App Router `error` prop and `reset` function correctly
-- [ ] Error UI shows a friendly message (not a raw stack trace in production)
-- [ ] Sentry `captureException` is called in each error boundary's effect (even before Phase 6 full Sentry setup)
+- [x] Each `error.tsx` uses the Next.js App Router `error` prop and `reset` function correctly
+- [x] Error UI shows a friendly message (not a raw stack trace in production)
+- [x] Sentry `captureException` is called in each error boundary's effect (even before Phase 6 full Sentry setup)
 
 ---
 
@@ -1310,9 +1310,9 @@ Each task follows this format:
 **Description**: Implement a service worker offline fallback page that shows a branded "You're offline" page when network requests fail; register the service worker in `apps/web/src/app/layout.tsx`.
 
 **Acceptance criteria**:
-- [ ] Offline fallback page renders correctly without any network requests
-- [ ] Service worker is registered only in production (not in dev mode)
-- [ ] Fallback shows a "Retry" button that attempts to reload when connectivity is restored
+- [x] Offline fallback page renders correctly without any network requests
+- [x] Service worker is registered only in production (not in dev mode)
+- [x] Fallback shows a "Retry" button that attempts to reload when connectivity is restored
 
 ---
 
@@ -1324,9 +1324,9 @@ Each task follows this format:
 **Description**: Run `axe-core` automated accessibility scan on all Phase 1–5 pages; fix all WCAG 2.1 AA violations — focus rings, aria-labels, color contrast, keyboard traps, screen reader announcements.
 
 **Acceptance criteria**:
-- [ ] `axe-core` reports zero critical or serious violations on dashboard, ideas, pipeline, analytics, and settings pages
-- [ ] All icon-only buttons have `aria-label`
-- [ ] Focus ring is visible on all interactive elements in both light and dark themes
+- [x] `axe-core` reports zero critical or serious violations on dashboard, ideas, pipeline, analytics, and settings pages
+- [x] All icon-only buttons have `aria-label`
+- [x] Focus ring is visible on all interactive elements in both light and dark themes
 
 ---
 
@@ -1338,9 +1338,9 @@ Each task follows this format:
 **Description**: Audit all animations (page transitions, confetti, XP toasts, skeleton pulses, drag previews) and wrap each in `@media (prefers-reduced-motion: reduce)` CSS rules or a `useReducedMotion()` hook.
 
 **Acceptance criteria**:
-- [ ] Enabling "Reduce Motion" in OS settings removes all CSS animations and transitions
-- [ ] `useReducedMotion()` hook is used for JS-driven animations (confetti, level-up modal)
-- [ ] Skeleton loaders use a static gray color (no pulse) when reduced motion is active
+- [x] Enabling "Reduce Motion" in OS settings removes all CSS animations and transitions
+- [x] `useReducedMotion()` hook is used for JS-driven animations (confetti, level-up modal)
+- [x] Skeleton loaders use a static gray color (no pulse) when reduced motion is active
 
 ---
 
@@ -1352,9 +1352,9 @@ Each task follows this format:
 **Description**: Test all pages at 320px, 768px, and 1280px breakpoints; fix layout overflow, truncation, touch target sizes (<44px), and horizontal scroll issues; ensure sidebar collapses to bottom nav on mobile.
 
 **Acceptance criteria**:
-- [ ] No horizontal scroll on any page at 320px width
-- [ ] All touch targets are ≥44×44px on mobile
-- [ ] Sidebar renders as a bottom navigation bar on screens <768px
+- [x] No horizontal scroll on any page at 320px width
+- [x] All touch targets are ≥44×44px on mobile
+- [x] Sidebar renders as a bottom navigation bar on screens <768px
 
 ---
 

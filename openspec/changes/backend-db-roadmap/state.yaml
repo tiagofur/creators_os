@@ -1,6 +1,6 @@
 change: backend-db-roadmap
 project: creators_os
-status: code_complete_pending_validation
+status: verified
 artifact_store_mode: openspec
 created: "2026-03-10"
 updated: "2026-03-10"
@@ -22,9 +22,13 @@ artifacts:
   - tasks.md
   - state.yaml
   - HANDOFF.md
-next_phase: verify
+next_phase: archive
 notes: |
-  All 83 tasks implemented. Code compiles and unit tests pass.
-  Integration tests written but not yet executed against live Docker stack.
-  Pending: docker-up, migrate-up, integration test run, smoke test.
-  See HANDOFF.md for complete continuation guide.
+  All 83 tasks implemented. Code compiles clean (go build ./...).
+  Integration tests: 56 PASS / 14 SKIP / 0 FAIL.
+  14 skipped tests require external API keys (Stripe test key, AI provider keys, WebSocket client).
+  Fixed during integration run: rate limiter IP bucketing, nil search results, audit/search/AI handler
+  wiring, free-tier member cap, duplicate enum in migration 000027, STABLE function in GENERATED
+  column in migration 000030.
+  Backend is production-ready pending environment setup (API keys + infra).
+  See HANDOFF.md for full integration test details and continuation guide.

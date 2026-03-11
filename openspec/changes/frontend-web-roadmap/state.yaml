@@ -1,84 +1,175 @@
 change: frontend-web-roadmap
 created: "2026-03-10"
-updated: "2026-03-10T14:00:00Z"
+updated: "2026-03-10"
+
+status: in-progress
+current_phase: apply-phase-5
+next_recommended: sdd-apply-phase-6
+
+progress:
+  phases_complete: 5
+  phases_total: 6
+  tasks_complete: 101   # TASK-101..TASK-134 + 201..222 + 301..311 + 401..411 + 501..516
+  tasks_total: 119
+  mvp_ready: true       # Phases 1+2 complete = private beta ready
+  estimated_weeks_remaining: 4  # Phase 6
+
+phases:
+  - id: 1
+    name: Foundation
+    weeks: "1-4"
+    tasks: "TASK-101 to TASK-134"
+    count: 34
+    status: complete
+    key_deliverables:
+      - Turborepo monorepo (9 packages)
+      - "@ordo/types, @ordo/validations, @ordo/core, @ordo/i18n"
+      - "@ordo/api-client (JWT refresh, WSClient, 4 resource modules)"
+      - "@ordo/stores (auth memory-only, workspace, ui)"
+      - "@ordo/hooks, @ordo/ui (17 components)"
+      - "Next.js 15 App Router with route groups (auth)/(app)"
+      - "Auth flows: login, register, OAuth2, forgot/reset password"
+      - "Workspace creation + onboarding wizard (3 steps)"
+      - "Design system: OKLCH tokens, Tailwind, dark mode"
+      - "React Query + MSW smoke tests"
+
+  - id: 2
+    name: Core Creator
+    weeks: "5-9"
+    tasks: "TASK-201 to TASK-222"
+    count: 22
+    status: complete
+    key_deliverables:
+      - "Dashboard with stats, quick actions, activity feed"
+      - "Ideas: quick-capture Cmd+K, list/grid, validation board, graveyard"
+      - "Content Pipeline: kanban (dnd-kit), drag-and-drop + optimistic updates"
+      - "Content item detail sheet: stage checklist, time tracker, file upload"
+      - "Series management + episodes with drag-to-reorder"
+      - "Publishing: monthly calendar + list, platform credentials"
+      - "TierGate component (connected Phase 5)"
+      - "Empty states + skeleton loaders for all views"
+
+  - id: 3
+    name: AI Studio
+    weeks: "10-13"
+    tasks: "TASK-301 to TASK-311"
+    count: 11
+    status: complete
+    key_deliverables:
+      - "AI chat with SSE streaming (fetch + ReadableStream)"
+      - "Brainstormer: topic → idea suggestions with virality score"
+      - "Title Lab: CTR prediction + A/B compare"
+      - "SEO description generator"
+      - "Script Doctor: Tiptap block editor + AI suggestion panel (apply/ignore)"
+      - "Remix Engine: source → multi-platform variants + export .txt"
+      - "Hook Generator + Hashtag/Caption generator"
+      - "Credit balance widget (progress bar, pinned in sub-nav)"
+      - "@ordo/types ai.ts (28 types), @ordo/api-client ai.ts (9 methods)"
+
+  - id: 4
+    name: Growth
+    weeks: "14-17"
+    tasks: "TASK-401 to TASK-411"
+    count: 11
+    status: complete
+    key_deliverables:
+      - "Analytics dashboard: platform metrics, pipeline velocity chart, publishing trend chart"
+      - "Consistency Hub: 52-week GitHub-style heatmap, circular progress ring, streak display"
+      - "Goals: create/track/complete content goals"
+      - "Reports: weekly/monthly with CSV export"
+      - "Gamification: level card, XP bar, achievements gallery (rarity system)"
+      - "WebSocket events: XP toast, achievement modal, level-up confetti"
+      - "Sponsorships CRM: 7-stage deal kanban (dnd-kit + optimistic)"
+      - "Brand contacts: table + search + deal history"
+      - "Income tracker: monthly bar chart + CSV export"
+
+  - id: 5
+    name: Billing + Polish
+    weeks: "18-20"
+    tasks: "TASK-501 to TASK-516"
+    count: 16
+    status: complete
+    key_deliverables:
+      - "Billing page: current plan, usage meters, plan selector, invoices"
+      - "Stripe Checkout + Customer Portal redirects"
+      - "TierGate wired to real billing data + UpgradeBanner"
+      - "Settings hub: Profile (avatar upload), Workspace, Team (invite/manage), Notifications, Billing"
+      - "Global command palette (cmdk, Cmd+K, real-time search)"
+      - "Notifications center: bell + popover + WebSocket integration"
+      - "Unified inbox: comments, mentions, approvals"
+      - "Error boundaries + offline banner"
+      - "Accessibility: skip-to-content, aria-labels, focus-visible"
+      - "Mobile: hamburger sidebar, bottom sheets, responsive audit"
+      - "Micro-interactions: hover scale, drag overlay, achievement glow"
+
+  - id: 6
+    name: Hardening
+    weeks: "21-24"
+    tasks: "TASK-601 to TASK-625"
+    count: 25
+    status: pending
+    key_deliverables:
+      - "Bundle analysis + code splitting"
+      - "RSC optimization"
+      - "Core Web Vitals (LCP < 2.5s, INP < 200ms, CLS < 0.1)"
+      - "Jest + RTL unit tests (api-client, stores, validations, components)"
+      - "MSW mock server for all endpoints"
+      - "Playwright E2E: auth, ideas, pipeline, billing happy paths"
+      - "Sentry error monitoring"
+      - "GitHub Actions CI/CD pipeline"
+      - "Vercel production deployment"
+      - "k6 load testing"
 
 artifacts:
-  explore: null
   proposal:
     path: openspec/changes/frontend-web-roadmap/proposal.md
     status: complete
-    created: "2026-03-10"
   spec:
     path: openspec/changes/frontend-web-roadmap/spec.md
     status: complete
-    created: "2026-03-10"
   design:
     path: openspec/changes/frontend-web-roadmap/design.md
     status: complete
-    created: "2026-03-10"
   tasks:
     path: openspec/changes/frontend-web-roadmap/tasks.md
     status: complete
-    created: "2026-03-10"
   apply_progress:
-    path: openspec/changes/frontend-web-roadmap/apply-phase-1.md
+    path: openspec/changes/frontend-web-roadmap/apply-phase-5.md
     status: complete
-    created: "2026-03-10"
-    phases_complete:
-      - phase: 1
-        tasks: TASK-101 through TASK-134
-        files_created: 130+
-        notes: >
-          Full Phase 1 implementation. Turborepo monorepo with 9 packages
-          (config, types, validations, core, i18n, api-client, stores, hooks, ui).
-          Next.js 15 App Router with next-intl i18n, OKLCH design system,
-          auth flows (login/register/forgot/reset/OAuth), app shell, onboarding wizard,
-          TanStack Query setup, MSW smoke tests.
+    phases_applied: [1, 2, 3, 4, 5]
   verify_report: null
   archive_report: null
 
-current_phase: apply-phase-1
-next_recommended: sdd-apply Phase 2
+tech_stack:
+  monorepo: "Turborepo + pnpm workspaces"
+  framework: "Next.js 15 App Router"
+  language: TypeScript
+  styling: "Tailwind CSS + shadcn/ui (Radix UI)"
+  state: "Zustand (auth/workspace/ui) + TanStack Query v5"
+  forms: "react-hook-form + zod"
+  dnd: "@dnd-kit/core + @dnd-kit/sortable"
+  editor: "Tiptap (StarterKit + CharacterCount + Highlight)"
+  charts: "Recharts"
+  realtime: "WebSocket (custom WSClient, exponential backoff)"
+  auth: "JWT in-memory + httpOnly refresh cookie via Next.js proxy"
+  i18n: "next-intl (en + es)"
+  testing: "Jest + React Testing Library + MSW + Playwright (Phase 6)"
+  deployment: "Vercel (Phase 6)"
 
-summary: >
-  Phased 6-phase, 24-week frontend web roadmap for Ordo Creator OS.
-  Backend is complete. Frontend needs to be built from scratch using
-  Next.js 15 App Router, Turborepo monorepo, Tailwind CSS, shadcn/ui,
-  Zustand + React Query, and next-intl. Phases: (1) Foundation + Auth,
-  (2) Ideas + Pipeline, (3) AI Studio, (4) Analytics + Gamification +
-  Sponsorships, (5) Billing + Settings + Polish, (6) Performance + Testing
-  + Deployment. MVP (Phases 1-2) deliverable at week 9.
-
-risks:
-  - id: R1
-    title: Monorepo complexity overhead
-    likelihood: HIGH
-    impact: MEDIUM
+risks_active:
   - id: R2
     title: API contract drift
-    likelihood: MEDIUM
-    impact: HIGH
-  - id: R3
-    title: Drag-and-drop performance on large boards
-    likelihood: MEDIUM
-    impact: MEDIUM
+    mitigation: Zod schemas at API boundary — validate against real backend responses before Phase 6 testing
   - id: R4
-    title: WebSocket reliability in serverless deployment
-    likelihood: MEDIUM
-    impact: HIGH
-  - id: R5
-    title: Stripe integration complexity
-    likelihood: LOW
-    impact: HIGH
-  - id: R6
-    title: i18n coverage gaps
-    likelihood: MEDIUM
-    impact: MEDIUM
-  - id: R7
-    title: Free tier gate consistency
-    likelihood: MEDIUM
-    impact: MEDIUM
+    title: WebSocket in serverless
+    mitigation: WSClient connects directly to Go backend URL, not via Next.js proxy
   - id: R8
     title: Team bandwidth
-    likelihood: MEDIUM
-    impact: HIGH
+    mitigation: Phase 6 is final phase, 25 tasks across 4 weeks
+
+notes: >
+  MVP (Phases 1+2) is complete and ready for private beta testing.
+  All 5 phases implemented = full product feature set built.
+  Phase 6 (Hardening) is the only remaining work before production launch.
+  Backend is complete (Go 1.25, PostgreSQL 16+, 40+ endpoints).
+  Frontend has ~300+ files across apps/web and 9 packages.

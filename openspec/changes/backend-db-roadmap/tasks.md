@@ -6,7 +6,7 @@
 **Overall:** 83/83 tasks implemented
 **Build:** `go build ./...` passes
 **Unit tests:** `go test ./...` passes
-**Integration tests:** Written, pending Docker execution
+**Integration tests:** 56 PASS / 14 SKIP / 0 FAIL (14 skipped require API keys)
 
 | Phase | Tasks | Status |
 |-------|-------|--------|
