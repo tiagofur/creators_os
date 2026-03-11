@@ -27,6 +27,15 @@ vi.mock('next/navigation', () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 
+// Mock toast
+vi.mock('@ordo/ui', async (importOriginal) => {
+  const original = await importOriginal<typeof import('@ordo/ui')>();
+  return {
+    ...original,
+    useToast: () => ({ toast: vi.fn() }),
+  };
+});
+
 // Mock stores
 vi.mock('@ordo/stores', () => ({
   useWorkspaceStore: (selector: (s: { activeWorkspaceId: string; tier: string }) => unknown) =>

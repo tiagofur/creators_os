@@ -8,6 +8,7 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./src/mocks/jest-setup.ts'],
+    exclude: ['e2e/**', 'node_modules/**'],
   },
   resolve: {
     alias: {
