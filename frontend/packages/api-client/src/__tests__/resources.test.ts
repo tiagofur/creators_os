@@ -454,10 +454,16 @@ describe('createSponsorshipsResource', () => {
     expect(client.get).toHaveBeenCalledWith('/v1/workspaces/ws-1/sponsorships/deals');
   });
 
-  it('listDeals with filters appends query params', async () => {
+  it('listDeals with stage filter appends query params', async () => {
     await sp.listDeals('ws-1', { stage: 'negotiation' as any });
     const url = (client.get as jest.Mock).mock.calls[0][0] as string;
     expect(url).toContain('stage=negotiation');
+  });
+
+  it('listDeals with brandContactId filter', async () => {
+    await sp.listDeals('ws-1', { brandContactId: 'bc-1' });
+    const url = (client.get as jest.Mock).mock.calls[0][0] as string;
+    expect(url).toContain('brand_contact_id=bc-1');
   });
 
   it('getDeal calls GET', async () => {
