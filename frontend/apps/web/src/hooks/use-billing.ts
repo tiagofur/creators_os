@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { apiClient } from '@/lib/api-client';
+import { BILLING_CACHE } from '@/lib/query-config';
 import type { Subscription, Invoice, UsageSummary, SubscriptionTier } from '@ordo/types';
 import type { BillingPeriod } from '@ordo/api-client';
 
@@ -17,7 +18,7 @@ export function useSubscription() {
   return useQuery({
     queryKey: BILLING_KEYS.subscription(),
     queryFn: () => apiClient.get<Subscription>('/v1/billing/subscription'),
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    ...BILLING_CACHE,
   });
 }
 
@@ -25,7 +26,7 @@ export function useInvoices() {
   return useQuery({
     queryKey: BILLING_KEYS.invoices(),
     queryFn: () => apiClient.get<Invoice[]>('/v1/billing/invoices'),
-    staleTime: 1000 * 60 * 10, // 10 minutes
+    ...BILLING_CACHE,
   });
 }
 
@@ -33,7 +34,7 @@ export function useUsage() {
   return useQuery({
     queryKey: BILLING_KEYS.usage(),
     queryFn: () => apiClient.get<UsageSummary>('/v1/billing/usage'),
-    staleTime: 1000 * 60, // 1 minute
+    ...BILLING_CACHE,
   });
 }
 

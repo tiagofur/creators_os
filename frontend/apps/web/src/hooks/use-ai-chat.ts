@@ -4,6 +4,7 @@ import * as React from 'react';
 import { useToast } from '@ordo/ui';
 import { useAuthStore } from '@ordo/stores';
 import { API_BASE_URL } from '@ordo/core';
+import { trackEvent } from '@/lib/analytics';
 import type { ChatMessage } from '@ordo/types';
 
 interface UseAiChatOptions {
@@ -127,6 +128,7 @@ export function useAiChat(options: UseAiChatOptions = {}): UseAiChatReturn {
             }
           }
         }
+        trackEvent('ai_credit_used', { tool: 'chat', creditsUsed: 1 });
       } catch (err) {
         const msg = err instanceof Error ? err.message : 'Failed to send message';
         setError(msg);

@@ -1,15 +1,36 @@
 'use client';
 
 import * as React from 'react';
+import dynamic from 'next/dynamic';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { cn } from '@ordo/core';
-import { Button } from '@ordo/ui';
+import { Button, Skeleton } from '@ordo/ui';
 import { useWorkspaceStore } from '@ordo/stores';
 import { useScheduledContent } from '@/hooks/use-publishing';
-import { PublishingCalendar } from './_components/publishing-calendar';
 import { PublishingList } from './_components/publishing-list';
 import { ContentDetailSheet } from '@/components/pipeline/content-detail-sheet';
 import type { ContentItem } from '@ordo/types';
+
+function CalendarSkeleton() {
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <Skeleton className="h-6 w-36" />
+        <div className="flex gap-1">
+          <Skeleton className="h-8 w-8 rounded-md" />
+          <Skeleton className="h-8 w-16 rounded-md" />
+          <Skeleton className="h-8 w-8 rounded-md" />
+        </div>
+      </div>
+      <Skeleton className="h-[400px] w-full rounded-lg" />
+    </div>
+  );
+}
+
+const PublishingCalendar = dynamic(
+  () => import('./_components/publishing-calendar').then((mod) => mod.PublishingCalendar),
+  { loading: () => <CalendarSkeleton />, ssr: false },
+);
 
 type ViewMode = 'calendar' | 'list';
 

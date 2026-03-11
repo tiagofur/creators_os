@@ -14,6 +14,7 @@ import {
 import { useCreateIdea } from '@/hooks/use-ideas';
 import { useWorkspaceStore } from '@ordo/stores';
 import { useToast } from '@ordo/ui';
+import { trackEvent } from '@/lib/analytics';
 
 type Platform =
   | 'youtube'
@@ -66,6 +67,7 @@ export function QuickCaptureModal({ open, onClose }: QuickCaptureModalProps) {
         tags: selectedPlatforms,
         workspace_id: activeWorkspaceId,
       });
+      trackEvent('idea_captured', { source: 'quick_capture' });
       toast({ title: 'Idea captured!', variant: 'default' });
       setText('');
       setSelectedPlatforms([]);

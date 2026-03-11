@@ -36,28 +36,28 @@ export default function DashboardPage() {
           Overview
         </h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Suspense fallback={<Skeleton className="h-32" />}>
+          <Suspense fallback={<Skeleton className="h-[156px] w-full rounded-lg" />}>
             <StatsCard
               label="Total Ideas"
               value="—"
               icon={<Lightbulb className="h-5 w-5" />}
             />
           </Suspense>
-          <Suspense fallback={<Skeleton className="h-32" />}>
+          <Suspense fallback={<Skeleton className="h-[156px] w-full rounded-lg" />}>
             <StatsCard
               label="In Pipeline"
               value="—"
               icon={<Kanban className="h-5 w-5" />}
             />
           </Suspense>
-          <Suspense fallback={<Skeleton className="h-32" />}>
+          <Suspense fallback={<Skeleton className="h-[156px] w-full rounded-lg" />}>
             <StatsCard
               label="Published"
               value="—"
               icon={<FileText className="h-5 w-5" />}
             />
           </Suspense>
-          <Suspense fallback={<Skeleton className="h-32" />}>
+          <Suspense fallback={<Skeleton className="h-[156px] w-full rounded-lg" />}>
             <StatsCard
               label="Team Members"
               value="—"
@@ -70,7 +70,7 @@ export default function DashboardPage() {
       {/* Bottom grid: recent activity + consistency */}
       <section className="grid gap-4 lg:grid-cols-3">
         <div className="lg:col-span-2">
-          <Suspense fallback={<Skeleton className="h-64" />}>
+          <Suspense fallback={<Skeleton className="h-64 w-full rounded-lg" />}>
             <RecentActivity />
           </Suspense>
         </div>

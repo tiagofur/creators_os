@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { apiClient } from '@/lib/api-client';
+import { NOTIFICATION_PREFS_CACHE } from '@/lib/query-config';
 
 export interface NotificationPreferences {
   inApp: {
@@ -27,7 +28,7 @@ export function useNotificationPreferences() {
   return useQuery({
     queryKey: PREFS_KEY,
     queryFn: () => apiClient.get<NotificationPreferences>('/v1/notifications/preferences'),
-    staleTime: 1000 * 60 * 5,
+    ...NOTIFICATION_PREFS_CACHE,
   });
 }
 

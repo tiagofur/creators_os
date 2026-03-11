@@ -1,13 +1,18 @@
 'use client';
 
 import * as React from 'react';
+import dynamic from 'next/dynamic';
 import { useWorkspaceStore } from '@ordo/stores';
 import { useContentItems } from '@/hooks/use-content';
-import { KanbanBoard } from '@/components/pipeline/kanban-board';
 import { PipelineToolbar, type PipelineViewMode } from '@/components/pipeline/pipeline-toolbar';
 import { ContentDetailSheet } from '@/components/pipeline/content-detail-sheet';
 import { KanbanBoardSkeleton } from '@/components/pipeline/kanban-board-skeleton';
 import type { ContentItem } from '@ordo/types';
+
+const KanbanBoard = dynamic(
+  () => import('@/components/pipeline/kanban-board').then((mod) => mod.KanbanBoard),
+  { loading: () => <KanbanBoardSkeleton />, ssr: false },
+);
 
 export default function PipelinePage() {
   const [search, setSearch] = React.useState('');

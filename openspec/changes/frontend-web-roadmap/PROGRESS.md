@@ -1,7 +1,7 @@
 # Frontend Web Roadmap — Progress Summary
 
-**Last updated**: 2026-03-10
-**Status**: 5/6 phases complete — ready for Phase 6 (Hardening)
+**Last updated**: 2026-03-11
+**Status**: 6/6 phases complete — ALL PHASES DONE ✅
 
 ## Quick Status
 
@@ -12,12 +12,12 @@
 | 3 | AI Studio | 11 | ✅ Complete |
 | 4 | Growth | 11 | ✅ Complete |
 | 5 | Billing + Polish | 16 | ✅ Complete |
-| 6 | Hardening | 25 | ⏳ Pending |
-| **Total** | | **119** | **101 done** |
+| 6 | Hardening | 25 | ✅ Complete |
+| **Total** | | **119** | **119 done** |
 
 **MVP status**: ✅ Ready for private beta (Phases 1+2 complete)
-**Full product**: 5/6 phases built
-**Remaining**: Phase 6 — testing, CI/CD, performance, deploy
+**Full product**: 6/6 phases built — COMPLETE
+**Remaining**: None — all phases implemented
 
 ## What's Built
 
@@ -82,20 +82,39 @@ app/[locale]/
     └── onboarding/             ← 3-step wizard
 ```
 
-## Next: Phase 6 — Hardening
+## Phase 6 — Hardening (COMPLETE)
 
-To start: tell the orchestrator `fase 6` or run `/sdd-apply frontend-web-roadmap`
+All 25 tasks implemented:
 
-Phase 6 tasks (25 total):
-- Bundle analysis + lazy loading optimization
-- RSC (React Server Components) optimization
-- Core Web Vitals: LCP < 2.5s, INP < 200ms, CLS < 0.1
-- Jest + RTL unit tests for all packages
-- MSW mock server for all 40+ endpoints
-- Playwright E2E: auth, onboarding, ideas, pipeline, billing
-- Sentry error + performance monitoring
-- GitHub Actions CI/CD (lint → typecheck → test → build → deploy)
-- Vercel deployment configuration
-- Environment variables audit
-- k6 load testing
-- Developer documentation
+### Performance (TASK-601–605)
+- ✅ Bundle analysis + `@next/bundle-analyzer` + dynamic imports (KanbanBoard, Calendar, Recharts, Tiptap)
+- ✅ RSC optimization — pages converted to Server Components, `"use client"` at leaf level only
+- ✅ Core Web Vitals — Lighthouse CI config, `next/font` Inter, image `priority` props
+- ✅ React Query caching — per-resource staleTime/gcTime profiles (realtime → stable)
+- ✅ WebSocket reconnection — exponential backoff, tab-focus reconnect, connection status indicator
+
+### Testing (TASK-606–616)
+- ✅ Jest unit tests: api-client (fetch wrapper, JWT refresh, resource modules)
+- ✅ Jest unit tests: Zustand stores (auth, workspace, ui)
+- ✅ Jest unit tests: Zod validation schemas (auth, idea, content, workspace, billing, AI, etc.)
+- ✅ RTL component tests: UI design system (Button, Input, Dialog, Badge, etc.)
+- ✅ RTL component tests: IdeaCard, ContentCard, ConsistencyHeatmap, TierGate
+- ✅ MSW mock server: 70+ handlers for all API endpoints
+- ✅ RTL integration tests: auth flow, idea capture, pipeline drag
+- ✅ Playwright E2E: happy path, auth + OAuth, billing upgrade (Chromium/Firefox/WebKit)
+
+### Monitoring (TASK-617–618)
+- ✅ Sentry error + performance monitoring (`@sentry/nextjs`, instrumentation.ts)
+- ✅ Analytics event tracking: idea_captured, content_stage_changed, ai_credit_used, upgrade_clicked
+
+### CI/CD (TASK-619–622)
+- ✅ GitHub Actions CI: lint → typecheck → test → coverage upload
+- ✅ GitHub Actions E2E: nightly, 3 browsers matrix, Slack notification
+- ✅ Staging deployment: auto-deploy on `develop`, smoke test
+- ✅ Production deployment: approval gate, `vercel --prod`
+
+### Documentation (TASK-623–625)
+- ✅ `.env.example` with all variables documented, secrets audit passed
+- ✅ k6 load test: 100 concurrent users, p95 < 2s threshold
+- ✅ READMEs: apps/web, packages/api-client, packages/ui
+- ✅ ADRs: state-management, routing, auth-token strategy

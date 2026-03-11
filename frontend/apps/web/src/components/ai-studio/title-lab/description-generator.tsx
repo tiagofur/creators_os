@@ -7,6 +7,7 @@ import { Copy } from 'lucide-react';
 import { Button, Input, Label, Textarea, useToast } from '@ordo/ui';
 import { cn } from '@ordo/core';
 import { apiClient } from '@/lib/api-client';
+import { trackEvent } from '@/lib/analytics';
 import type { DescriptionRequest, DescriptionResponse } from '@ordo/types';
 
 interface FormValues {
@@ -30,6 +31,7 @@ export function DescriptionGenerator() {
     mutationFn: (payload: DescriptionRequest) =>
       apiClient.post<DescriptionResponse>('/v1/ai/description', payload),
     onSuccess: (data) => {
+      trackEvent('ai_credit_used', { tool: 'description_generator', creditsUsed: 1 });
       setResult(data);
       toast({ title: 'Description generated' });
     },

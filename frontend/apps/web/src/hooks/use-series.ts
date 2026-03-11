@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 import { queryKeys } from '@/lib/query-keys';
+import { SERIES_CACHE } from '@/lib/query-config';
 import type { Series } from '@ordo/types';
 
 // GET all series for workspace
@@ -12,7 +13,7 @@ export function useSeries(workspaceId: string) {
     queryFn: () =>
       apiClient.get<Series[]>(`/v1/series?workspace_id=${workspaceId}`),
     enabled: Boolean(workspaceId),
-    staleTime: 1000 * 60,
+    ...SERIES_CACHE,
   });
 }
 
@@ -22,7 +23,7 @@ export function useSerie(id: string) {
     queryKey: queryKeys.series.detail(id),
     queryFn: () => apiClient.get<Series>(`/v1/series/${id}`),
     enabled: Boolean(id),
-    staleTime: 1000 * 60,
+    ...SERIES_CACHE,
   });
 }
 

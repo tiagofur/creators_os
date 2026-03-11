@@ -7,6 +7,7 @@ import { apiClient } from '@/lib/api-client';
 import { TitleLabForm } from '@/components/ai-studio/title-lab/title-lab-form';
 import { TitleResults } from '@/components/ai-studio/title-lab/title-results';
 import { DescriptionGenerator } from '@/components/ai-studio/title-lab/description-generator';
+import { trackEvent } from '@/lib/analytics';
 import type { TitleLabRequest, GeneratedTitle, TitleLabResponse } from '@ordo/types';
 
 export default function TitleLabPage() {
@@ -19,6 +20,7 @@ export default function TitleLabPage() {
     mutationFn: (payload: TitleLabRequest) =>
       apiClient.post<TitleLabResponse>('/v1/ai/title-lab', payload),
     onSuccess: (data) => {
+      trackEvent('ai_credit_used', { tool: 'title_lab', creditsUsed: 1 });
       setTitles(data.titles);
       toast({ title: `${data.titles.length} titles generated` });
     },

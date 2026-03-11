@@ -55,8 +55,7 @@
     --color-info: 0.6 0.18 240;
     --color-info-foreground: 1 0 0;
 
-    /* Typography */
-    --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+    /* Typography — --font-sans is set by next/font on <html> to avoid FOUT */
     --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 
     /* Border Radius */

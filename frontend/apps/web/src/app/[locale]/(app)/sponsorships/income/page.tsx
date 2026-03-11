@@ -1,10 +1,29 @@
 'use client';
 
 import * as React from 'react';
+import dynamic from 'next/dynamic';
 import { useWorkspaceStore } from '@ordo/stores';
+import { Skeleton } from '@ordo/ui';
 import { useIncomeEntries, useSponsorshipDeals } from '@/hooks/use-sponsorships';
 import { IncomeTracker } from '@/components/sponsorships/income-tracker';
-import { IncomeChart } from '@/components/sponsorships/income-chart';
+
+function IncomeChartSkeleton() {
+  return (
+    <div className="rounded-lg border bg-card">
+      <div className="p-6 pb-2">
+        <Skeleton className="h-5 w-48" />
+      </div>
+      <div className="p-6 pt-0">
+        <Skeleton className="h-[300px] w-full" />
+      </div>
+    </div>
+  );
+}
+
+const IncomeChart = dynamic(
+  () => import('@/components/sponsorships/income-chart').then((mod) => mod.IncomeChart),
+  { loading: () => <IncomeChartSkeleton />, ssr: false },
+);
 
 export default function IncomePage() {
   const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspace?.id) ?? '';

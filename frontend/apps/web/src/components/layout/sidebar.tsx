@@ -24,6 +24,7 @@ import { cn } from '@ordo/core';
 import { useUiStore } from '@ordo/stores';
 import { Button } from '@ordo/ui';
 import { WorkspaceSelector } from '@/components/workspace/workspace-selector';
+import { ConnectionStatusIndicator } from './connection-status-indicator';
 
 interface NavItem {
   label: string;
@@ -116,21 +117,24 @@ export function Sidebar() {
         })}
       </nav>
 
-      {/* Collapse toggle */}
+      {/* Footer: connection status + collapse toggle */}
       <div className="border-t p-2">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={toggleSidebar}
-          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          className="w-full"
-        >
-          {collapsed ? (
-            <ChevronRight className="h-4 w-4" />
-          ) : (
-            <ChevronLeft className="h-4 w-4" />
-          )}
-        </Button>
+        <div className={cn('flex items-center', collapsed ? 'justify-center gap-0' : 'gap-2')}>
+          <ConnectionStatusIndicator />
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleSidebar}
+            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            className={cn(collapsed ? 'w-full' : 'ml-auto')}
+          >
+            {collapsed ? (
+              <ChevronRight className="h-4 w-4" />
+            ) : (
+              <ChevronLeft className="h-4 w-4" />
+            )}
+          </Button>
+        </div>
       </div>
     </aside>
   );

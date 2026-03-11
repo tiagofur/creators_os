@@ -3,6 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 import { queryKeys } from '@/lib/query-keys';
+import { GAMIFICATION_CACHE } from '@/lib/query-config';
 import { createGamificationResource } from '@ordo/api-client';
 import { useAuthStore } from '@ordo/stores';
 
@@ -16,7 +17,7 @@ export function useCreatorLevel() {
     queryKey: queryKeys.gamification.profile(userId),
     queryFn: () => gamificationApi.getProfile(userId),
     enabled: Boolean(userId),
-    staleTime: 1000 * 60 * 2, // 2min
+    ...GAMIFICATION_CACHE,
   });
 
   return {
@@ -33,7 +34,7 @@ export function useGamificationProfile() {
     queryKey: queryKeys.gamification.profile(userId),
     queryFn: () => gamificationApi.getProfile(userId),
     enabled: Boolean(userId),
-    staleTime: 1000 * 60 * 2,
+    ...GAMIFICATION_CACHE,
   });
 }
 
@@ -45,6 +46,6 @@ export function useAchievements() {
     queryKey: queryKeys.gamification.achievements(userId),
     queryFn: () => gamificationApi.getAchievements(userId),
     enabled: Boolean(userId),
-    staleTime: 1000 * 60 * 5,
+    ...GAMIFICATION_CACHE,
   });
 }

@@ -4,6 +4,8 @@ import * as React from 'react';
 import { cn } from '@ordo/core';
 import { Button, Card, CardContent } from '@ordo/ui';
 import { Lock, Zap } from 'lucide-react';
+import { trackEvent } from '@/lib/analytics';
+import { useTier } from '@/hooks/use-tier';
 
 interface UpgradePromptProps {
   feature: string;
@@ -38,6 +40,15 @@ export function UpgradePrompt({
   variant = 'inline',
   className,
 }: UpgradePromptProps) {
+  const { tier } = useTier();
+
+  const handleUpgradeClick = () => {
+    trackEvent('upgrade_clicked', { source: feature, currentTier: tier });
+    if (typeof window !== 'undefined') {
+      window.location.href = '/settings/billing';
+    }
+  };
+
   const benefitList = benefits ?? DEFAULT_BENEFITS[feature] ?? [
     'Unlock advanced features',
     'Grow your creator business',
@@ -62,11 +73,7 @@ export function UpgradePrompt({
           </ul>
           <Button
             className="mt-5"
-            onClick={() => {
-              if (typeof window !== 'undefined') {
-                window.location.href = '/settings/billing';
-              }
-            }}
+            onClick={handleUpgradeClick}
           >
             Upgrade now
           </Button>

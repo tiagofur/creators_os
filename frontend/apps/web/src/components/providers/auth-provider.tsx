@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { useAuthStore } from '@ordo/stores';
+import { useAuthStore, useWsStore } from '@ordo/stores';
 import { createWsClient } from '@ordo/api-client';
 import { apiClient } from '@/lib/api-client';
 import { queryKeys } from '@/lib/query-keys';
@@ -102,8 +102,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
           wsClient.subscribe('achievement_unlocked', handleAchievementUnlocked);
           wsClient.subscribe('level_up', handleLevelUp);
 
+          // Sync connection state to Zustand store
+          const unsubscribeState = wsClient.onConnectionStateChange((state) => {
+            useWsStore.getState().setConnectionState(state);
+          });
+
           // Cleanup on unmount
           return () => {
+            unsubscribeState();
             wsClient.disconnect();
           };
         }

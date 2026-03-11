@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
+import { PLATFORM_CREDENTIALS_CACHE } from '@/lib/query-config';
 
 export type Platform = 'youtube' | 'instagram' | 'tiktok' | 'twitter' | 'linkedin';
 
@@ -26,7 +27,7 @@ export function usePlatformCredentials(workspaceId: string) {
         `/v1/workspaces/${workspaceId}/platform-credentials`,
       ),
     enabled: Boolean(workspaceId),
-    staleTime: 1000 * 60 * 5,
+    ...PLATFORM_CREDENTIALS_CACHE,
   });
 }
 
