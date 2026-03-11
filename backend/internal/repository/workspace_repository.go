@@ -567,5 +567,23 @@ func (r *pgInvitationRepository) Delete(ctx context.Context, id uuid.UUID) error
 	return err
 }
 
+// CountPending returns the number of pending (non-accepted, non-expired) invitations for a workspace.
+func (r *pgInvitationRepository) CountPending(ctx context.Context, workspaceID uuid.UUID) (int, error) {
+	start := time.Now()
+	defer func() {
+		metrics.DBQueryDuration.WithLabelValues("invitations.count_pending").Observe(time.Since(start).Seconds())
+	}()
+
+	const q = `
+		SELECT COUNT(*) FROM workspace_invitations
+		WHERE workspace_id = $1 AND accepted_at IS NULL AND expires_at > NOW()`
+	var count int
+	err := r.pool.QueryRow(ctx, q, workspaceID).Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
 // Compile-time interface check.
 var _ InvitationRepository = (*pgInvitationRepository)(nil)

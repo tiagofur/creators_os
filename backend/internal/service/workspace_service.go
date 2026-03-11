@@ -235,11 +235,15 @@ func (s *workspaceService) InviteMember(ctx context.Context, workspaceID, invite
 
 	limit := memberLimit(inviter.SubscriptionTier)
 	if limit >= 0 {
-		count, err := s.wsRepo.CountMembers(ctx, workspaceID)
+		memberCount, err := s.wsRepo.CountMembers(ctx, workspaceID)
 		if err != nil {
 			return nil, fmt.Errorf("workspace: invite: count members: %w", err)
 		}
-		if count >= limit {
+		pendingCount, err := s.invRepo.CountPending(ctx, workspaceID)
+		if err != nil {
+			return nil, fmt.Errorf("workspace: invite: count pending invitations: %w", err)
+		}
+		if memberCount+pendingCount >= limit {
 			return nil, domain.NewError("MEMBER_LIMIT_REACHED",
 				fmt.Sprintf("your plan allows a maximum of %d members. Upgrade to add more.", limit),
 				402)

@@ -54,6 +54,8 @@ type InvitationRepository interface {
 	ListByWorkspace(ctx context.Context, workspaceID uuid.UUID) ([]*domain.WorkspaceInvitation, error)
 	Accept(ctx context.Context, token string) (*domain.WorkspaceInvitation, error)
 	Delete(ctx context.Context, id uuid.UUID) error
+	// CountPending returns the number of non-expired, non-accepted invitations for a workspace.
+	CountPending(ctx context.Context, workspaceID uuid.UUID) (int, error)
 }
 
 // UserRepository defines all persistence operations for users.

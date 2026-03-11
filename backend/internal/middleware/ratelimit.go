@@ -3,6 +3,7 @@ package middleware
 import (
 	"context"
 	"fmt"
+	"net"
 	"net/http"
 	"strconv"
 	"strings"
@@ -136,6 +137,10 @@ func RateLimiter(redisClient *redis.Client, env string, limit int, window time.D
 				ip = strings.SplitN(fwd, ",", 2)[0]
 			}
 			ip = strings.TrimSpace(ip)
+			// Strip port so that all connections from the same host share one bucket.
+			if host, _, err := net.SplitHostPort(ip); err == nil {
+				ip = host
+			}
 
 			// Use the first two path segments as the key prefix to group related routes
 			pathPrefix := pathKey(r.URL.Path)

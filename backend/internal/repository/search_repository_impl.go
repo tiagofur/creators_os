@@ -187,7 +187,7 @@ func (r *pgSearchRepository) Search(
 		close(resultCh)
 	}()
 
-	var all []*domain.SearchResult
+	all := make([]*domain.SearchResult, 0)
 	for qr := range resultCh {
 		if qr.err != nil {
 			return nil, qr.err

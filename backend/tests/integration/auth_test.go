@@ -67,20 +67,27 @@ func setupTestEnv(t *testing.T) *testEnv {
 	sessionRepo := repository.NewSessionRepository(pool)
 	wsRepo := repository.NewWorkspaceRepository(pool)
 	invRepo := repository.NewInvitationRepository(pool)
+	searchRepo := repository.NewSearchRepository(pool)
+	aiRepo := repository.NewAIRepository(pool)
 
 	// --- Services ---
 	authSvc := service.NewAuthService(userRepo, sessionRepo, jwtManager, asynqClient, nil, nil)
 	wsSvc := service.NewWorkspaceService(wsRepo, invRepo, userRepo, asynqClient, nil)
+	searchSvc := service.NewSearchService(searchRepo)
+	aiSvc := service.NewAIService(nil, aiRepo, userRepo, nil)
 
 	// --- Handlers ---
 	authHnd := handler.NewAuthHandler(authSvc, jwtManager, nil)
 	userHnd := handler.NewUserHandler(userRepo)
 	wsHnd := handler.NewWorkspaceHandler(wsSvc)
 	healthHnd := handler.NewHealthHandler(pool, redisClient, "test")
+	searchHnd := handler.NewSearchHandler(searchSvc)
+	auditHnd := handler.NewAuditHandler(pool)
+	aiHnd := handler.NewAIHandler(aiSvc, aiRepo, userRepo)
 
 	cfg := &config.Config{AppEnv: "test", CORSAllowedOrigins: []string{"*"}}
 	router := server.NewRouter(cfg, redisClient, healthHnd, authHnd, userHnd, wsHnd, jwtManager, wsRepo,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+		nil, nil, nil, nil, aiHnd, nil, nil, nil, nil, nil, nil, nil, searchHnd, auditHnd)
 
 	ts := httptest.NewServer(router)
 	t.Cleanup(ts.Close)
