@@ -6,8 +6,6 @@
  * 3. Refresh failure: API returns 401, refresh returns 401, user redirected to login
  */
 import {
-  beforeAll,
-  afterAll,
   afterEach,
   beforeEach,
   describe,
@@ -18,22 +16,20 @@ import {
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
-import { server } from '../mocks/server';
-
-const API_BASE = process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:8000';
+import { server } from '@/mocks/server';
+import { createApiClient } from '@ordo/api-client';
 
 // Track navigation
 const mockPush = vi.fn();
 const mockReplace = vi.fn();
 
-// Setup MSW
-beforeAll(() => server.listen({ onUnhandledRequest: 'warn' }));
+// The canonical server is already started by the setup file (jest-setup.ts).
+// We only need to reset handlers after each test.
 afterEach(() => {
   server.resetHandlers();
   mockPush.mockClear();
   mockReplace.mockClear();
 });
-afterAll(() => server.close());
 
 // Mock next/navigation
 vi.mock('next/navigation', () => ({
@@ -74,8 +70,13 @@ vi.mock('@ordo/stores', () => ({
       }),
     },
   ),
-  useWorkspaceStore: (selector: (s: Record<string, unknown>) => unknown) =>
-    selector({ activeWorkspaceId: 'workspace-1', activeWorkspace: { id: 'workspace-1' }, tier: 'free' }),
+  useWorkspaceStore: Object.assign(
+    (selector: (s: Record<string, unknown>) => unknown) =>
+      selector({ activeWorkspaceId: 'workspace-1', activeWorkspace: { id: 'workspace-1' }, tier: 'free' }),
+    {
+      getState: () => ({ activeWorkspaceId: 'workspace-1' }),
+    },
+  ),
   useUiStore: (selector: (s: Record<string, unknown>) => unknown) =>
     selector({}),
 }));
@@ -90,7 +91,16 @@ describe('Auth Integration: Registration flow', () => {
   it('completes registration and redirects to onboarding', async () => {
     const user = userEvent.setup();
 
-    // MSW already has a register handler returning 201 with tokens
+    // Override register handler to return 201
+    server.use(
+      http.post('*/v1/auth/register', () => {
+        return HttpResponse.json(
+          { access_token: 'new-reg-token', token_type: 'Bearer', expires_in: 3600 },
+          { status: 201 },
+        );
+      }),
+    );
+
     const { RegisterForm } = await import(
       '@/app/[locale]/(auth)/register/_components/register-form'
     );
@@ -102,9 +112,7 @@ describe('Auth Integration: Registration flow', () => {
     await user.type(screen.getByLabelText(/email/i), 'jane@example.com');
 
     const passwordFields = screen.getAllByLabelText(/password/i);
-    // First password field
     await user.type(passwordFields[0], 'SecurePass123!');
-    // Confirm password field
     await user.type(passwordFields[1], 'SecurePass123!');
 
     // Accept terms
@@ -115,7 +123,7 @@ describe('Auth Integration: Registration flow', () => {
 
     // Wait for the form submission to complete
     await waitFor(() => {
-      expect(mockSetAccessToken).toHaveBeenCalledWith('mock-access-token');
+      expect(mockSetAccessToken).toHaveBeenCalledWith('new-reg-token');
     });
 
     await waitFor(() => {
@@ -128,7 +136,7 @@ describe('Auth Integration: Registration flow', () => {
 
     // Override the register handler to return an error
     server.use(
-      http.post(`${API_BASE}/v1/auth/register`, () => {
+      http.post('*/v1/auth/register', () => {
         return HttpResponse.json(
           { status: 400, code: 'EMAIL_TAKEN', message: 'Email already in use' },
           { status: 400 },
@@ -167,9 +175,9 @@ describe('Auth Integration: Token refresh flow', () => {
   it('retries the original request after a successful token refresh', async () => {
     let callCount = 0;
 
-    // First call returns 401, second (retry) returns 200
+    // First call returns 401, second (retry after refresh) returns 200
     server.use(
-      http.get(`${API_BASE}/v1/ideas`, () => {
+      http.get('*/v1/test-endpoint', () => {
         callCount++;
         if (callCount === 1) {
           return HttpResponse.json(
@@ -177,10 +185,7 @@ describe('Auth Integration: Token refresh flow', () => {
             { status: 401 },
           );
         }
-        return HttpResponse.json({
-          data: [{ id: 'idea-1', title: 'Refreshed idea' }],
-          meta: { page: 1, per_page: 20, total: 1, total_pages: 1 },
-        });
+        return HttpResponse.json({ message: 'success after refresh' });
       }),
       // Refresh succeeds
       http.post('/api/auth/refresh', () => {
@@ -191,26 +196,24 @@ describe('Auth Integration: Token refresh flow', () => {
       }),
     );
 
-    // Use the apiClient directly to test the refresh flow
-    const { createApiClient } = await import('@ordo/api-client');
-
+    // Use the apiClient directly to test the refresh logic
     const client = createApiClient({
-      baseUrl: API_BASE,
+      baseUrl: 'http://localhost:8000',
       getAccessToken: () => mockAccessToken,
       onUnauthorized: mockLogout,
     });
 
-    const result = await client.get<{ data: { id: string; title: string }[] }>('/v1/ideas');
+    const result = await client.get<{ message: string }>('/v1/test-endpoint');
 
     expect(callCount).toBe(2);
-    expect(result.data[0].title).toBe('Refreshed idea');
+    expect(result.message).toBe('success after refresh');
     expect(mockLogout).not.toHaveBeenCalled();
   });
 
   it('redirects to login when refresh token also fails (401)', async () => {
+    // API returns 401
     server.use(
-      // API returns 401
-      http.get(`${API_BASE}/v1/ideas`, () => {
+      http.get('*/v1/test-refresh-fail', () => {
         return HttpResponse.json(
           { status: 401, code: 'UNAUTHORIZED', message: 'Token expired' },
           { status: 401 },
@@ -225,15 +228,13 @@ describe('Auth Integration: Token refresh flow', () => {
       }),
     );
 
-    const { createApiClient } = await import('@ordo/api-client');
-
     const client = createApiClient({
-      baseUrl: API_BASE,
+      baseUrl: 'http://localhost:8000',
       getAccessToken: () => mockAccessToken,
       onUnauthorized: mockLogout,
     });
 
-    await expect(client.get('/v1/ideas')).rejects.toThrow();
+    await expect(client.get('/v1/test-refresh-fail')).rejects.toThrow();
 
     expect(mockLogout).toHaveBeenCalled();
   });

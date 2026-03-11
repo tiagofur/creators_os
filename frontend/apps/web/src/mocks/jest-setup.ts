@@ -1,4 +1,14 @@
+import '@testing-library/jest-dom/vitest';
 import { server } from './server';
+
+// Polyfill ResizeObserver for jsdom (used by Radix UI)
+if (typeof globalThis.ResizeObserver === 'undefined') {
+  globalThis.ResizeObserver = class ResizeObserver {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  };
+}
 
 // Start the MSW server before all tests
 beforeAll(() => {
