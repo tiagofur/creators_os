@@ -1,0 +1,191 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* =====================================================
+     * OKLCH Color Tokens — Light Mode
+     * ===================================================== */
+
+    /* Background / Foreground */
+    --color-background: 0.98 0 0;
+    --color-foreground: 0.15 0 0;
+
+    /* Primary — Creator Purple */
+    --color-primary: 0.55 0.22 290;
+    --color-primary-foreground: 1 0 0;
+
+    /* Secondary */
+    --color-secondary: 0.94 0.01 290;
+    --color-secondary-foreground: 0.2 0.05 290;
+
+    /* Muted */
+    --color-muted: 0.95 0 0;
+    --color-muted-foreground: 0.55 0 0;
+
+    /* Accent */
+    --color-accent: 0.92 0.02 290;
+    --color-accent-foreground: 0.15 0.1 290;
+
+    /* Destructive */
+    --color-destructive: 0.55 0.22 25;
+    --color-destructive-foreground: 1 0 0;
+
+    /* Border / Ring / Input */
+    --color-border: 0.88 0 0;
+    --color-ring: 0.55 0.22 290;
+    --color-input: 0.88 0 0;
+
+    /* Section Brand Colors */
+    --color-ideas: 0.7 0.15 195;        /* cyan */
+    --color-pipeline: 0.6 0.18 290;     /* violet */
+    --color-studio: 0.65 0.2 330;       /* pink */
+    --color-publishing: 0.68 0.18 55;   /* orange */
+    --color-analytics: 0.6 0.18 240;    /* blue */
+    --color-sponsorships: 0.65 0.17 145; /* green */
+
+    /* Status */
+    --color-success: 0.65 0.17 145;
+    --color-success-foreground: 1 0 0;
+    --color-warning: 0.75 0.18 75;
+    --color-warning-foreground: 0.15 0 0;
+    --color-error: 0.55 0.22 25;
+    --color-error-foreground: 1 0 0;
+    --color-info: 0.6 0.18 240;
+    --color-info-foreground: 1 0 0;
+
+    /* Typography */
+    --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+    /* Border Radius */
+    --radius-sm: 0.25rem;
+    --radius: 0.375rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+    --radius-full: 9999px;
+
+    /* Animation Durations */
+    --duration-fast: 150ms;
+    --duration-base: 200ms;
+    --duration-slow: 300ms;
+    --duration-slower: 500ms;
+  }
+
+  .dark {
+    /* =====================================================
+     * OKLCH Color Tokens — Dark Mode
+     * ===================================================== */
+
+    --color-background: 0.13 0.01 290;
+    --color-foreground: 0.94 0 0;
+
+    --color-primary: 0.7 0.22 290;
+    --color-primary-foreground: 0.1 0.05 290;
+
+    --color-secondary: 0.2 0.03 290;
+    --color-secondary-foreground: 0.85 0.05 290;
+
+    --color-muted: 0.2 0.02 290;
+    --color-muted-foreground: 0.6 0.02 290;
+
+    --color-accent: 0.22 0.04 290;
+    --color-accent-foreground: 0.9 0.04 290;
+
+    --color-destructive: 0.65 0.22 25;
+    --color-destructive-foreground: 0.1 0 0;
+
+    --color-border: 0.25 0.03 290;
+    --color-ring: 0.7 0.22 290;
+    --color-input: 0.22 0.03 290;
+
+    --color-success: 0.72 0.17 145;
+    --color-warning: 0.78 0.18 75;
+    --color-error: 0.65 0.22 25;
+    --color-info: 0.68 0.18 240;
+  }
+
+  * {
+    border-color: oklch(var(--color-border));
+  }
+
+  body {
+    background-color: oklch(var(--color-background));
+    color: oklch(var(--color-foreground));
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fade-in var(--duration-base) ease-out;
+  }
+
+  .animate-slide-up {
+    animation: slide-up var(--duration-slow) ease-out;
+  }
+
+  .animate-slide-in-right {
+    animation: slide-in-from-right var(--duration-slow) ease-out;
+  }
+
+  .animate-scale-in {
+    animation: scale-in var(--duration-fast) ease-out;
+  }
+
+  .animate-progress-shrink {
+    animation: progress-shrink linear forwards;
+  }
+
+  /* Idea card hover micro-interaction */
+  .idea-card-hover {
+    transition: transform 150ms ease, box-shadow 150ms ease;
+  }
+  .idea-card-hover:hover {
+    transform: scale(1.01);
+    box-shadow: 0 4px 16px -2px rgb(0 0 0 / 0.12);
+  }
+
+  /* Sidebar nav slide-in indicator */
+  .nav-indicator {
+    position: relative;
+    overflow: hidden;
+  }
+  .nav-indicator::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%) translateX(-100%);
+    width: 3px;
+    height: 60%;
+    border-radius: 0 2px 2px 0;
+    background-color: oklch(var(--color-primary));
+    transition: transform 150ms ease;
+  }
+  .nav-indicator[data-active='true']::before,
+  .nav-indicator:hover::before {
+    transform: translateY(-50%) translateX(0);
+  }
+}
+
+@keyframes progress-shrink {
+  from { width: 100%; }
+  to { width: 0%; }
+}
+
+@keyframes achievement-unlock {
+  0% { transform: scale(0.5); opacity: 0; }
+  60% { transform: scale(1.15); }
+  80% { transform: scale(0.95); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 8px 2px oklch(var(--color-primary) / 0.4); }
+  50% { box-shadow: 0 0 20px 6px oklch(var(--color-primary) / 0.6); }
+}
