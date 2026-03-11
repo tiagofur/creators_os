@@ -4,6 +4,7 @@ import * as React from 'react';
 import { useMutation } from '@tanstack/react-query';
 import type { Editor } from '@tiptap/react';
 import { apiClient } from '@/lib/api-client';
+import { trackEvent } from '@/lib/analytics';
 import type { ScriptDoctorRequest, ScriptSuggestion, ScriptDoctorResponse } from '@ordo/types';
 
 interface UseScriptDoctorReturn {
@@ -22,6 +23,7 @@ export function useScriptDoctor(): UseScriptDoctorReturn {
     mutationFn: (payload: ScriptDoctorRequest) =>
       apiClient.post<ScriptDoctorResponse>('/v1/ai/script-doctor', payload),
     onSuccess: (data) => {
+      trackEvent('ai_credit_used', { tool: 'script_doctor', creditsUsed: 1 });
       setSuggestions(data.suggestions);
     },
   });

@@ -8,6 +8,7 @@ import { RemixForm } from '@/components/ai-studio/remix/remix-form';
 import { RemixResults } from '@/components/ai-studio/remix/remix-results';
 import { HookGeneratorForm } from '@/components/ai-studio/hook-generator/hook-generator-form';
 import { HookResults } from '@/components/ai-studio/hook-generator/hook-results';
+import { trackEvent } from '@/lib/analytics';
 import type { RemixRequest, RemixVariant, RemixResponse, HookRequest, GeneratedHook, HookResponse } from '@ordo/types';
 
 export default function RemixPage() {
@@ -20,6 +21,7 @@ export default function RemixPage() {
     mutationFn: (payload: RemixRequest) =>
       apiClient.post<RemixResponse>('/v1/ai/remix', payload),
     onSuccess: (data) => {
+      trackEvent('ai_credit_used', { tool: 'remix', creditsUsed: 1 });
       setVariants(data.variants);
       toast({ title: `${data.variants.length} variants created` });
     },
@@ -32,6 +34,7 @@ export default function RemixPage() {
     mutationFn: (payload: HookRequest) =>
       apiClient.post<HookResponse>('/v1/ai/hooks', payload),
     onSuccess: (data) => {
+      trackEvent('ai_credit_used', { tool: 'hook_generator', creditsUsed: 1 });
       setHooks(data.hooks);
       toast({ title: `${data.hooks.length} hooks generated` });
     },

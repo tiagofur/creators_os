@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
+import { NOTIFICATIONS_CACHE } from '@/lib/query-config';
 import type { AppNotification } from '@ordo/types';
 
 const NOTIFICATION_KEYS = {
@@ -14,7 +15,7 @@ export function useNotifications() {
   return useQuery({
     queryKey: NOTIFICATION_KEYS.list(),
     queryFn: () => apiClient.get<AppNotification[]>('/v1/notifications?unread=false&page=1'),
-    staleTime: 1000 * 30, // 30 seconds
+    ...NOTIFICATIONS_CACHE,
   });
 }
 
@@ -22,7 +23,7 @@ export function useUnreadCount() {
   return useQuery({
     queryKey: NOTIFICATION_KEYS.count(),
     queryFn: () => apiClient.get<{ count: number }>('/v1/notifications/count'),
-    staleTime: 1000 * 30, // 30 seconds
+    ...NOTIFICATIONS_CACHE,
     refetchInterval: 1000 * 60, // poll every minute
   });
 }

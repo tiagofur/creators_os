@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 import { queryKeys } from '@/lib/query-keys';
+import { CONTENT_CACHE } from '@/lib/query-config';
 import type { ContentItem, PipelineStage, PaginatedResponse } from '@ordo/types';
 
 export interface ContentFilters {
@@ -34,7 +35,7 @@ export function useContentItems(workspaceId: string, filters?: ContentFilters) {
       );
     },
     enabled: Boolean(workspaceId),
-    staleTime: 1000 * 30,
+    ...CONTENT_CACHE,
   });
 }
 
@@ -44,7 +45,7 @@ export function useContentItem(id: string) {
     queryKey: queryKeys.content.detail(id),
     queryFn: () => apiClient.get<ContentItem>(`/v1/contents/${id}`),
     enabled: Boolean(id),
-    staleTime: 1000 * 60,
+    ...CONTENT_CACHE,
   });
 }
 

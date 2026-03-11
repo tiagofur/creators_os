@@ -6,6 +6,7 @@ import { useToast } from '@ordo/ui';
 import { apiClient } from '@/lib/api-client';
 import { HashtagForm } from '@/components/ai-studio/hashtags/hashtag-form';
 import { HashtagResults } from '@/components/ai-studio/hashtags/hashtag-results';
+import { trackEvent } from '@/lib/analytics';
 import type { HashtagRequest, HashtagResponse } from '@ordo/types';
 
 export default function HashtagsPage() {
@@ -16,6 +17,7 @@ export default function HashtagsPage() {
     mutationFn: (payload: HashtagRequest) =>
       apiClient.post<HashtagResponse>('/v1/ai/hashtags', payload),
     onSuccess: (data) => {
+      trackEvent('ai_credit_used', { tool: 'hashtags', creditsUsed: 1 });
       setResult(data);
       const total = data.groups.reduce((sum, g) => sum + g.hashtags.length, 0);
       toast({ title: `${total} hashtags generated` });

@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
+import { PUBLISHING_CACHE } from '@/lib/query-config';
 import type { ContentItem } from '@ordo/types';
 
 const publishingKeys = {
@@ -29,7 +30,7 @@ export function useScheduledContent(
       );
     },
     enabled: Boolean(workspaceId),
-    staleTime: 1000 * 60,
+    ...PUBLISHING_CACHE,
   });
 }
 

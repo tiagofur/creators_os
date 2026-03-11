@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 import { queryKeys } from '@/lib/query-keys';
+import { ANALYTICS_CACHE } from '@/lib/query-config';
 import { createAnalyticsResource } from '@ordo/api-client';
 import type { AnalyticsGoal } from '@ordo/types';
 
@@ -13,7 +14,7 @@ export function usePlatformMetrics(workspaceId: string, period: string) {
     queryKey: queryKeys.analytics.platforms(workspaceId, period),
     queryFn: () => analyticsApi.getPlatformMetrics(workspaceId, period),
     enabled: Boolean(workspaceId),
-    staleTime: 1000 * 60 * 5, // 5min
+    ...ANALYTICS_CACHE,
   });
 }
 
@@ -22,7 +23,7 @@ export function useConsistencyScore(workspaceId: string) {
     queryKey: queryKeys.analytics.consistency(workspaceId),
     queryFn: () => analyticsApi.getConsistencyScore(workspaceId),
     enabled: Boolean(workspaceId),
-    staleTime: 1000 * 60, // 1min
+    ...ANALYTICS_CACHE,
   });
 }
 
@@ -31,7 +32,7 @@ export function useHeatmap(workspaceId: string, year: number) {
     queryKey: queryKeys.analytics.heatmap(workspaceId, year),
     queryFn: () => analyticsApi.getHeatmap(workspaceId, year),
     enabled: Boolean(workspaceId),
-    staleTime: 1000 * 60 * 10, // 10min
+    ...ANALYTICS_CACHE,
   });
 }
 
@@ -40,7 +41,7 @@ export function usePipelineVelocity(workspaceId: string) {
     queryKey: queryKeys.analytics.velocity(workspaceId),
     queryFn: () => analyticsApi.getPipelineVelocity(workspaceId),
     enabled: Boolean(workspaceId),
-    staleTime: 1000 * 60 * 5, // 5min
+    ...ANALYTICS_CACHE,
   });
 }
 
@@ -49,7 +50,7 @@ export function useWeeklyReport(workspaceId: string) {
     queryKey: queryKeys.analytics.weeklyReport(workspaceId),
     queryFn: () => analyticsApi.getWeeklyReport(workspaceId),
     enabled: Boolean(workspaceId),
-    staleTime: 1000 * 60 * 30, // 30min
+    ...ANALYTICS_CACHE,
   });
 }
 
@@ -58,7 +59,7 @@ export function useMonthlyReport(workspaceId: string) {
     queryKey: queryKeys.analytics.monthlyReport(workspaceId),
     queryFn: () => analyticsApi.getMonthlyReport(workspaceId),
     enabled: Boolean(workspaceId),
-    staleTime: 1000 * 60 * 30, // 30min
+    ...ANALYTICS_CACHE,
   });
 }
 
@@ -67,7 +68,7 @@ export function useAnalyticsGoals(workspaceId: string) {
     queryKey: queryKeys.analytics.goals(workspaceId),
     queryFn: () => analyticsApi.listGoals(workspaceId),
     enabled: Boolean(workspaceId),
-    staleTime: 1000 * 60 * 5,
+    ...ANALYTICS_CACHE,
   });
 }
 

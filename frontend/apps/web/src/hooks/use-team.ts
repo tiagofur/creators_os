@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { apiClient } from '@/lib/api-client';
+import { WORKSPACE_CACHE } from '@/lib/query-config';
 import type { WorkspaceMember, WorkspaceInvitation } from '@ordo/types';
 
 const TEAM_KEYS = {
@@ -16,7 +17,7 @@ export function useTeamMembers(workspaceId: string) {
     queryKey: TEAM_KEYS.members(workspaceId),
     queryFn: () => apiClient.get<WorkspaceMember[]>(`/v1/workspaces/${workspaceId}/members`),
     enabled: Boolean(workspaceId),
-    staleTime: 1000 * 60, // 1 minute
+    ...WORKSPACE_CACHE,
   });
 }
 

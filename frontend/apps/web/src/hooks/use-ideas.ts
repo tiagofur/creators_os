@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 import { queryKeys } from '@/lib/query-keys';
+import { IDEAS_CACHE } from '@/lib/query-config';
 import type { Idea, IdeaStatus, PaginatedResponse } from '@ordo/types';
 
 export interface IdeaFilters {
@@ -36,7 +37,7 @@ export function useIdeas(workspaceId: string, filters?: IdeaFilters) {
       );
     },
     enabled: Boolean(workspaceId),
-    staleTime: 1000 * 30, // 30s
+    ...IDEAS_CACHE,
   });
 }
 
@@ -46,7 +47,7 @@ export function useIdea(id: string) {
     queryKey: queryKeys.ideas.detail(id),
     queryFn: () => apiClient.get<Idea>(`/v1/ideas/${id}`),
     enabled: Boolean(id),
-    staleTime: 1000 * 60,
+    ...IDEAS_CACHE,
   });
 }
 

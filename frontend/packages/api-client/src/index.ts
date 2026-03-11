@@ -1,7 +1,7 @@
 export { createApiClient, ApiError } from './client';
 export type { OrdoApiClient, ApiClientConfig } from './client';
 export { createWsClient } from './ws-client';
-export type { WsClient, WsClientConfig } from './ws-client';
+export type { WsClient, WsClientConfig, WsConnectionState } from './ws-client';
 export { queryKeys } from './query-keys';
 export {
   createAuthResource,

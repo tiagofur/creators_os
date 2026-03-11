@@ -15,6 +15,7 @@ import { cn } from '@ordo/core';
 import { Card, CardContent } from '@ordo/ui';
 import { KanbanColumn } from './kanban-column';
 import { useMoveStage } from '@/hooks/use-content';
+import { trackEvent } from '@/lib/analytics';
 import type { ContentItem, PipelineStage } from '@ordo/types';
 
 const PIPELINE_STAGES: PipelineStage[] = [
@@ -72,6 +73,11 @@ export function KanbanBoard({ items, onAddContent, onClickCard }: KanbanBoardPro
       : items.find((i) => i.id === over.id)?.pipeline_stage;
 
     if (targetStage && targetStage !== draggedItem.pipeline_stage) {
+      trackEvent('content_stage_changed', {
+        from: draggedItem.pipeline_stage,
+        to: targetStage,
+        contentId: draggedItem.id,
+      });
       moveStage({ id: draggedItem.id, stage: targetStage });
     }
   };

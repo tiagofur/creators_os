@@ -6,6 +6,7 @@ import { useToast } from '@ordo/ui';
 import { apiClient } from '@/lib/api-client';
 import { BrainstormerForm } from '@/components/ai-studio/brainstormer/brainstormer-form';
 import { BrainstormerResults } from '@/components/ai-studio/brainstormer/brainstormer-results';
+import { trackEvent } from '@/lib/analytics';
 import type { BrainstormRequest, BrainstormIdea, BrainstormResponse } from '@ordo/types';
 
 export default function BrainstormerPage() {
@@ -17,6 +18,7 @@ export default function BrainstormerPage() {
     mutationFn: (payload: BrainstormRequest) =>
       apiClient.post<BrainstormResponse>('/v1/ai/brainstorm', payload),
     onSuccess: (data) => {
+      trackEvent('ai_credit_used', { tool: 'brainstormer', creditsUsed: 1 });
       setIdeas(data.ideas);
       toast({ title: `${data.ideas.length} ideas generated` });
     },

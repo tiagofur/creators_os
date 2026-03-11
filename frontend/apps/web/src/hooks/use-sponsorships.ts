@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 import { queryKeys } from '@/lib/query-keys';
+import { SPONSORSHIPS_CACHE } from '@/lib/query-config';
 import { createSponsorshipsResource } from '@ordo/api-client';
 import type { BrandContact, SponsorshipDeal, DealStage } from '@ordo/types';
 import type { DealFilters } from '@ordo/api-client';
@@ -16,7 +17,7 @@ export function useBrandContacts(workspaceId: string) {
     queryKey: queryKeys.sponsorships.brands(workspaceId),
     queryFn: () => sponsorshipsApi.listBrands(workspaceId),
     enabled: Boolean(workspaceId),
-    staleTime: 1000 * 60 * 5,
+    ...SPONSORSHIPS_CACHE,
   });
 }
 
@@ -25,7 +26,7 @@ export function useBrandContact(workspaceId: string, id: string) {
     queryKey: queryKeys.sponsorships.brand(id),
     queryFn: () => sponsorshipsApi.getBrand(workspaceId, id),
     enabled: Boolean(workspaceId) && Boolean(id),
-    staleTime: 1000 * 60 * 5,
+    ...SPONSORSHIPS_CACHE,
   });
 }
 
@@ -90,7 +91,7 @@ export function useSponsorshipDeals(workspaceId: string, filters?: DealFilters) 
     queryKey: queryKeys.sponsorships.deals(workspaceId, filters as Record<string, unknown>),
     queryFn: () => sponsorshipsApi.listDeals(workspaceId, filters),
     enabled: Boolean(workspaceId),
-    staleTime: 1000 * 60 * 2,
+    ...SPONSORSHIPS_CACHE,
   });
 }
 
@@ -99,7 +100,7 @@ export function useSponsorshipDeal(workspaceId: string, id: string) {
     queryKey: queryKeys.sponsorships.deal(id),
     queryFn: () => sponsorshipsApi.getDeal(workspaceId, id),
     enabled: Boolean(workspaceId) && Boolean(id),
-    staleTime: 1000 * 60 * 2,
+    ...SPONSORSHIPS_CACHE,
   });
 }
 
@@ -210,7 +211,7 @@ export function useIncomeEntries(workspaceId: string) {
     queryKey: queryKeys.sponsorships.income(workspaceId),
     queryFn: () => sponsorshipsApi.listIncome(workspaceId),
     enabled: Boolean(workspaceId),
-    staleTime: 1000 * 60 * 5,
+    ...SPONSORSHIPS_CACHE,
   });
 }
 

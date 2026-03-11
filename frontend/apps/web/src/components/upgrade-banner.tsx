@@ -7,6 +7,7 @@ import { X, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useUsage, useSubscription } from '@/hooks/use-billing';
+import { trackEvent } from '@/lib/analytics';
 import { TIER_LIMITS } from '@ordo/types';
 
 function getDismissKey() {
@@ -75,7 +76,12 @@ export function UpgradeBanner({ className }: { className?: string }) {
         asChild
         className="shrink-0 text-xs"
       >
-        <Link href={`/${locale}/settings/billing`}>Upgrade</Link>
+        <Link
+          href={`/${locale}/settings/billing`}
+          onClick={() => trackEvent('upgrade_clicked', { source: 'banner', currentTier: tier })}
+        >
+          Upgrade
+        </Link>
       </Button>
       <button
         onClick={handleDismiss}

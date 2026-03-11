@@ -8,6 +8,7 @@ import { Lightbulb, FileText, Wand2, Search } from 'lucide-react';
 import { useGlobalSearch } from '@/hooks/use-global-search';
 import { useWorkspaceStore } from '@ordo/stores';
 import { CommandResultItem } from './command-result-item';
+import { trackEvent } from '@/lib/analytics';
 import type { SearchResult } from '@ordo/types';
 
 const RECENT_KEY = 'ordo:recent-commands';
@@ -112,7 +113,10 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
             {!query && (
               <Command.Group heading="Quick actions">
                 <Command.Item
-                  onSelect={() => navigate(`/${locale}/ideas?capture=true`, 'Capture idea')}
+                  onSelect={() => {
+                    trackEvent('idea_captured', { source: 'cmd_k' });
+                    navigate(`/${locale}/ideas?capture=true`, 'Capture idea');
+                  }}
                   className="flex cursor-pointer items-center gap-3 rounded-md px-2 py-2 text-sm aria-selected:bg-accent aria-selected:text-accent-foreground"
                 >
                   <Lightbulb className="h-4 w-4 text-muted-foreground" />
