@@ -5,6 +5,8 @@
   "exports": {
     "./eslint": "./eslint.config.mjs",
     "./tsconfig": "./tsconfig.base.json",
+    "./tsconfig/nextjs": "./tsconfig.nextjs.json",
+    "./tsconfig/library": "./tsconfig.library.json",
     "./tailwind": "./tailwind.config.base.ts"
   }
 }
