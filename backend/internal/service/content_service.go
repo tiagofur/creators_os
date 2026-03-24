@@ -78,7 +78,7 @@ func (s *contentService) List(ctx context.Context, workspaceID uuid.UUID, filter
 }
 
 // Update updates mutable fields of a content item.
-func (s *contentService) Update(ctx context.Context, id uuid.UUID, title *string, description *string, platformTarget *domain.PlatformType, dueDate *string, scheduledAt *string) (*domain.Content, error) {
+func (s *contentService) Update(ctx context.Context, id uuid.UUID, title *string, description *string, platformTarget *domain.PlatformType, dueDate *string, scheduledAt *string, metadata map[string]any) (*domain.Content, error) {
 	content, err := s.contentRepo.GetByID(ctx, id)
 	if err != nil {
 		return nil, fmt.Errorf("content: update: get: %w", err)
@@ -92,6 +92,15 @@ func (s *contentService) Update(ctx context.Context, id uuid.UUID, title *string
 	}
 	if platformTarget != nil {
 		content.PlatformTarget = platformTarget
+	}
+	if metadata != nil {
+		// Merge incoming metadata with existing metadata to avoid overwriting unrelated keys
+		if content.Metadata == nil {
+			content.Metadata = make(map[string]any)
+		}
+		for k, v := range metadata {
+			content.Metadata[k] = v
+		}
 	}
 
 	updated, err := s.contentRepo.Update(ctx, content)

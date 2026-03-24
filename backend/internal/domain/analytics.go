@@ -95,6 +95,22 @@ type AnalyticsGoal struct {
 	CreatedAt    time.Time `json:"createdAt"`
 }
 
+// PostingTimeSlot represents engagement data for a specific day-of-week and hour combination.
+type PostingTimeSlot struct {
+	DayOfWeek     int     `json:"day_of_week"` // 0=Sunday, 6=Saturday
+	Hour          int     `json:"hour"`         // 0-23
+	AvgEngagement float64 `json:"avg_engagement"`
+	PostCount     int     `json:"post_count"`
+	Confidence    string  `json:"confidence"` // "low", "medium", "high"
+}
+
+// BestTimesResponse holds the recommended posting times for a platform.
+type BestTimesResponse struct {
+	Platform string            `json:"platform"`
+	Slots    []PostingTimeSlot `json:"slots"`
+	Message  string            `json:"message,omitempty"` // e.g., "Need more data"
+}
+
 // CreateGoalInput holds the fields needed to create a new goal.
 type CreateGoalInput struct {
 	Title       string  `json:"title"`

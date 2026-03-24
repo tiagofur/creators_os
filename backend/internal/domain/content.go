@@ -86,6 +86,21 @@ type ContentAssignment struct {
 	AssignedAt time.Time `json:"assigned_at"`
 }
 
+// ContentTemplate represents a reusable content template with predefined defaults.
+type ContentTemplate struct {
+	ID               uuid.UUID      `json:"id"`
+	WorkspaceID      uuid.UUID      `json:"workspace_id"`
+	Name             string         `json:"name"`
+	Description      *string        `json:"description,omitempty"`
+	ContentType      ContentType    `json:"content_type"`
+	PlatformTarget   *PlatformType  `json:"platform_target,omitempty"`
+	DefaultChecklist map[string]any `json:"default_checklist"`
+	PromptTemplate   *string        `json:"prompt_template,omitempty"`
+	Metadata         map[string]any `json:"metadata"`
+	CreatedAt        time.Time      `json:"created_at"`
+	UpdatedAt        time.Time      `json:"updated_at"`
+}
+
 // ContentFilter holds optional filtering parameters for listing content.
 type ContentFilter struct {
 	Statuses   []ContentStatus
@@ -99,4 +114,26 @@ type ContentFilter struct {
 // KanbanBoard groups content by status column.
 type KanbanBoard struct {
 	Columns map[string][]*Content `json:"columns"`
+}
+
+// ApprovalLink represents a time-limited, token-authenticated public URL
+// that allows an external reviewer to approve or reject a content item.
+type ApprovalLink struct {
+	ID            uuid.UUID  `json:"id"`
+	ContentID     uuid.UUID  `json:"content_id"`
+	WorkspaceID   uuid.UUID  `json:"workspace_id"`
+	Token         string     `json:"token"`
+	ReviewerName  *string    `json:"reviewer_name"`
+	ReviewerEmail *string    `json:"reviewer_email"`
+	Status        string     `json:"status"` // "pending", "approved", "rejected"
+	Comment       *string    `json:"comment"`
+	ExpiresAt     time.Time  `json:"expires_at"`
+	DecidedAt     *time.Time `json:"decided_at,omitempty"`
+	CreatedAt     time.Time  `json:"created_at"`
+}
+
+// ApprovalDecision carries the reviewer's approve/reject decision.
+type ApprovalDecision struct {
+	Status  string `json:"status"`  // "approved" or "rejected"
+	Comment string `json:"comment"`
 }

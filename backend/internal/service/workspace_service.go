@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -323,6 +324,49 @@ func (s *workspaceService) ListInvitations(ctx context.Context, workspaceID uuid
 func (s *workspaceService) DeleteInvitation(ctx context.Context, id uuid.UUID) error {
 	if err := s.invRepo.Delete(ctx, id); err != nil {
 		return fmt.Errorf("workspace: delete invitation: %w", err)
+	}
+	return nil
+}
+
+// GetBrandKit reads the brand kit from Workspace.Settings["brand_kit"].
+func (s *workspaceService) GetBrandKit(ctx context.Context, workspaceID uuid.UUID) (*domain.BrandKit, error) {
+	ws, err := s.wsRepo.GetByID(ctx, workspaceID)
+	if err != nil {
+		return nil, fmt.Errorf("workspace: get brand kit: %w", err)
+	}
+
+	raw, ok := ws.Settings["brand_kit"]
+	if !ok || raw == nil {
+		return &domain.BrandKit{}, nil
+	}
+
+	// Marshal back to JSON so we can unmarshal into the typed struct
+	data, err := json.Marshal(raw)
+	if err != nil {
+		return nil, fmt.Errorf("workspace: get brand kit: marshal: %w", err)
+	}
+
+	var kit domain.BrandKit
+	if err := json.Unmarshal(data, &kit); err != nil {
+		return nil, fmt.Errorf("workspace: get brand kit: unmarshal: %w", err)
+	}
+	return &kit, nil
+}
+
+// UpdateBrandKit writes the brand kit to Workspace.Settings["brand_kit"].
+func (s *workspaceService) UpdateBrandKit(ctx context.Context, workspaceID uuid.UUID, kit *domain.BrandKit) error {
+	ws, err := s.wsRepo.GetByID(ctx, workspaceID)
+	if err != nil {
+		return fmt.Errorf("workspace: update brand kit: get: %w", err)
+	}
+
+	if ws.Settings == nil {
+		ws.Settings = map[string]any{}
+	}
+	ws.Settings["brand_kit"] = kit
+
+	if _, err := s.wsRepo.Update(ctx, ws); err != nil {
+		return fmt.Errorf("workspace: update brand kit: save: %w", err)
 	}
 	return nil
 }

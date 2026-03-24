@@ -2,7 +2,8 @@
 
 import * as React from 'react';
 import { format, isPast } from 'date-fns';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Split } from 'lucide-react';
+import { useMutation } from '@tanstack/react-query';
 import {
   Sheet,
   SheetContent,
@@ -27,7 +28,10 @@ import {
 import { useUpdateContent, useDeleteContent } from '@/hooks/use-content';
 import { StageChecklist } from './stage-checklist';
 import { TimeTracker } from './time-tracker';
-import type { ContentItem, PipelineStage } from '@ordo/types';
+import { AtomizeResultsDialog } from '@/components/ai-studio/atomize-results';
+import { apiClient } from '@/lib/api-client';
+import { useWorkspaceStore } from '@ordo/stores';
+import type { ContentItem, PipelineStage, AtomizeResponse, AtomizedContent } from '@ordo/types';
 
 const STAGE_LABELS: Record<PipelineStage, string> = {
   idea: 'Idea',
@@ -46,9 +50,33 @@ interface ContentDetailSheetProps {
 
 export function ContentDetailSheet({ item, open, onClose }: ContentDetailSheetProps) {
   const [deleteOpen, setDeleteOpen] = React.useState(false);
+  const [atomizeOpen, setAtomizeOpen] = React.useState(false);
+  const [atomizeVariations, setAtomizeVariations] = React.useState<AtomizedContent[]>([]);
+  const [atomizeSourceTitle, setAtomizeSourceTitle] = React.useState('');
   const { mutate: updateContent } = useUpdateContent();
   const { mutateAsync: deleteContent, isPending: isDeleting } = useDeleteContent();
   const { toast } = useToast();
+  const workspaceId = useWorkspaceStore((s) => s.activeWorkspace?.id) ?? '';
+
+  const { mutate: runAtomize, isPending: isAtomizing } = useMutation({
+    mutationFn: () =>
+      apiClient.ai.atomize(workspaceId, item.id),
+    onSuccess: (data: AtomizeResponse) => {
+      setAtomizeSourceTitle(data.source_title);
+      setAtomizeVariations(data.variations);
+    },
+    onError: () => {
+      toast({ title: 'Failed to atomize content', variant: 'destructive' });
+      setAtomizeOpen(false);
+    },
+  });
+
+  const handleAtomize = () => {
+    setAtomizeOpen(true);
+    setAtomizeVariations([]);
+    setAtomizeSourceTitle('');
+    runAtomize();
+  };
 
   const isOverdue =
     item.scheduled_at != null && isPast(new Date(item.scheduled_at));
@@ -158,7 +186,7 @@ export function ContentDetailSheet({ item, open, onClose }: ContentDetailSheetPr
             <Separator />
 
             {/* Stage checklist */}
-            <StageChecklist stage={item.pipeline_stage} />
+            <StageChecklist stage={item.pipeline_stage} contentItem={item} />
 
             <Separator />
 
@@ -185,6 +213,17 @@ export function ContentDetailSheet({ item, open, onClose }: ContentDetailSheetPr
             </div>
 
             <Separator />
+
+            {/* Atomize */}
+            <Button
+              variant="outline"
+              leftIcon={<Split className="h-4 w-4" />}
+              onClick={handleAtomize}
+              loading={isAtomizing}
+              className="w-full"
+            >
+              Atomize for platforms
+            </Button>
 
             {/* Delete */}
             <Button
@@ -222,6 +261,15 @@ export function ContentDetailSheet({ item, open, onClose }: ContentDetailSheetPr
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Atomize results */}
+      <AtomizeResultsDialog
+        open={atomizeOpen}
+        onClose={() => setAtomizeOpen(false)}
+        sourceTitle={atomizeSourceTitle}
+        variations={atomizeVariations}
+        isLoading={isAtomizing}
+      />
     </>
   );
 }

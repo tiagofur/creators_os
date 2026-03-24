@@ -38,6 +38,27 @@ type ScriptSuggestion struct {
 	SuggestedImprovement string `json:"suggested_improvement"`
 }
 
+// AtomizedContent represents a single platform-specific content variation.
+type AtomizedContent struct {
+	Platform    string   `json:"platform"`
+	ContentType string   `json:"content_type"`
+	Title       string   `json:"title"`
+	Body        string   `json:"body"`
+	Hooks       string   `json:"hooks,omitempty"`
+	Hashtags    []string `json:"hashtags,omitempty"`
+}
+
+// AtomizeRequest is the input for the content atomizer.
+type AtomizeRequest struct {
+	ContentID string `json:"content_id"`
+}
+
+// AtomizeResponse contains the source title and platform-specific variations.
+type AtomizeResponse struct {
+	SourceTitle string            `json:"source_title"`
+	Variations  []AtomizedContent `json:"variations"`
+}
+
 // AICreditUsage records AI credit consumption for billing and auditing.
 type AICreditUsage struct {
 	ID             uuid.UUID

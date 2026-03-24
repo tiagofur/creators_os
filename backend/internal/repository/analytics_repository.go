@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -102,6 +103,97 @@ func (r *pgAnalyticsRepository) GetPlatformAnalytics(ctx context.Context, worksp
 		results = append(results, a)
 	}
 	return results, rows.Err()
+}
+
+func (r *pgAnalyticsRepository) GetBestPostingTimes(ctx context.Context, workspaceID uuid.UUID, platform string) (*domain.BestTimesResponse, error) {
+	// First, check if there are enough published posts to generate recommendations.
+	countQuery := `
+		SELECT COUNT(*)
+		FROM scheduled_posts
+		WHERE workspace_id = $1
+		  AND status = 'published'
+		  AND published_at IS NOT NULL`
+	countArgs := []any{workspaceID}
+
+	if platform != "" {
+		countQuery += ` AND platform = $` + fmt.Sprintf("%d", len(countArgs)+1)
+		countArgs = append(countArgs, platform)
+	}
+
+	var totalPosts int
+	if err := r.pool.QueryRow(ctx, countQuery, countArgs...).Scan(&totalPosts); err != nil {
+		return nil, err
+	}
+
+	resp := &domain.BestTimesResponse{
+		Platform: platform,
+	}
+	if platform == "" {
+		resp.Platform = "all"
+	}
+
+	if totalPosts < 5 {
+		resp.Message = "Need at least 5 published posts to generate recommendations"
+		resp.Slots = []domain.PostingTimeSlot{}
+		return resp, nil
+	}
+
+	// Query engagement data grouped by day-of-week and hour.
+	q := `
+		SELECT
+			EXTRACT(DOW FROM sp.published_at)::int AS day_of_week,
+			EXTRACT(HOUR FROM sp.published_at)::int AS hour,
+			COALESCE(AVG(pa.total_engagement), 0) AS avg_engagement,
+			COUNT(*)::int AS post_count
+		FROM scheduled_posts sp
+		LEFT JOIN platform_analytics pa
+			ON pa.workspace_id = sp.workspace_id
+			AND pa.platform = sp.platform
+			AND pa.recorded_at >= sp.published_at
+			AND pa.recorded_at < sp.published_at + INTERVAL '24 hours'
+		WHERE sp.workspace_id = $1
+		  AND sp.status = 'published'
+		  AND sp.published_at IS NOT NULL`
+	args := []any{workspaceID}
+
+	if platform != "" {
+		q += ` AND sp.platform = $` + fmt.Sprintf("%d", len(args)+1)
+		args = append(args, platform)
+	}
+
+	q += `
+		GROUP BY day_of_week, hour
+		ORDER BY avg_engagement DESC`
+
+	rows, err := r.pool.Query(ctx, q, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var slots []domain.PostingTimeSlot
+	for rows.Next() {
+		var slot domain.PostingTimeSlot
+		if err := rows.Scan(&slot.DayOfWeek, &slot.Hour, &slot.AvgEngagement, &slot.PostCount); err != nil {
+			return nil, err
+		}
+		// Set confidence based on sample size.
+		switch {
+		case slot.PostCount > 10:
+			slot.Confidence = "high"
+		case slot.PostCount >= 3:
+			slot.Confidence = "medium"
+		default:
+			slot.Confidence = "low"
+		}
+		slots = append(slots, slot)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	resp.Slots = slots
+	return resp, nil
 }
 
 var _ AnalyticsRepository = (*pgAnalyticsRepository)(nil)

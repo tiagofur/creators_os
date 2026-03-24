@@ -204,6 +204,28 @@ export interface HashtagResponse {
 }
 
 // ---------------------------------------------------------------------------
+// Atomizer
+// ---------------------------------------------------------------------------
+
+export interface AtomizeRequest {
+  content_id: string;
+}
+
+export interface AtomizedContent {
+  platform: string;
+  content_type: string;
+  title: string;
+  body: string;
+  hooks?: string;
+  hashtags?: string[];
+}
+
+export interface AtomizeResponse {
+  source_title: string;
+  variations: AtomizedContent[];
+}
+
+// ---------------------------------------------------------------------------
 // Credits
 // ---------------------------------------------------------------------------
 

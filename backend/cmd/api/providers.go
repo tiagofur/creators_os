@@ -250,11 +250,12 @@ func provideRouter(
 	wsHandler *handler.WSHandler,
 	searchHandler *handler.SearchHandler,
 	auditHandler *handler.AuditHandler,
+	contentTemplateHandler *handler.ContentTemplateHandler,
 ) *server.Server {
 	router := server.NewRouter(cfg, redisClient, healthHandler, authHandler, userHandler, workspaceHandler, jwtManager, wsRepo,
 		ideaHandler, contentHandler, seriesHandler, uploadHandler, aiHandler, remixHandler,
 		publishingHandler, analyticsHandler, gamificationHandler, sponsorshipHandler, billingHandler, wsHandler,
-		searchHandler, auditHandler)
+		searchHandler, auditHandler, contentTemplateHandler)
 	return server.NewServer(cfg.ServerPort, router)
 }
 
@@ -384,9 +385,10 @@ func provideAIService(
 	aiRouter *ai.Router,
 	aiRepo repository.AIRepository,
 	userRepo repository.UserRepository,
+	contentRepo repository.ContentRepository,
 	logger *slog.Logger,
 ) service.AIService {
-	return service.NewAIService(aiRouter, aiRepo, userRepo, logger)
+	return service.NewAIService(aiRouter, aiRepo, userRepo, contentRepo, logger)
 }
 
 // provideRemixService creates the RemixService.
@@ -430,4 +432,24 @@ func provideAuditService(db *pgxpool.Pool, logger *slog.Logger) *service.AuditSe
 // provideAuditHandler creates the audit log HTTP handler.
 func provideAuditHandler(db *pgxpool.Pool) *handler.AuditHandler {
 	return handler.NewAuditHandler(db)
+}
+
+// provideContentTemplateRepository creates the ContentTemplateRepository.
+func provideContentTemplateRepository(db *pgxpool.Pool) repository.ContentTemplateRepository {
+	return repository.NewContentTemplateRepository(db)
+}
+
+// provideContentTemplateService creates the ContentTemplateService.
+func provideContentTemplateService(
+	templateRepo repository.ContentTemplateRepository,
+	contentRepo repository.ContentRepository,
+	aiSvc service.AIService,
+	logger *slog.Logger,
+) service.ContentTemplateService {
+	return service.NewContentTemplateService(templateRepo, contentRepo, aiSvc, logger)
+}
+
+// provideContentTemplateHandler creates the content template HTTP handler.
+func provideContentTemplateHandler(templateSvc service.ContentTemplateService) *handler.ContentTemplateHandler {
+	return handler.NewContentTemplateHandler(templateSvc)
 }

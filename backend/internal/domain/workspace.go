@@ -32,6 +32,18 @@ func RoleRank(r WorkspaceRole) int {
 	return 0
 }
 
+// BrandKit holds workspace-level brand voice, tone, style, and boilerplate guidelines.
+// It is stored as a JSON object inside Workspace.Settings["brand_kit"].
+type BrandKit struct {
+	Voice            string   `json:"voice"`
+	Tone             string   `json:"tone"`
+	StyleRules       string   `json:"style_rules"`
+	BoilerplateIntro string   `json:"boilerplate_intro"`
+	BoilerplateOutro string   `json:"boilerplate_outro"`
+	Keywords         []string `json:"keywords"`
+	AntiKeywords     []string `json:"anti_keywords"`
+}
+
 // Workspace is the core workspace aggregate.
 type Workspace struct {
 	ID          uuid.UUID      `json:"id"`

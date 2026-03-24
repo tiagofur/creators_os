@@ -15,13 +15,15 @@ type AIService interface {
 	// Returns AI_002 error with 402 if the balance is insufficient.
 	CheckAndDeductCredits(ctx context.Context, userID uuid.UUID, cost int) error
 	// SendMessage streams the assistant response to w and persists both messages.
-	SendMessage(ctx context.Context, conversationID uuid.UUID, userID uuid.UUID, content string, w io.Writer) error
+	SendMessage(ctx context.Context, conversationID uuid.UUID, userID uuid.UUID, workspaceID uuid.UUID, content string, w io.Writer) error
 	// Brainstorm returns a non-streaming brainstorm response for the given topic.
-	Brainstorm(ctx context.Context, userID uuid.UUID, topic string) (string, error)
+	Brainstorm(ctx context.Context, userID uuid.UUID, workspaceID uuid.UUID, topic string) (string, error)
 	// GenerateScript returns a non-streaming script for the given title and description.
-	GenerateScript(ctx context.Context, userID uuid.UUID, title, description string) (string, error)
+	GenerateScript(ctx context.Context, userID uuid.UUID, workspaceID uuid.UUID, title, description string) (string, error)
 	// AnalyzeScript returns AI suggestions for improving the given script text.
-	AnalyzeScript(ctx context.Context, userID uuid.UUID, scriptText string) ([]domain.ScriptSuggestion, error)
+	AnalyzeScript(ctx context.Context, userID uuid.UUID, workspaceID uuid.UUID, scriptText string) ([]domain.ScriptSuggestion, error)
+	// Atomize generates platform-specific micro-content variations from an existing content item.
+	Atomize(ctx context.Context, userID, workspaceID, contentID uuid.UUID) (*domain.AtomizeResponse, error)
 	// GetCreditBalance returns the current AI credit balance for the user.
 	GetCreditBalance(ctx context.Context, userID uuid.UUID) (int, error)
 }
@@ -52,6 +54,8 @@ type WorkspaceService interface {
 	AcceptInvitation(ctx context.Context, token string, userID uuid.UUID) error
 	ListInvitations(ctx context.Context, workspaceID uuid.UUID) ([]*domain.WorkspaceInvitation, error)
 	DeleteInvitation(ctx context.Context, id uuid.UUID) error
+	GetBrandKit(ctx context.Context, workspaceID uuid.UUID) (*domain.BrandKit, error)
+	UpdateBrandKit(ctx context.Context, workspaceID uuid.UUID, kit *domain.BrandKit) error
 }
 
 // IdeaService defines all idea management operations.
@@ -71,11 +75,21 @@ type ContentService interface {
 	Create(ctx context.Context, workspaceID, createdBy uuid.UUID, title string, description *string, contentType domain.ContentType, platformTarget *domain.PlatformType) (*domain.Content, error)
 	GetByID(ctx context.Context, id uuid.UUID) (*domain.Content, error)
 	List(ctx context.Context, workspaceID uuid.UUID, filter domain.ContentFilter) ([]*domain.Content, error)
-	Update(ctx context.Context, id uuid.UUID, title *string, description *string, platformTarget *domain.PlatformType, dueDate *string, scheduledAt *string) (*domain.Content, error)
+	Update(ctx context.Context, id uuid.UUID, title *string, description *string, platformTarget *domain.PlatformType, dueDate *string, scheduledAt *string, metadata map[string]any) (*domain.Content, error)
 	Delete(ctx context.Context, id uuid.UUID) error
 	TransitionStatus(ctx context.Context, contentID uuid.UUID, to domain.ContentStatus) error
 	AddAssignment(ctx context.Context, contentID, userID uuid.UUID, role string) (*domain.ContentAssignment, error)
 	RemoveAssignment(ctx context.Context, contentID, userID uuid.UUID) error
+}
+
+// ContentTemplateService defines all content template management operations.
+type ContentTemplateService interface {
+	Create(ctx context.Context, workspaceID uuid.UUID, name string, description *string, contentType domain.ContentType, platformTarget *domain.PlatformType, defaultChecklist map[string]any, promptTemplate *string, metadata map[string]any) (*domain.ContentTemplate, error)
+	GetByID(ctx context.Context, id uuid.UUID) (*domain.ContentTemplate, error)
+	List(ctx context.Context, workspaceID uuid.UUID) ([]*domain.ContentTemplate, error)
+	Update(ctx context.Context, id uuid.UUID, name *string, description *string, contentType *domain.ContentType, platformTarget *domain.PlatformType, defaultChecklist map[string]any, promptTemplate *string, metadata map[string]any) (*domain.ContentTemplate, error)
+	Delete(ctx context.Context, id uuid.UUID) error
+	Instantiate(ctx context.Context, templateID, workspaceID, userID uuid.UUID, topic string, useAI bool) (*domain.Content, error)
 }
 
 // SeriesService defines all series management operations.
@@ -118,6 +132,7 @@ type AnalyticsService interface {
 	CreateGoal(ctx context.Context, workspaceID uuid.UUID, input domain.CreateGoalInput) (*domain.AnalyticsGoal, error)
 	UpdateGoal(ctx context.Context, goalID uuid.UUID, input domain.UpdateGoalInput) (*domain.AnalyticsGoal, error)
 	DeleteGoal(ctx context.Context, goalID uuid.UUID) error
+	GetBestPostingTimes(ctx context.Context, workspaceID uuid.UUID, platform string) (*domain.BestTimesResponse, error)
 }
 
 // GamificationService defines all gamification operations.
@@ -150,6 +165,14 @@ type BillingService interface {
 // SearchService defines the global full-text search operation.
 type SearchServiceInterface interface {
 	Search(ctx context.Context, workspaceID uuid.UUID, query string, types []domain.SearchResultType, limit, offset int) (*domain.SearchResponse, error)
+}
+
+// ApprovalService defines all approval link operations.
+type ApprovalService interface {
+	CreateApprovalLink(ctx context.Context, contentID, workspaceID uuid.UUID, reviewerName, reviewerEmail string, expiresIn time.Duration) (*domain.ApprovalLink, error)
+	GetApprovalByToken(ctx context.Context, token string) (*domain.ApprovalLink, *domain.Content, error)
+	SubmitDecision(ctx context.Context, token string, decision domain.ApprovalDecision) error
+	ListApprovalLinks(ctx context.Context, contentID uuid.UUID) ([]*domain.ApprovalLink, error)
 }
 
 // AuthService defines all authentication and session management operations.

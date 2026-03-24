@@ -16,10 +16,12 @@ import (
 
 // aiService implements AIService.
 type aiService struct {
-	aiRouter *ai.Router
-	aiRepo   repository.AIRepository
-	userRepo repository.UserRepository
-	logger   *slog.Logger
+	aiRouter    *ai.Router
+	aiRepo      repository.AIRepository
+	userRepo    repository.UserRepository
+	contentRepo repository.ContentRepository
+	wsRepo      repository.WorkspaceRepository
+	logger      *slog.Logger
 }
 
 // NewAIService creates a new AIService with the required dependencies.
@@ -27,16 +29,20 @@ func NewAIService(
 	aiRouter *ai.Router,
 	aiRepo repository.AIRepository,
 	userRepo repository.UserRepository,
+	contentRepo repository.ContentRepository,
+	wsRepo repository.WorkspaceRepository,
 	logger *slog.Logger,
 ) AIService {
 	if logger == nil {
 		logger = slog.Default()
 	}
 	return &aiService{
-		aiRouter: aiRouter,
-		aiRepo:   aiRepo,
-		userRepo: userRepo,
-		logger:   logger,
+		aiRouter:    aiRouter,
+		aiRepo:      aiRepo,
+		userRepo:    userRepo,
+		contentRepo: contentRepo,
+		wsRepo:      wsRepo,
+		logger:      logger,
 	}
 }
 
@@ -45,8 +51,67 @@ func (s *aiService) CheckAndDeductCredits(ctx context.Context, userID uuid.UUID,
 	return s.userRepo.DecrementAICredits(ctx, userID, cost)
 }
 
+// buildBrandContext fetches the brand kit for a workspace and returns a prompt
+// prefix string. Returns "" if no brand kit is configured or on error.
+func (s *aiService) buildBrandContext(ctx context.Context, workspaceID uuid.UUID) string {
+	if workspaceID == uuid.Nil {
+		return ""
+	}
+
+	ws, err := s.wsRepo.GetByID(ctx, workspaceID)
+	if err != nil {
+		s.logger.WarnContext(ctx, "failed to fetch workspace for brand kit", "err", err)
+		return ""
+	}
+
+	raw, ok := ws.Settings["brand_kit"]
+	if !ok || raw == nil {
+		return ""
+	}
+
+	data, err := json.Marshal(raw)
+	if err != nil {
+		return ""
+	}
+
+	var kit domain.BrandKit
+	if err := json.Unmarshal(data, &kit); err != nil {
+		return ""
+	}
+
+	// Build the brand context string only from non-empty fields
+	var parts []string
+	if kit.Voice != "" {
+		parts = append(parts, fmt.Sprintf("Creator's brand voice: %s.", kit.Voice))
+	}
+	if kit.Tone != "" {
+		parts = append(parts, fmt.Sprintf("Tone: %s.", kit.Tone))
+	}
+	if kit.StyleRules != "" {
+		parts = append(parts, fmt.Sprintf("Style rules: %s.", kit.StyleRules))
+	}
+	if len(kit.Keywords) > 0 {
+		parts = append(parts, fmt.Sprintf("Preferred keywords: %s.", strings.Join(kit.Keywords, ", ")))
+	}
+	if len(kit.AntiKeywords) > 0 {
+		parts = append(parts, fmt.Sprintf("Avoid these words/phrases: %s.", strings.Join(kit.AntiKeywords, ", ")))
+	}
+	if kit.BoilerplateIntro != "" {
+		parts = append(parts, fmt.Sprintf("Standard intro: %s.", kit.BoilerplateIntro))
+	}
+	if kit.BoilerplateOutro != "" {
+		parts = append(parts, fmt.Sprintf("Standard outro: %s.", kit.BoilerplateOutro))
+	}
+
+	if len(parts) == 0 {
+		return ""
+	}
+
+	return "BRAND GUIDELINES — Apply these to all generated content:\n" + strings.Join(parts, "\n") + "\n\n"
+}
+
 // SendMessage streams the AI response into w, persisting both messages.
-func (s *aiService) SendMessage(ctx context.Context, conversationID uuid.UUID, userID uuid.UUID, content string, w io.Writer) error {
+func (s *aiService) SendMessage(ctx context.Context, conversationID uuid.UUID, userID uuid.UUID, workspaceID uuid.UUID, content string, w io.Writer) error {
 	// Fetch conversation to verify ownership / existence
 	_, err := s.aiRepo.GetConversation(ctx, conversationID)
 	if err != nil {
@@ -88,9 +153,10 @@ func (s *aiService) SendMessage(ctx context.Context, conversationID uuid.UUID, u
 		msgs = append(msgs, ai.Message{Role: m.Role, Content: m.Content})
 	}
 
+	brandCtx := s.buildBrandContext(ctx, workspaceID)
 	req := ai.CompletionRequest{
 		Messages:     msgs,
-		SystemPrompt: "You are a helpful AI assistant for content creators.",
+		SystemPrompt: brandCtx + "You are a helpful AI assistant for content creators.",
 		MaxTokens:    2048,
 	}
 
@@ -126,7 +192,7 @@ func (s *aiService) SendMessage(ctx context.Context, conversationID uuid.UUID, u
 }
 
 // Brainstorm returns a non-streaming brainstorm completion for the given topic.
-func (s *aiService) Brainstorm(ctx context.Context, userID uuid.UUID, topic string) (string, error) {
+func (s *aiService) Brainstorm(ctx context.Context, userID uuid.UUID, workspaceID uuid.UUID, topic string) (string, error) {
 	prompt := fmt.Sprintf("Brainstorm content ideas about: %s\n\nProvide 5 creative, engaging ideas.", topic)
 	estimatedCost := s.aiRouter.EstimateTokens(prompt)
 	if estimatedCost < 1 {
@@ -137,11 +203,12 @@ func (s *aiService) Brainstorm(ctx context.Context, userID uuid.UUID, topic stri
 		return "", err
 	}
 
+	brandCtx := s.buildBrandContext(ctx, workspaceID)
 	req := ai.CompletionRequest{
 		Messages: []ai.Message{
 			{Role: "user", Content: prompt},
 		},
-		SystemPrompt: "You are a creative content strategy assistant for content creators.",
+		SystemPrompt: brandCtx + "You are a creative content strategy assistant for content creators.",
 		MaxTokens:    1024,
 	}
 
@@ -153,7 +220,7 @@ func (s *aiService) Brainstorm(ctx context.Context, userID uuid.UUID, topic stri
 }
 
 // GenerateScript returns a non-streaming script for the given title and description.
-func (s *aiService) GenerateScript(ctx context.Context, userID uuid.UUID, title, description string) (string, error) {
+func (s *aiService) GenerateScript(ctx context.Context, userID uuid.UUID, workspaceID uuid.UUID, title, description string) (string, error) {
 	prompt := fmt.Sprintf("Write a detailed content script.\n\nTitle: %s\n\nDescription: %s\n\nInclude introduction, main sections, and a strong call-to-action.", title, description)
 	estimatedCost := s.aiRouter.EstimateTokens(prompt)
 	if estimatedCost < 1 {
@@ -164,11 +231,12 @@ func (s *aiService) GenerateScript(ctx context.Context, userID uuid.UUID, title,
 		return "", err
 	}
 
+	brandCtx := s.buildBrandContext(ctx, workspaceID)
 	req := ai.CompletionRequest{
 		Messages: []ai.Message{
 			{Role: "user", Content: prompt},
 		},
-		SystemPrompt: "You are an expert scriptwriter for digital content creators.",
+		SystemPrompt: brandCtx + "You are an expert scriptwriter for digital content creators.",
 		MaxTokens:    2048,
 	}
 
@@ -180,7 +248,7 @@ func (s *aiService) GenerateScript(ctx context.Context, userID uuid.UUID, title,
 }
 
 // AnalyzeScript returns AI-generated suggestions for improving a script.
-func (s *aiService) AnalyzeScript(ctx context.Context, userID uuid.UUID, scriptText string) ([]domain.ScriptSuggestion, error) {
+func (s *aiService) AnalyzeScript(ctx context.Context, userID uuid.UUID, workspaceID uuid.UUID, scriptText string) ([]domain.ScriptSuggestion, error) {
 	prompt := fmt.Sprintf(`Analyze the following script and provide improvement suggestions. For each suggestion, return a JSON array of objects with these fields:
 - id: a unique string id (e.g. "sug_01", "sug_02")
 - type: one of "hook", "clarity", "cta", "pacing", "engagement"
@@ -208,11 +276,12 @@ Script:
 		return nil, err
 	}
 
+	brandCtx := s.buildBrandContext(ctx, workspaceID)
 	req := ai.CompletionRequest{
 		Messages: []ai.Message{
 			{Role: "user", Content: prompt},
 		},
-		SystemPrompt: "You are an expert script doctor for digital content creators. You analyze scripts for YouTube videos, podcasts, and other digital content, providing specific, actionable improvement suggestions. Always respond with valid JSON.",
+		SystemPrompt: brandCtx + "You are an expert script doctor for digital content creators. You analyze scripts for YouTube videos, podcasts, and other digital content, providing specific, actionable improvement suggestions. Always respond with valid JSON.",
 		MaxTokens:    2048,
 	}
 
@@ -240,6 +309,89 @@ Script:
 	}
 
 	return suggestions, nil
+}
+
+// Atomize takes a content item and generates platform-specific micro-content variations.
+func (s *aiService) Atomize(ctx context.Context, userID, workspaceID, contentID uuid.UUID) (*domain.AtomizeResponse, error) {
+	// Fetch the source content
+	content, err := s.contentRepo.GetByID(ctx, contentID)
+	if err != nil {
+		return nil, fmt.Errorf("ai_service: atomize: fetch content: %w", err)
+	}
+
+	description := ""
+	if content.Description != nil {
+		description = *content.Description
+	}
+
+	prompt := fmt.Sprintf(`You are a content repurposing expert. Take the following content and create platform-specific micro-content variations.
+
+Source Content:
+Title: %s
+Description/Script: %s
+Content Type: %s
+
+Generate variations for each of these platforms:
+1. Twitter/X Thread (3-5 tweets)
+2. Instagram Carousel (outline with slide-by-slide text)
+3. TikTok Script (short-form hook + body + CTA)
+4. LinkedIn Post (professional tone, storytelling)
+5. Short-form Video Script (YouTube Shorts / Reels, under 60 seconds)
+
+For each variation, return a JSON array of objects with these fields:
+- platform: the platform name (e.g. "twitter", "instagram", "tiktok", "linkedin", "short_video")
+- content_type: the format (e.g. "thread", "carousel", "script", "post", "short_script")
+- title: a catchy title for this variation
+- body: the full content text
+- hooks: an opening hook line (optional)
+- hashtags: an array of relevant hashtags (optional)
+
+Return ONLY a valid JSON array, no other text.`, content.Title, description, string(content.ContentType))
+
+	estimatedCost := s.aiRouter.EstimateTokens(prompt)
+	if estimatedCost < 1 {
+		estimatedCost = 1
+	}
+
+	if err := s.CheckAndDeductCredits(ctx, userID, estimatedCost); err != nil {
+		return nil, err
+	}
+
+	brandCtx := s.buildBrandContext(ctx, workspaceID)
+	req := ai.CompletionRequest{
+		Messages: []ai.Message{
+			{Role: "user", Content: prompt},
+		},
+		SystemPrompt: brandCtx + "You are an expert content repurposing strategist for digital creators. You transform long-form content into platform-optimized micro-content. Always respond with valid JSON.",
+		MaxTokens:    2048,
+	}
+
+	resp, err := s.aiRouter.Complete(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("ai_service: atomize: %w", err)
+	}
+
+	var variations []domain.AtomizedContent
+	if err := parseJSON(resp.Content, &variations); err != nil {
+		s.logger.WarnContext(ctx, "failed to parse atomize response as JSON, returning raw",
+			"err", err,
+			"raw", resp.Content,
+		)
+		// Return a single catch-all variation if parsing fails
+		variations = []domain.AtomizedContent{
+			{
+				Platform:    "general",
+				ContentType: "post",
+				Title:       content.Title,
+				Body:        resp.Content,
+			},
+		}
+	}
+
+	return &domain.AtomizeResponse{
+		SourceTitle: content.Title,
+		Variations:  variations,
+	}, nil
 }
 
 // GetCreditBalance returns the AI credit balance for the given user.

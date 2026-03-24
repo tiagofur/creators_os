@@ -84,7 +84,7 @@ func main() {
 
 	// --- AI providers ---
 	aiRouter := provideAIRouter(cfg)
-	aiSvc := provideAIService(aiRouter, aiRepo, userRepo, log)
+	aiSvc := provideAIService(aiRouter, aiRepo, userRepo, contentRepo, log)
 	remixSvc := provideRemixService(remixRepo, contentRepo, asynqClient, log)
 
 	// --- WebSocket Hub ---
@@ -133,7 +133,7 @@ func main() {
 	// Notification tasks
 	mux.HandleFunc(tasks.TypeAssignmentNotification, tasks.HandleAssignmentNotificationTask)
 	// Idea validation task
-	ideaValidationHandler := &tasks.IdeaValidationHandler{IdeaRepo: ideaRepo}
+	ideaValidationHandler := &tasks.IdeaValidationHandler{IdeaRepo: ideaRepo, AIRouter: aiRouter}
 	mux.HandleFunc(tasks.TypeIdeaValidation, ideaValidationHandler.HandleIdeaValidationTask)
 	// Remix worker
 	mux.HandleFunc(tasks.TypeRemixAnalysis, tasks.MakeHandleRemixAnalysisTask(remixRepo, aiRouter))
@@ -141,6 +141,8 @@ func main() {
 	mux.HandleFunc(tasks.TypePublishPost, tasks.NewPublishTaskHandler(db))
 	// Analytics sync worker
 	mux.HandleFunc(tasks.TypeAnalyticsSync, tasks.NewAnalyticsSyncHandler(db))
+	// Weekly digest email handler
+	mux.HandleFunc(tasks.TypeWeeklyDigest, tasks.NewWeeklyDigestHandler(db))
 	// Publish scheduler handler — triggered every minute to enqueue due posts
 	mux.HandleFunc("publish:scheduler", func(ctx context.Context, t *asynq.Task) error {
 		return tasks.HandlePublishScheduler(ctx, t, db, asynqClient)
@@ -162,6 +164,10 @@ func main() {
 	publishSchedulerTask := asynq.NewTask("publish:scheduler", nil)
 	if _, err := scheduler.Register("* * * * *", publishSchedulerTask); err != nil {
 		log.Error("failed to register publish scheduler", "err", err)
+	}
+	// Weekly digest email — every Sunday at 18:00 UTC
+	if _, err := scheduler.Register("0 18 * * 0", asynq.NewTask(tasks.TypeWeeklyDigest, nil)); err != nil {
+		log.Error("failed to register weekly digest scheduler", "err", err)
 	}
 
 	go func() {

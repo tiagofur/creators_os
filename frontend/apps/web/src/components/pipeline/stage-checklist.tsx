@@ -2,7 +2,8 @@
 
 import * as React from 'react';
 import { Checkbox } from '@ordo/ui';
-import type { PipelineStage } from '@ordo/types';
+import { useUpdateContent } from '@/hooks/use-content';
+import type { ContentItem, PipelineStage } from '@ordo/types';
 
 const STAGE_CHECKLISTS: Record<PipelineStage, string[]> = {
   idea: ['Define the core concept', 'Identify target audience', 'Research competitors'],
@@ -15,14 +16,75 @@ const STAGE_CHECKLISTS: Record<PipelineStage, string[]> = {
 
 interface StageChecklistProps {
   stage: PipelineStage;
+  contentItem?: ContentItem;
 }
 
-export function StageChecklist({ stage }: StageChecklistProps) {
-  const [checked, setChecked] = React.useState<Record<string, boolean>>({});
+export function StageChecklist({ stage, contentItem }: StageChecklistProps) {
+  const { mutate: updateContent } = useUpdateContent();
+
+  // Initialize checked state from persisted metadata if available
+  const initialChecked = React.useMemo(() => {
+    const persisted = contentItem?.metadata as Record<string, unknown> | null | undefined;
+    const checklist = persisted?.checklist as Record<string, Record<string, boolean>> | undefined;
+    return checklist?.[stage] ?? {};
+  }, [contentItem?.metadata, stage]);
+
+  const [checked, setChecked] = React.useState<Record<string, boolean>>(initialChecked);
+
+  // Sync state when contentItem metadata or stage changes externally
+  React.useEffect(() => {
+    const persisted = contentItem?.metadata as Record<string, unknown> | null | undefined;
+    const checklist = persisted?.checklist as Record<string, Record<string, boolean>> | undefined;
+    setChecked(checklist?.[stage] ?? {});
+  }, [contentItem?.metadata, stage]);
+
+  // Debounced save ref
+  const saveTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const persistChecklist = React.useCallback(
+    (newChecked: Record<string, boolean>) => {
+      if (!contentItem) return;
+
+      if (saveTimerRef.current) {
+        clearTimeout(saveTimerRef.current);
+      }
+
+      saveTimerRef.current = setTimeout(() => {
+        const existingMetadata = (contentItem.metadata ?? {}) as Record<string, unknown>;
+        const existingChecklist = (existingMetadata.checklist ?? {}) as Record<string, Record<string, boolean>>;
+
+        updateContent({
+          id: contentItem.id,
+          metadata: {
+            ...existingMetadata,
+            checklist: {
+              ...existingChecklist,
+              [stage]: newChecked,
+            },
+          },
+        });
+      }, 300);
+    },
+    [contentItem, stage, updateContent],
+  );
+
+  // Cleanup timer on unmount
+  React.useEffect(() => {
+    return () => {
+      if (saveTimerRef.current) {
+        clearTimeout(saveTimerRef.current);
+      }
+    };
+  }, []);
+
   const items = STAGE_CHECKLISTS[stage] ?? [];
 
   const toggle = (item: string) => {
-    setChecked((prev) => ({ ...prev, [item]: !prev[item] }));
+    setChecked((prev) => {
+      const next = { ...prev, [item]: !prev[item] };
+      persistChecklist(next);
+      return next;
+    });
   };
 
   const completedCount = Object.values(checked).filter(Boolean).length;

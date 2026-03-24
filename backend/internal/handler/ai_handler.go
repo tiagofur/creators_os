@@ -51,6 +51,10 @@ type scriptDoctorRequest struct {
 	ScriptText string `json:"script_text"`
 }
 
+type atomizeRequest struct {
+	ContentID string `json:"content_id"`
+}
+
 // ---- Handlers ----
 
 // CreateConversation POST /api/v1/workspaces/{workspaceId}/ai/conversations
@@ -186,7 +190,10 @@ func (h *AIHandler) SendMessage(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Connection", "keep-alive")
 	w.WriteHeader(http.StatusOK)
 
-	if err := h.aiService.SendMessage(r.Context(), convID, claims.UserID, req.Content, w); err != nil {
+	workspaceIDStr := chi.URLParam(r, "workspaceId")
+	wsID, _ := uuid.Parse(workspaceIDStr)
+
+	if err := h.aiService.SendMessage(r.Context(), convID, claims.UserID, wsID, req.Content, w); err != nil {
 		// Can't change status code after WriteHeader, log and write error event
 		_, _ = w.Write([]byte("data: {\"error\":\"" + err.Error() + "\"}\n\n"))
 		return
@@ -216,7 +223,10 @@ func (h *AIHandler) Brainstorm(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := h.aiService.Brainstorm(r.Context(), claims.UserID, req.Topic)
+	workspaceIDStr := chi.URLParam(r, "workspaceId")
+	wsID, _ := uuid.Parse(workspaceIDStr)
+
+	result, err := h.aiService.Brainstorm(r.Context(), claims.UserID, wsID, req.Topic)
 	if err != nil {
 		Error(w, err)
 		return
@@ -244,7 +254,10 @@ func (h *AIHandler) GenerateScript(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := h.aiService.GenerateScript(r.Context(), claims.UserID, req.Title, req.Description)
+	workspaceIDStr := chi.URLParam(r, "workspaceId")
+	wsID, _ := uuid.Parse(workspaceIDStr)
+
+	result, err := h.aiService.GenerateScript(r.Context(), claims.UserID, wsID, req.Title, req.Description)
 	if err != nil {
 		Error(w, err)
 		return
@@ -272,13 +285,57 @@ func (h *AIHandler) AnalyzeScript(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	suggestions, err := h.aiService.AnalyzeScript(r.Context(), claims.UserID, req.ScriptText)
+	workspaceIDStr := chi.URLParam(r, "workspaceId")
+	wsID, _ := uuid.Parse(workspaceIDStr)
+
+	suggestions, err := h.aiService.AnalyzeScript(r.Context(), claims.UserID, wsID, req.ScriptText)
 	if err != nil {
 		Error(w, err)
 		return
 	}
 
 	JSON(w, http.StatusOK, map[string]any{"suggestions": suggestions})
+}
+
+// Atomize POST /api/v1/workspaces/{workspaceId}/ai/atomize
+func (h *AIHandler) Atomize(w http.ResponseWriter, r *http.Request) {
+	claims, ok := middleware.UserClaimsFromContext(r.Context())
+	if !ok {
+		Error(w, domain.ErrUnauthorized)
+		return
+	}
+
+	workspaceIDStr := chi.URLParam(r, "workspaceId")
+	workspaceID, err := uuid.Parse(workspaceIDStr)
+	if err != nil {
+		JSON(w, http.StatusBadRequest, domain.NewError("VALIDATION", "invalid workspaceId", 400))
+		return
+	}
+
+	var req atomizeRequest
+	if err := Decode(r, &req); err != nil {
+		JSON(w, http.StatusBadRequest, domain.NewError("VALIDATION", "invalid request body", 400))
+		return
+	}
+
+	if req.ContentID == "" {
+		JSON(w, http.StatusBadRequest, domain.NewError("VALIDATION", "content_id is required", 400))
+		return
+	}
+
+	contentID, err := uuid.Parse(req.ContentID)
+	if err != nil {
+		JSON(w, http.StatusBadRequest, domain.NewError("VALIDATION", "invalid content_id", 400))
+		return
+	}
+
+	result, err := h.aiService.Atomize(r.Context(), claims.UserID, workspaceID, contentID)
+	if err != nil {
+		Error(w, err)
+		return
+	}
+
+	JSON(w, http.StatusOK, result)
 }
 
 // GetCreditBalance GET /api/v1/users/me/ai/credits

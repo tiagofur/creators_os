@@ -61,4 +61,53 @@ func (s *analyticsService) TriggerSync(ctx context.Context, workspaceID uuid.UUI
 	return nil
 }
 
+func (s *analyticsService) GetConsistencyScore(ctx context.Context, workspaceID uuid.UUID) (*domain.ConsistencyScore, error) {
+	return s.repo.GetConsistencyScore(ctx, workspaceID)
+}
+
+func (s *analyticsService) GetHeatmap(ctx context.Context, workspaceID uuid.UUID, year int) ([]*domain.HeatmapDay, error) {
+	return s.repo.GetHeatmap(ctx, workspaceID, year)
+}
+
+func (s *analyticsService) GetPipelineVelocity(ctx context.Context, workspaceID uuid.UUID) ([]*domain.PipelineVelocity, error) {
+	return s.repo.GetPipelineVelocity(ctx, workspaceID)
+}
+
+func (s *analyticsService) GetWeeklyReport(ctx context.Context, workspaceID uuid.UUID) (*domain.WeeklyReport, error) {
+	return s.repo.GetWeeklyReport(ctx, workspaceID)
+}
+
+func (s *analyticsService) GetMonthlyReport(ctx context.Context, workspaceID uuid.UUID) (*domain.MonthlyReport, error) {
+	return s.repo.GetMonthlyReport(ctx, workspaceID)
+}
+
+func (s *analyticsService) ListGoals(ctx context.Context, workspaceID uuid.UUID) ([]*domain.AnalyticsGoal, error) {
+	return s.repo.ListGoals(ctx, workspaceID)
+}
+
+func (s *analyticsService) CreateGoal(ctx context.Context, workspaceID uuid.UUID, input domain.CreateGoalInput) (*domain.AnalyticsGoal, error) {
+	goal := &domain.AnalyticsGoal{
+		ID:          uuid.New(),
+		WorkspaceID: workspaceID,
+		Title:       input.Title,
+		MetricType:  input.MetricType,
+		TargetValue: input.TargetValue,
+		Deadline:    input.Deadline,
+		Status:      "active",
+	}
+	return s.repo.CreateGoal(ctx, goal)
+}
+
+func (s *analyticsService) UpdateGoal(ctx context.Context, goalID uuid.UUID, input domain.UpdateGoalInput) (*domain.AnalyticsGoal, error) {
+	return s.repo.UpdateGoal(ctx, goalID, input)
+}
+
+func (s *analyticsService) DeleteGoal(ctx context.Context, goalID uuid.UUID) error {
+	return s.repo.DeleteGoal(ctx, goalID)
+}
+
+func (s *analyticsService) GetBestPostingTimes(ctx context.Context, workspaceID uuid.UUID, platform string) (*domain.BestTimesResponse, error) {
+	return s.repo.GetBestPostingTimes(ctx, workspaceID, platform)
+}
+
 var _ AnalyticsService = (*analyticsService)(nil)
