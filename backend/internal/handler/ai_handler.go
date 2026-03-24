@@ -47,6 +47,10 @@ type generateScriptRequest struct {
 	Description string `json:"description"`
 }
 
+type scriptDoctorRequest struct {
+	ScriptText string `json:"script_text"`
+}
+
 // ---- Handlers ----
 
 // CreateConversation POST /api/v1/workspaces/{workspaceId}/ai/conversations
@@ -247,6 +251,34 @@ func (h *AIHandler) GenerateScript(w http.ResponseWriter, r *http.Request) {
 	}
 
 	JSON(w, http.StatusOK, map[string]string{"script": result})
+}
+
+// AnalyzeScript POST /api/v1/workspaces/{workspaceId}/ai/script-doctor
+func (h *AIHandler) AnalyzeScript(w http.ResponseWriter, r *http.Request) {
+	claims, ok := middleware.UserClaimsFromContext(r.Context())
+	if !ok {
+		Error(w, domain.ErrUnauthorized)
+		return
+	}
+
+	var req scriptDoctorRequest
+	if err := Decode(r, &req); err != nil {
+		JSON(w, http.StatusBadRequest, domain.NewError("VALIDATION", "invalid request body", 400))
+		return
+	}
+
+	if req.ScriptText == "" {
+		JSON(w, http.StatusBadRequest, domain.NewError("VALIDATION", "script_text is required", 400))
+		return
+	}
+
+	suggestions, err := h.aiService.AnalyzeScript(r.Context(), claims.UserID, req.ScriptText)
+	if err != nil {
+		Error(w, err)
+		return
+	}
+
+	JSON(w, http.StatusOK, map[string]any{"suggestions": suggestions})
 }
 
 // GetCreditBalance GET /api/v1/users/me/ai/credits

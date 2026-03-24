@@ -1,5 +1,4 @@
 import type { OrdoApiClient } from '../client';
-import type { Subscription } from '@ordo/types';
 
 export type BillingPeriod = 'monthly' | 'annual';
 

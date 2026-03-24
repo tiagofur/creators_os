@@ -35,6 +35,15 @@ export function usePlatformAnalytics(workspaceId: string, platform: string) {
   });
 }
 
+export function useConsistencyScore(workspaceId: string) {
+  return useQuery({
+    queryKey: queryKeys.analytics.consistency(workspaceId),
+    queryFn: () => analyticsApi.getConsistencyScore(workspaceId),
+    enabled: Boolean(workspaceId),
+    ...ANALYTICS_CACHE,
+  });
+}
+
 export function useTriggerAnalyticsSync() {
   const queryClient = useQueryClient();
   return useMutation({

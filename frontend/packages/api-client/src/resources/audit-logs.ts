@@ -1,14 +1,15 @@
 import type { OrdoApiClient } from '../client';
+import type { UUID, Timestamp } from '@ordo/types';
 
 export interface AuditLogEntry {
-  id: string;
-  workspace_id: string;
-  user_id?: string | null;
+  id: UUID;
+  workspace_id: UUID;
+  user_id?: UUID | null;
   action: string;
   entity_type: string;
-  entity_id?: string | null;
+  entity_id?: UUID | null;
   metadata: Record<string, unknown>;
-  created_at: string;
+  created_at: Timestamp;
 }
 
 export interface AuditLogFilters {

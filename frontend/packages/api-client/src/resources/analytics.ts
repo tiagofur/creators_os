@@ -24,6 +24,12 @@ export function createAnalyticsResource(client: OrdoApiClient) {
       );
     },
 
+    getConsistencyScore(workspaceId: string): Promise<ConsistencyScore> {
+      return client.get<ConsistencyScore>(
+        `/api/v1/workspaces/${workspaceId}/analytics/consistency`,
+      );
+    },
+
     triggerSync(workspaceId: string): Promise<void> {
       return client.post<void>(
         `/api/v1/workspaces/${workspaceId}/analytics/sync`,

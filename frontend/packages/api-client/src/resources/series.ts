@@ -1,50 +1,22 @@
 import type { OrdoApiClient } from '../client';
-
-export interface SeriesItem {
-  id: string;
-  workspace_id: string;
-  created_by: string;
-  title: string;
-  description?: string | null;
-  platform?: string | null;
-  template?: Record<string, unknown>;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface SeriesEpisode {
-  id: string;
-  series_id: string;
-  content_id?: string | null;
-  episode_number: number;
-  title: string;
-  status: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface SeriesPublishingSchedule {
-  id: string;
-  series_id: string;
-  frequency: string;
-  day_of_week?: number | null;
-  time_of_day: string;
-  timezone: string;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-}
+import type {
+  Series,
+  SeriesEpisode,
+  SeriesPublishingSchedule,
+  PlatformType,
+  ContentStatus,
+} from '@ordo/types';
 
 export interface CreateSeriesInput {
   title: string;
   description?: string | null;
-  platform?: string | null;
+  platform?: PlatformType | null;
 }
 
 export interface UpdateSeriesInput {
   title?: string | null;
   description?: string | null;
-  platform?: string | null;
+  platform?: PlatformType | null;
 }
 
 export interface AddEpisodeInput {
@@ -55,7 +27,7 @@ export interface AddEpisodeInput {
 
 export interface UpdateEpisodeInput {
   title?: string | null;
-  status?: string | null;
+  status?: ContentStatus | null;
   content_id?: string | null;
 }
 
@@ -69,27 +41,27 @@ export interface UpsertScheduleInput {
 
 export function createSeriesResource(client: OrdoApiClient) {
   return {
-    list(workspaceId: string): Promise<SeriesItem[]> {
-      return client.get<SeriesItem[]>(
+    list(workspaceId: string): Promise<Series[]> {
+      return client.get<Series[]>(
         `/api/v1/workspaces/${workspaceId}/series`,
       );
     },
 
-    get(workspaceId: string, seriesId: string): Promise<SeriesItem> {
-      return client.get<SeriesItem>(
+    get(workspaceId: string, seriesId: string): Promise<Series> {
+      return client.get<Series>(
         `/api/v1/workspaces/${workspaceId}/series/${seriesId}`,
       );
     },
 
-    create(workspaceId: string, body: CreateSeriesInput): Promise<SeriesItem> {
-      return client.post<SeriesItem>(
+    create(workspaceId: string, body: CreateSeriesInput): Promise<Series> {
+      return client.post<Series>(
         `/api/v1/workspaces/${workspaceId}/series`,
         body,
       );
     },
 
-    update(workspaceId: string, seriesId: string, body: UpdateSeriesInput): Promise<SeriesItem> {
-      return client.put<SeriesItem>(
+    update(workspaceId: string, seriesId: string, body: UpdateSeriesInput): Promise<Series> {
+      return client.put<Series>(
         `/api/v1/workspaces/${workspaceId}/series/${seriesId}`,
         body,
       );
@@ -108,7 +80,12 @@ export function createSeriesResource(client: OrdoApiClient) {
       );
     },
 
-    updateEpisode(workspaceId: string, seriesId: string, episodeId: string, body: UpdateEpisodeInput): Promise<SeriesEpisode> {
+    updateEpisode(
+      workspaceId: string,
+      seriesId: string,
+      episodeId: string,
+      body: UpdateEpisodeInput,
+    ): Promise<SeriesEpisode> {
       return client.put<SeriesEpisode>(
         `/api/v1/workspaces/${workspaceId}/series/${seriesId}/episodes/${episodeId}`,
         body,
@@ -121,7 +98,11 @@ export function createSeriesResource(client: OrdoApiClient) {
       );
     },
 
-    upsertSchedule(workspaceId: string, seriesId: string, body: UpsertScheduleInput): Promise<SeriesPublishingSchedule> {
+    upsertSchedule(
+      workspaceId: string,
+      seriesId: string,
+      body: UpsertScheduleInput,
+    ): Promise<SeriesPublishingSchedule> {
       return client.put<SeriesPublishingSchedule>(
         `/api/v1/workspaces/${workspaceId}/series/${seriesId}/schedule`,
         body,

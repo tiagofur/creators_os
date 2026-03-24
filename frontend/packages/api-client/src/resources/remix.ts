@@ -1,16 +1,5 @@
 import type { OrdoApiClient } from '../client';
-
-export interface RemixJob {
-  id: string;
-  workspace_id: string;
-  user_id: string;
-  status: string;
-  input_url: string;
-  results?: Record<string, unknown>;
-  error_message?: string | null;
-  created_at: string;
-  updated_at: string;
-}
+import type { RemixJob, ContentItem } from '@ordo/types';
 
 export interface SubmitAnalysisInput {
   input_url: string;
@@ -24,13 +13,6 @@ export interface SubmitAnalysisResponse {
 
 export interface ApplyResultsInput {
   clip_ids: string[];
-}
-
-export interface RemixContent {
-  id: string;
-  workspace_id: string;
-  title: string;
-  [key: string]: unknown;
 }
 
 export function createRemixResource(client: OrdoApiClient) {
@@ -54,8 +36,8 @@ export function createRemixResource(client: OrdoApiClient) {
       );
     },
 
-    applyResults(workspaceId: string, jobId: string, body: ApplyResultsInput): Promise<RemixContent[]> {
-      return client.post<RemixContent[]>(
+    applyResults(workspaceId: string, jobId: string, body: ApplyResultsInput): Promise<ContentItem[]> {
+      return client.post<ContentItem[]>(
         `/api/v1/workspaces/${workspaceId}/remix/${jobId}/apply`,
         body,
       );

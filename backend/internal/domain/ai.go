@@ -30,6 +30,14 @@ type AIMessage struct {
 	CreatedAt      time.Time
 }
 
+// ScriptSuggestion represents a single AI suggestion for improving a script.
+type ScriptSuggestion struct {
+	ID                   string `json:"id"`
+	Type                 string `json:"type"` // hook, clarity, cta, pacing, engagement
+	AffectedText         string `json:"affected_text"`
+	SuggestedImprovement string `json:"suggested_improvement"`
+}
+
 // AICreditUsage records AI credit consumption for billing and auditing.
 type AICreditUsage struct {
 	ID             uuid.UUID

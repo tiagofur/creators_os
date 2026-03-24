@@ -1,34 +1,12 @@
 import type { OrdoApiClient } from '../client';
-
-export interface PlatformCredential {
-  id: string;
-  workspace_id: string;
-  platform: string;
-  channel_id?: string | null;
-  channel_name?: string | null;
-  scopes: string[];
-  token_expires_at?: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface ScheduledPost {
-  id: string;
-  workspace_id: string;
-  content_id: string;
-  credential_id?: string | null;
-  platform: string;
-  status: string;
-  scheduled_at: string;
-  published_at?: string | null;
-  error_message?: string | null;
-  platform_post_id?: string | null;
-  created_at: string;
-  updated_at: string;
-}
+import type {
+  PlatformCredential,
+  ScheduledPost,
+  PlatformType,
+} from '@ordo/types';
 
 export interface StoreCredentialInput {
-  platform: string;
+  platform: PlatformType;
   access_token?: string | null;
   refresh_token?: string | null;
   scopes?: string[];
@@ -41,7 +19,7 @@ export interface StoreCredentialOAuthResponse {
 
 export interface SchedulePostInput {
   content_id: string;
-  platform: string;
+  platform: PlatformType;
   scheduled_at: string;
 }
 
@@ -52,7 +30,10 @@ export interface CalendarFilters {
 
 export function createPublishingResource(client: OrdoApiClient) {
   return {
-    storeCredential(workspaceId: string, body: StoreCredentialInput): Promise<PlatformCredential | StoreCredentialOAuthResponse> {
+    storeCredential(
+      workspaceId: string,
+      body: StoreCredentialInput,
+    ): Promise<PlatformCredential | StoreCredentialOAuthResponse> {
       return client.post<PlatformCredential | StoreCredentialOAuthResponse>(
         `/api/v1/workspaces/${workspaceId}/publishing/credentials`,
         body,

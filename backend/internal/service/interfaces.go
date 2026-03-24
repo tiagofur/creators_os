@@ -20,6 +20,8 @@ type AIService interface {
 	Brainstorm(ctx context.Context, userID uuid.UUID, topic string) (string, error)
 	// GenerateScript returns a non-streaming script for the given title and description.
 	GenerateScript(ctx context.Context, userID uuid.UUID, title, description string) (string, error)
+	// AnalyzeScript returns AI suggestions for improving the given script text.
+	AnalyzeScript(ctx context.Context, userID uuid.UUID, scriptText string) ([]domain.ScriptSuggestion, error)
 	// GetCreditBalance returns the current AI credit balance for the user.
 	GetCreditBalance(ctx context.Context, userID uuid.UUID) (int, error)
 }
@@ -107,6 +109,15 @@ type AnalyticsService interface {
 	GetContentAnalytics(ctx context.Context, contentID uuid.UUID, from, to time.Time) ([]*domain.ContentAnalyticsSummary, error)
 	GetPlatformAnalytics(ctx context.Context, workspaceID uuid.UUID, platform domain.PlatformType, limit int) ([]*domain.PlatformAnalytics, error)
 	TriggerSync(ctx context.Context, workspaceID uuid.UUID) error
+	GetConsistencyScore(ctx context.Context, workspaceID uuid.UUID) (*domain.ConsistencyScore, error)
+	GetHeatmap(ctx context.Context, workspaceID uuid.UUID, year int) ([]*domain.HeatmapDay, error)
+	GetPipelineVelocity(ctx context.Context, workspaceID uuid.UUID) ([]*domain.PipelineVelocity, error)
+	GetWeeklyReport(ctx context.Context, workspaceID uuid.UUID) (*domain.WeeklyReport, error)
+	GetMonthlyReport(ctx context.Context, workspaceID uuid.UUID) (*domain.MonthlyReport, error)
+	ListGoals(ctx context.Context, workspaceID uuid.UUID) ([]*domain.AnalyticsGoal, error)
+	CreateGoal(ctx context.Context, workspaceID uuid.UUID, input domain.CreateGoalInput) (*domain.AnalyticsGoal, error)
+	UpdateGoal(ctx context.Context, goalID uuid.UUID, input domain.UpdateGoalInput) (*domain.AnalyticsGoal, error)
+	DeleteGoal(ctx context.Context, goalID uuid.UUID) error
 }
 
 // GamificationService defines all gamification operations.

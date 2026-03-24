@@ -1,11 +1,9 @@
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
-import { Lightbulb, Kanban, FileText, Users } from 'lucide-react';
 import { Skeleton } from '@ordo/ui';
-import { StatsCard } from './_components/stats-card';
 import { QuickActions } from './_components/quick-actions';
 import { RecentActivity } from './_components/recent-activity';
-import { ConsistencyMiniWidget } from './_components/consistency-mini-widget';
+import { DashboardStats } from './_components/dashboard-stats';
 
 export const metadata: Metadata = {
   title: 'Dashboard',
@@ -30,52 +28,28 @@ export default function DashboardPage() {
         <QuickActions />
       </section>
 
-      {/* Stats grid */}
-      <section>
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-          Overview
-        </h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Suspense fallback={<Skeleton className="h-[156px] w-full rounded-lg" />}>
-            <StatsCard
-              label="Total Ideas"
-              value="—"
-              icon={<Lightbulb className="h-5 w-5" />}
-            />
-          </Suspense>
-          <Suspense fallback={<Skeleton className="h-[156px] w-full rounded-lg" />}>
-            <StatsCard
-              label="In Pipeline"
-              value="—"
-              icon={<Kanban className="h-5 w-5" />}
-            />
-          </Suspense>
-          <Suspense fallback={<Skeleton className="h-[156px] w-full rounded-lg" />}>
-            <StatsCard
-              label="Published"
-              value="—"
-              icon={<FileText className="h-5 w-5" />}
-            />
-          </Suspense>
-          <Suspense fallback={<Skeleton className="h-[156px] w-full rounded-lg" />}>
-            <StatsCard
-              label="Team Members"
-              value="—"
-              icon={<Users className="h-5 w-5" />}
-            />
-          </Suspense>
-        </div>
-      </section>
+      {/* Stats grid + Consistency widget (client component with real data) */}
+      <Suspense
+        fallback={
+          <div className="space-y-6">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} className="h-[156px] w-full rounded-lg" />
+              ))}
+            </div>
+            <Skeleton className="h-24 w-full rounded-lg" />
+          </div>
+        }
+      >
+        <DashboardStats />
+      </Suspense>
 
-      {/* Bottom grid: recent activity + consistency */}
+      {/* Bottom grid: recent activity */}
       <section className="grid gap-4 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <Suspense fallback={<Skeleton className="h-64 w-full rounded-lg" />}>
             <RecentActivity />
           </Suspense>
-        </div>
-        <div>
-          <ConsistencyMiniWidget streak={0} />
         </div>
       </section>
     </main>
