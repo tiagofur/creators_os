@@ -20,6 +20,7 @@ type aiService struct {
 	aiRepo      repository.AIRepository
 	userRepo    repository.UserRepository
 	contentRepo repository.ContentRepository
+	wsRepo      repository.WorkspaceRepository
 	logger      *slog.Logger
 }
 
@@ -29,6 +30,7 @@ func NewAIService(
 	aiRepo repository.AIRepository,
 	userRepo repository.UserRepository,
 	contentRepo repository.ContentRepository,
+	wsRepo repository.WorkspaceRepository,
 	logger *slog.Logger,
 ) AIService {
 	if logger == nil {
@@ -39,6 +41,7 @@ func NewAIService(
 		aiRepo:      aiRepo,
 		userRepo:    userRepo,
 		contentRepo: contentRepo,
+		wsRepo:      wsRepo,
 		logger:      logger,
 	}
 }

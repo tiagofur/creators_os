@@ -86,6 +86,21 @@ type ContentAssignment struct {
 	AssignedAt time.Time `json:"assigned_at"`
 }
 
+// ContentTemplate represents a reusable content template with predefined defaults.
+type ContentTemplate struct {
+	ID               uuid.UUID      `json:"id"`
+	WorkspaceID      uuid.UUID      `json:"workspace_id"`
+	Name             string         `json:"name"`
+	Description      *string        `json:"description,omitempty"`
+	ContentType      ContentType    `json:"content_type"`
+	PlatformTarget   *PlatformType  `json:"platform_target,omitempty"`
+	DefaultChecklist map[string]any `json:"default_checklist"`
+	PromptTemplate   *string        `json:"prompt_template,omitempty"`
+	Metadata         map[string]any `json:"metadata"`
+	CreatedAt        time.Time      `json:"created_at"`
+	UpdatedAt        time.Time      `json:"updated_at"`
+}
+
 // ContentFilter holds optional filtering parameters for listing content.
 type ContentFilter struct {
 	Statuses   []ContentStatus

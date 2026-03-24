@@ -165,6 +165,15 @@ type SponsorshipRepository interface {
 	ListMessages(ctx context.Context, sponsorshipID uuid.UUID) ([]*domain.SponsorshipMessage, error)
 }
 
+// ContentTemplateRepository defines all persistence operations for content templates.
+type ContentTemplateRepository interface {
+	Create(ctx context.Context, t *domain.ContentTemplate) (*domain.ContentTemplate, error)
+	GetByID(ctx context.Context, id uuid.UUID) (*domain.ContentTemplate, error)
+	List(ctx context.Context, workspaceID uuid.UUID) ([]*domain.ContentTemplate, error)
+	Update(ctx context.Context, t *domain.ContentTemplate) (*domain.ContentTemplate, error)
+	Delete(ctx context.Context, id uuid.UUID) error
+}
+
 // SeriesRepository defines all persistence operations for series and episodes.
 type SeriesRepository interface {
 	Create(ctx context.Context, s *domain.Series) (*domain.Series, error)
