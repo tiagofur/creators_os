@@ -15,13 +15,13 @@ type AIService interface {
 	// Returns AI_002 error with 402 if the balance is insufficient.
 	CheckAndDeductCredits(ctx context.Context, userID uuid.UUID, cost int) error
 	// SendMessage streams the assistant response to w and persists both messages.
-	SendMessage(ctx context.Context, conversationID uuid.UUID, userID uuid.UUID, content string, w io.Writer) error
+	SendMessage(ctx context.Context, conversationID uuid.UUID, userID uuid.UUID, workspaceID uuid.UUID, content string, w io.Writer) error
 	// Brainstorm returns a non-streaming brainstorm response for the given topic.
-	Brainstorm(ctx context.Context, userID uuid.UUID, topic string) (string, error)
+	Brainstorm(ctx context.Context, userID uuid.UUID, workspaceID uuid.UUID, topic string) (string, error)
 	// GenerateScript returns a non-streaming script for the given title and description.
-	GenerateScript(ctx context.Context, userID uuid.UUID, title, description string) (string, error)
+	GenerateScript(ctx context.Context, userID uuid.UUID, workspaceID uuid.UUID, title, description string) (string, error)
 	// AnalyzeScript returns AI suggestions for improving the given script text.
-	AnalyzeScript(ctx context.Context, userID uuid.UUID, scriptText string) ([]domain.ScriptSuggestion, error)
+	AnalyzeScript(ctx context.Context, userID uuid.UUID, workspaceID uuid.UUID, scriptText string) ([]domain.ScriptSuggestion, error)
 	// Atomize generates platform-specific micro-content variations from an existing content item.
 	Atomize(ctx context.Context, userID, workspaceID, contentID uuid.UUID) (*domain.AtomizeResponse, error)
 	// GetCreditBalance returns the current AI credit balance for the user.
@@ -54,6 +54,8 @@ type WorkspaceService interface {
 	AcceptInvitation(ctx context.Context, token string, userID uuid.UUID) error
 	ListInvitations(ctx context.Context, workspaceID uuid.UUID) ([]*domain.WorkspaceInvitation, error)
 	DeleteInvitation(ctx context.Context, id uuid.UUID) error
+	GetBrandKit(ctx context.Context, workspaceID uuid.UUID) (*domain.BrandKit, error)
+	UpdateBrandKit(ctx context.Context, workspaceID uuid.UUID, kit *domain.BrandKit) error
 }
 
 // IdeaService defines all idea management operations.
