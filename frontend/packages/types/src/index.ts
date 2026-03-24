@@ -60,6 +60,9 @@ export type {
   HashtagRequest,
   HashtagGroup,
   HashtagResponse,
+  AtomizeRequest,
+  AtomizedContent,
+  AtomizeResponse,
   AiCredits,
 } from './ai';
 export type {

@@ -4,6 +4,7 @@ import type {
   AiChatResponse,
   AiConversation,
   AiCredits,
+  AtomizeResponse,
   BrainstormRequest,
   BrainstormResponse,
   DescriptionRequest,
@@ -48,6 +49,10 @@ export function createAiResource(client: OrdoApiClient) {
 
     generateScript(workspaceId: string, payload: ScriptDoctorRequest): Promise<ScriptDoctorResponse> {
       return client.post<ScriptDoctorResponse>(`/api/v1/workspaces/${workspaceId}/ai/script-generate`, payload);
+    },
+
+    atomize(workspaceId: string, contentId: string): Promise<AtomizeResponse> {
+      return client.post<AtomizeResponse>(`/api/v1/workspaces/${workspaceId}/ai/atomize`, { content_id: contentId });
     },
 
     getCredits(): Promise<AiCredits> {
