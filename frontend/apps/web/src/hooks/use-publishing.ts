@@ -26,7 +26,7 @@ export function useScheduledContent(
         params.set('to', dateRange.to);
       }
       return apiClient.get<ContentItem[]>(
-        `/v1/publishing/scheduled?${params.toString()}`,
+        `/api/v1/publishing/scheduled?${params.toString()}`,
       );
     },
     enabled: Boolean(workspaceId),
@@ -46,7 +46,7 @@ export function useScheduleContent() {
       contentId: string;
       scheduledAt: string;
     }) =>
-      apiClient.post<ContentItem>(`/v1/contents/${contentId}/schedule`, {
+      apiClient.post<ContentItem>(`/api/v1/contents/${contentId}/schedule`, {
         scheduled_at: scheduledAt,
       }),
     onSuccess: () => {
@@ -61,7 +61,7 @@ export function useUnscheduleContent() {
 
   return useMutation({
     mutationFn: (contentId: string) =>
-      apiClient.delete<void>(`/v1/contents/${contentId}/schedule`),
+      apiClient.delete<void>(`/api/v1/contents/${contentId}/schedule`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: publishingKeys.all() });
     },

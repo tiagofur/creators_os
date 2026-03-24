@@ -9,7 +9,7 @@ export function useGlobalSearch(query: string, workspaceId: string) {
     queryKey: ['search', query, workspaceId],
     queryFn: () => {
       const params = new URLSearchParams({ q: query, workspace: workspaceId });
-      return apiClient.get<SearchResult[]>(`/v1/search?${params.toString()}`);
+      return apiClient.get<SearchResult[]>(`/api/v1/search?${params.toString()}`);
     },
     enabled: query.length >= 2 && Boolean(workspaceId),
     staleTime: 0, // always fresh

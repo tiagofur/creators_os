@@ -118,7 +118,7 @@ export function useScriptDoctor(): UseScriptDoctorReturn {
 
   const { mutate: runAnalysis, isPending: isAnalyzing } = useMutation({
     mutationFn: (payload: ScriptDoctorRequest) =>
-      apiClient.post<ScriptDoctorResponse>('/v1/ai/script-doctor', payload),
+      apiClient.post<ScriptDoctorResponse>('/api/v1/ai/script-doctor', payload),
     onSuccess: (data) => {
       trackEvent('ai_credit_used', { tool: 'script_doctor', creditsUsed: 1 });
       setSuggestions(data.suggestions);

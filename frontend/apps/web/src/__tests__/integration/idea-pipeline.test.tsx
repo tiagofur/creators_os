@@ -158,13 +158,14 @@ describe('Idea Capture Integration', () => {
     const user = userEvent.setup();
     // Override idea creation to capture the request
     server.use(
-      http.post('*/v1/ideas', async ({ request }) => {
+      http.post('*/api/v1/workspaces/:workspaceId/ideas', async ({ request, params }) => {
         const body = await request.json() as Record<string, unknown>;
         return HttpResponse.json(
           {
-            id: 'idea-new-123',
-            workspace_id: 'workspace-1',
-            user_id: 'user-1',
+            id: '00000000-0000-4000-a000-000000000002',
+            workspace_id: params.workspaceId,
+            created_by: '00000000-0000-4000-a000-000000000099',
+            user_id: '00000000-0000-4000-a000-000000000099',
             title: body.title,
             description: null,
             status: 'inbox',
@@ -204,10 +205,10 @@ describe('Idea Capture Integration', () => {
     const captureButton = screen.getByRole('button', { name: /capture idea/i });
     await user.click(captureButton);
 
-    // Verify the POST /v1/ideas was called
+    // Verify the POST was called
     await waitFor(() => {
       const postRequest = requestLog.find(
-        (r) => r.method === 'POST' && r.url.includes('/v1/ideas'),
+        (r) => r.method === 'POST' && r.url.includes('/api/v1/workspaces/') && r.url.includes('/ideas'),
       );
       expect(postRequest).toBeDefined();
     });
@@ -256,10 +257,12 @@ describe('Pipeline Drag Integration', () => {
       {
         id: 'content-1',
         workspace_id: 'workspace-1',
+        created_by: 'user-1',
         idea_id: null,
         title: 'Draft Blog Post',
         body: null,
-        status: 'draft' as const,
+        status: 'scripting' as const,
+        content_type: 'video' as const,
         pipeline_stage: 'scripting' as const,
         platform: 'blog',
         scheduled_at: null,
@@ -289,12 +292,12 @@ describe('Pipeline Drag Integration', () => {
       });
     });
 
-    // Verify the PATCH /v1/contents/:id was called to move stage
+    // Verify the PUT was called to move stage
     await waitFor(() => {
-      const patchRequest = requestLog.find(
-        (r) => r.method === 'PATCH' && r.url.includes('/v1/contents'),
+      const putRequest = requestLog.find(
+        (r) => (r.method === 'PUT' || r.method === 'PATCH') && r.url.includes('/contents'),
       );
-      expect(patchRequest).toBeDefined();
+      expect(putRequest).toBeDefined();
     });
 
   });
@@ -302,9 +305,15 @@ describe('Pipeline Drag Integration', () => {
   it('reverts position when API call fails', async () => {
 
 
-    // Override PATCH to fail
+    // Override PUT to fail
     server.use(
-      http.patch('*/v1/contents/:id', () => {
+      http.put('*/api/v1/workspaces/:workspaceId/contents/:id', () => {
+        return HttpResponse.json(
+          { status: 500, code: 'INTERNAL_ERROR', message: 'Server error' },
+          { status: 500 },
+        );
+      }),
+      http.put('*/api/v1/workspaces/:workspaceId/contents/:id/status', () => {
         return HttpResponse.json(
           { status: 500, code: 'INTERNAL_ERROR', message: 'Server error' },
           { status: 500 },
@@ -320,10 +329,12 @@ describe('Pipeline Drag Integration', () => {
       {
         id: 'content-2',
         workspace_id: 'workspace-1',
+        created_by: 'user-1',
         idea_id: null,
         title: 'Editing Video',
         body: null,
-        status: 'draft' as const,
+        status: 'editing' as const,
+        content_type: 'video' as const,
         pipeline_stage: 'editing' as const,
         platform: 'youtube',
         scheduled_at: null,
@@ -352,12 +363,12 @@ describe('Pipeline Drag Integration', () => {
       });
     });
 
-    // The PATCH should have been attempted
+    // The PUT/PATCH should have been attempted
     await waitFor(() => {
-      const patchRequest = requestLog.find(
-        (r) => r.method === 'PATCH' && r.url.includes('/v1/contents'),
+      const apiRequest = requestLog.find(
+        (r) => (r.method === 'PUT' || r.method === 'PATCH') && r.url.includes('/contents'),
       );
-      expect(patchRequest).toBeDefined();
+      expect(apiRequest).toBeDefined();
     });
 
     // The card should still be visible (component re-renders with original data from parent)
@@ -376,10 +387,12 @@ describe('Pipeline Drag Integration', () => {
       {
         id: 'content-3',
         workspace_id: 'workspace-1',
+        created_by: 'user-1',
         idea_id: null,
         title: 'Recording Session',
         body: null,
-        status: 'draft' as const,
+        status: 'recording' as const,
+        content_type: 'video' as const,
         pipeline_stage: 'recording' as const,
         platform: 'youtube',
         scheduled_at: null,
@@ -407,11 +420,11 @@ describe('Pipeline Drag Integration', () => {
       });
     });
 
-    // No PATCH request should have been made
-    const patchRequests = requestLog
+    // No PUT/PATCH request should have been made
+    const mutationRequests = requestLog
       .slice(initialRequestCount)
-      .filter((r) => r.method === 'PATCH');
-    expect(patchRequests).toHaveLength(0);
+      .filter((r) => r.method === 'PUT' || r.method === 'PATCH');
+    expect(mutationRequests).toHaveLength(0);
 
   });
 });
@@ -424,13 +437,16 @@ describe('API call assertions', () => {
     let capturedBody: Record<string, unknown> | null = null;
 
     server.use(
-      http.post('*/v1/ideas', async ({ request }) => {
+      http.post('*/api/v1/workspaces/:workspaceId/ideas', async ({ request, params }) => {
         capturedBody = await request.json() as Record<string, unknown>;
+        // Store the workspaceId from the URL path for assertion
+        (capturedBody as any).__workspaceId = params.workspaceId;
         return HttpResponse.json(
           {
-            id: 'idea-api-test',
-            workspace_id: 'workspace-1',
-            user_id: 'user-1',
+            id: '00000000-0000-4000-a000-000000000001',
+            workspace_id: params.workspaceId,
+            created_by: '00000000-0000-4000-a000-000000000099',
+            user_id: '00000000-0000-4000-a000-000000000099',
             title: capturedBody.title,
             description: null,
             status: 'inbox',
@@ -475,7 +491,8 @@ describe('API call assertions', () => {
       expect(capturedBody).not.toBeNull();
       expect(capturedBody!.title).toBe('API Test Idea');
       expect(capturedBody!.tags).toEqual(['youtube']);
-      expect(capturedBody!.workspace_id).toBe('workspace-1');
+      // workspace_id is now in the URL path, not the request body
+      expect((capturedBody as any).__workspaceId).toBe('workspace-1');
     });
 
   });
@@ -491,10 +508,12 @@ describe('API call assertions', () => {
       {
         id: 'content-track',
         workspace_id: 'workspace-1',
+        created_by: 'user-1',
         idea_id: null,
         title: 'Track API Call',
         body: null,
-        status: 'draft' as const,
+        status: 'idea' as const,
+        content_type: 'video' as const,
         pipeline_stage: 'idea' as const,
         platform: 'youtube',
         scheduled_at: null,
@@ -521,12 +540,11 @@ describe('API call assertions', () => {
     });
 
     await waitFor(() => {
-      const patchRequest = requestLog.find(
-        (r) => r.method === 'PATCH' && r.url.includes('/v1/contents/content-track'),
+      const apiRequest = requestLog.find(
+        (r) => (r.method === 'PUT' || r.method === 'PATCH') && r.url.includes('/contents/content-track'),
       );
-      expect(patchRequest).toBeDefined();
-      expect(patchRequest!.method).toBe('PATCH');
-      expect(patchRequest!.url).toContain('/v1/contents/content-track');
+      expect(apiRequest).toBeDefined();
+      expect(apiRequest!.url).toContain('/contents/content-track');
     });
 
   });

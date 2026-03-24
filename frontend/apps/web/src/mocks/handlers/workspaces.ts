@@ -6,10 +6,10 @@ import {
   mockWorkspaceInvitation,
 } from '../data';
 
-const BASE = '*/v1/workspaces';
+const BASE = '*/api/v1/workspaces';
 
 export const workspacesHandlers = [
-  // GET /v1/workspaces
+  // GET /api/v1/workspaces
   http.get(BASE, () => {
     return HttpResponse.json({
       data: mockWorkspaces,
@@ -22,7 +22,7 @@ export const workspacesHandlers = [
     });
   }),
 
-  // GET /v1/workspaces/:id
+  // GET /api/v1/workspaces/:id
   http.get(`${BASE}/:id`, ({ params }) => {
     const ws = mockWorkspaces.find((w) => w.id === params.id);
     if (!ws) {
@@ -34,7 +34,7 @@ export const workspacesHandlers = [
     return HttpResponse.json(ws);
   }),
 
-  // POST /v1/workspaces
+  // POST /api/v1/workspaces
   http.post(BASE, async ({ request }) => {
     const body = (await request.json()) as Record<string, unknown>;
     const newWs = {
@@ -47,8 +47,8 @@ export const workspacesHandlers = [
     return HttpResponse.json(newWs, { status: 201 });
   }),
 
-  // PATCH /v1/workspaces/:id
-  http.patch(`${BASE}/:id`, async ({ params, request }) => {
+  // PUT /api/v1/workspaces/:id
+  http.put(`${BASE}/:id`, async ({ params, request }) => {
     const ws = mockWorkspaces.find((w) => w.id === params.id);
     if (!ws) {
       return HttpResponse.json(
@@ -64,12 +64,12 @@ export const workspacesHandlers = [
     });
   }),
 
-  // DELETE /v1/workspaces/:id
+  // DELETE /api/v1/workspaces/:id
   http.delete(`${BASE}/:id`, () => {
     return new HttpResponse(null, { status: 204 });
   }),
 
-  // GET /v1/workspaces/:id/members
+  // GET /api/v1/workspaces/:id/members
   http.get(`${BASE}/:id/members`, () => {
     return HttpResponse.json({
       data: mockWorkspaceMembers,
@@ -82,8 +82,19 @@ export const workspacesHandlers = [
     });
   }),
 
-  // POST /v1/workspaces/:id/members/invite
-  http.post(`${BASE}/:id/members/invite`, async ({ request }) => {
+  // PUT /api/v1/workspaces/:workspaceId/members/:userId/role
+  http.put(`${BASE}/:workspaceId/members/:userId/role`, async ({ request }) => {
+    const body = (await request.json()) as Record<string, unknown>;
+    return HttpResponse.json({ role: body.role });
+  }),
+
+  // DELETE /api/v1/workspaces/:workspaceId/members/:userId
+  http.delete(`${BASE}/:workspaceId/members/:userId`, () => {
+    return new HttpResponse(null, { status: 204 });
+  }),
+
+  // POST /api/v1/workspaces/:id/invitations
+  http.post(`${BASE}/:id/invitations`, async ({ request }) => {
     const body = (await request.json()) as Record<string, unknown>;
     return HttpResponse.json({
       ...mockWorkspaceInvitation,
@@ -93,8 +104,18 @@ export const workspacesHandlers = [
     }, { status: 201 });
   }),
 
-  // DELETE /v1/workspaces/:workspaceId/members/:userId
-  http.delete(`${BASE}/:workspaceId/members/:userId`, () => {
+  // GET /api/v1/workspaces/:id/invitations
+  http.get(`${BASE}/:id/invitations`, () => {
+    return HttpResponse.json([mockWorkspaceInvitation]);
+  }),
+
+  // DELETE /api/v1/workspaces/:workspaceId/invitations/:invitationId
+  http.delete(`${BASE}/:workspaceId/invitations/:invitationId`, () => {
+    return new HttpResponse(null, { status: 204 });
+  }),
+
+  // POST /api/v1/invitations/:token/accept
+  http.post('*/api/v1/invitations/:token/accept', () => {
     return new HttpResponse(null, { status: 204 });
   }),
 ];

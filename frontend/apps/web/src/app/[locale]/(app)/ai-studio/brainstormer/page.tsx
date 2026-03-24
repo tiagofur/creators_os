@@ -16,7 +16,7 @@ export default function BrainstormerPage() {
 
   const { mutate, isPending } = useMutation({
     mutationFn: (payload: BrainstormRequest) =>
-      apiClient.post<BrainstormResponse>('/v1/ai/brainstorm', payload),
+      apiClient.post<BrainstormResponse>('/api/v1/ai/brainstorm', payload),
     onSuccess: (data) => {
       trackEvent('ai_credit_used', { tool: 'brainstormer', creditsUsed: 1 });
       setIdeas(data.ideas);

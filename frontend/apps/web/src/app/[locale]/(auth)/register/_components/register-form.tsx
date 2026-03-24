@@ -42,14 +42,14 @@ export function RegisterForm() {
 
   async function onSubmit(data: RegisterInput) {
     try {
-      const tokens = await apiClient.post<AuthTokens>('/v1/auth/register', {
+      const tokens = await apiClient.post<AuthTokens>('/api/v1/auth/register', {
         name: data.name,
         email: data.email,
         password: data.password,
       });
       setAccessToken(tokens.access_token);
 
-      const user = await apiClient.get('/v1/auth/me');
+      const user = await apiClient.get('/api/v1/users/me');
       setUser(user as Parameters<typeof setUser>[0]);
 
       router.push(`/${locale}/onboarding`);

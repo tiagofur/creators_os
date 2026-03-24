@@ -1,6 +1,6 @@
 import { http, HttpResponse } from 'msw';
 
-const BASE = '*/v1/integrations';
+const BASE = '*/api/v1/integrations';
 
 interface Integration {
   id: string;
@@ -28,12 +28,12 @@ const mockIntegrations: Integration[] = [
 ];
 
 export const integrationsHandlers = [
-  // GET /v1/integrations
+  // GET /api/v1/integrations
   http.get(BASE, () => {
     return HttpResponse.json(mockIntegrations);
   }),
 
-  // POST /v1/integrations
+  // POST /api/v1/integrations
   http.post(BASE, async ({ request }) => {
     const body = (await request.json()) as Record<string, unknown>;
     return HttpResponse.json({
@@ -45,7 +45,7 @@ export const integrationsHandlers = [
     }, { status: 201 });
   }),
 
-  // DELETE /v1/integrations/:id
+  // DELETE /api/v1/integrations/:id
   http.delete(`${BASE}/:id`, () => {
     return new HttpResponse(null, { status: 204 });
   }),

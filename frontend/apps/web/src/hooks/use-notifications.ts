@@ -14,7 +14,7 @@ const NOTIFICATION_KEYS = {
 export function useNotifications() {
   return useQuery({
     queryKey: NOTIFICATION_KEYS.list(),
-    queryFn: () => apiClient.get<AppNotification[]>('/v1/notifications?unread=false&page=1'),
+    queryFn: () => apiClient.get<AppNotification[]>('/api/v1/notifications?unread=false&page=1'),
     ...NOTIFICATIONS_CACHE,
   });
 }
@@ -22,7 +22,7 @@ export function useNotifications() {
 export function useUnreadCount() {
   return useQuery({
     queryKey: NOTIFICATION_KEYS.count(),
-    queryFn: () => apiClient.get<{ count: number }>('/v1/notifications/count'),
+    queryFn: () => apiClient.get<{ count: number }>('/api/v1/notifications/count'),
     ...NOTIFICATIONS_CACHE,
     refetchInterval: 1000 * 60, // poll every minute
   });
@@ -32,7 +32,7 @@ export function useMarkAsRead() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => apiClient.patch<void>(`/v1/notifications/${id}`, { read: true }),
+    mutationFn: (id: string) => apiClient.patch<void>(`/api/v1/notifications/${id}`, { read: true }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: NOTIFICATION_KEYS.list() });
       queryClient.invalidateQueries({ queryKey: NOTIFICATION_KEYS.count() });
@@ -44,7 +44,7 @@ export function useMarkAllAsRead() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: () => apiClient.post<void>('/v1/notifications/mark-all-read'),
+    mutationFn: () => apiClient.post<void>('/api/v1/notifications/mark-all-read'),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: NOTIFICATION_KEYS.all });
     },

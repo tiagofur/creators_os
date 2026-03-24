@@ -40,7 +40,7 @@ export function WorkspaceSettingsForm() {
   async function onSubmit(data: WorkspaceFormValues) {
     if (!workspace?.id) return;
     try {
-      await apiClient.patch(`/v1/workspaces/${workspace.id}`, data);
+      await apiClient.put(`/api/v1/workspaces/${workspace.id}`, data);
       toast.success('Workspace settings saved.');
     } catch {
       toast.error('Failed to save workspace settings.');
@@ -54,7 +54,7 @@ export function WorkspaceSettingsForm() {
     }
     setDeleting(true);
     try {
-      await apiClient.delete(`/v1/workspaces/${workspace.id}`);
+      await apiClient.delete(`/api/v1/workspaces/${workspace.id}`);
       window.location.href = '/';
     } catch {
       toast.error('Failed to delete workspace.');

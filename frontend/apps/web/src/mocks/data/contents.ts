@@ -1,16 +1,21 @@
 import type { ContentItem, Series } from '@ordo/types';
 import { mockWorkspace } from './workspaces';
 import { mockIdea1 } from './ideas';
+import { mockUser } from './users';
 
 export const mockContent1: ContentItem = {
   id: 'cnt_01HQCNT111111111',
   workspace_id: mockWorkspace.id,
+  created_by: mockUser.id,
   idea_id: mockIdea1.id,
   title: '10 TypeScript Tips for React Developers',
   body: '## Introduction\n\nTypeScript has become the de-facto standard for React development...',
+  description: 'A guide covering 10 essential TypeScript tips for React developers.',
   status: 'published',
+  content_type: 'video',
   pipeline_stage: 'publishing',
   platform: 'youtube',
+  platform_target: 'youtube',
   scheduled_at: '2025-01-12T15:00:00.000Z',
   published_at: '2025-01-12T15:00:00.000Z',
   thumbnail_url: 'https://example.com/thumbnails/ts-tips.jpg',
@@ -22,12 +27,16 @@ export const mockContent1: ContentItem = {
 export const mockContent2: ContentItem = {
   id: 'cnt_02HQCNT222222222',
   workspace_id: mockWorkspace.id,
+  created_by: mockUser.id,
   idea_id: null,
   title: 'Quick Tip: CSS Grid in 60 Seconds',
   body: 'Short-form content about CSS Grid layouts.',
-  status: 'draft',
+  description: 'Short-form content about CSS Grid layouts.',
+  status: 'scripting',
+  content_type: 'short',
   pipeline_stage: 'scripting',
   platform: 'tiktok',
+  platform_target: 'tiktok',
   scheduled_at: null,
   published_at: null,
   thumbnail_url: null,
@@ -39,12 +48,16 @@ export const mockContent2: ContentItem = {
 export const mockContent3: ContentItem = {
   id: 'cnt_03HQCNT333333333',
   workspace_id: mockWorkspace.id,
+  created_by: mockUser.id,
   idea_id: null,
   title: 'State Management in 2025: What to Use?',
   body: null,
+  description: null,
   status: 'review',
+  content_type: 'video',
   pipeline_stage: 'review',
   platform: 'youtube',
+  platform_target: 'youtube',
   scheduled_at: '2025-01-20T14:00:00.000Z',
   published_at: null,
   thumbnail_url: 'https://example.com/thumbnails/state-mgmt.jpg',
@@ -58,10 +71,10 @@ export const mockContents: ContentItem[] = [mockContent1, mockContent2, mockCont
 export const mockSeries1: Series = {
   id: 'ser_01HQSER111111111',
   workspace_id: mockWorkspace.id,
-  name: 'TypeScript Mastery',
+  created_by: mockUser.id,
+  title: 'TypeScript Mastery',
   description: 'A series covering advanced TypeScript patterns for web developers.',
-  cover_url: 'https://example.com/series/ts-mastery.jpg',
-  content_ids: [mockContent1.id],
+  platform: 'youtube',
   created_at: '2025-01-01T08:00:00.000Z',
   updated_at: '2025-01-08T10:00:00.000Z',
 };

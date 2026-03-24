@@ -29,7 +29,7 @@ export function DescriptionGenerator() {
 
   const { mutate, isPending } = useMutation({
     mutationFn: (payload: DescriptionRequest) =>
-      apiClient.post<DescriptionResponse>('/v1/ai/description', payload),
+      apiClient.post<DescriptionResponse>('/api/v1/ai/description', payload),
     onSuccess: (data) => {
       trackEvent('ai_credit_used', { tool: 'description_generator', creditsUsed: 1 });
       setResult(data);

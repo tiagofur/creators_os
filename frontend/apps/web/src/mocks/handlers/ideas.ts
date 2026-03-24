@@ -1,10 +1,10 @@
 import { http, HttpResponse } from 'msw';
 import { mockIdeas, mockIdea1 } from '../data';
 
-const BASE = '*/v1/ideas';
+const BASE = '*/api/v1/workspaces/:workspaceId/ideas';
 
 export const ideasHandlers = [
-  // GET /v1/ideas
+  // GET /api/v1/workspaces/:workspaceId/ideas
   http.get(BASE, () => {
     return HttpResponse.json({
       data: mockIdeas,
@@ -17,7 +17,7 @@ export const ideasHandlers = [
     });
   }),
 
-  // GET /v1/ideas/:id
+  // GET /api/v1/workspaces/:workspaceId/ideas/:id
   http.get(`${BASE}/:id`, ({ params }) => {
     const idea = mockIdeas.find((i) => i.id === params.id);
     if (!idea) {
@@ -29,7 +29,7 @@ export const ideasHandlers = [
     return HttpResponse.json(idea);
   }),
 
-  // POST /v1/ideas
+  // POST /api/v1/workspaces/:workspaceId/ideas
   http.post(BASE, async ({ request }) => {
     const body = (await request.json()) as Record<string, unknown>;
     const newIdea = {
@@ -46,8 +46,8 @@ export const ideasHandlers = [
     return HttpResponse.json(newIdea, { status: 201 });
   }),
 
-  // PATCH /v1/ideas/:id
-  http.patch(`${BASE}/:id`, async ({ params, request }) => {
+  // PUT /api/v1/workspaces/:workspaceId/ideas/:id
+  http.put(`${BASE}/:id`, async ({ params, request }) => {
     const idea = mockIdeas.find((i) => i.id === params.id);
     if (!idea) {
       return HttpResponse.json(
@@ -63,8 +63,46 @@ export const ideasHandlers = [
     });
   }),
 
-  // DELETE /v1/ideas/:id
+  // DELETE /api/v1/workspaces/:workspaceId/ideas/:id
   http.delete(`${BASE}/:id`, () => {
     return new HttpResponse(null, { status: 204 });
+  }),
+
+  // POST /api/v1/workspaces/:workspaceId/ideas/:id/validate
+  http.post(`${BASE}/:id/validate`, () => {
+    return new HttpResponse(null, { status: 202 });
+  }),
+
+  // PUT /api/v1/workspaces/:workspaceId/ideas/:id/tags
+  http.put(`${BASE}/:id/tags`, async ({ params, request }) => {
+    const idea = mockIdeas.find((i) => i.id === params.id);
+    if (!idea) {
+      return HttpResponse.json(
+        { status: 404, code: 'NOT_FOUND', message: 'Idea not found' },
+        { status: 404 },
+      );
+    }
+    const body = (await request.json()) as Record<string, unknown>;
+    return HttpResponse.json({
+      ...idea,
+      tags: body.tags,
+      updated_at: new Date().toISOString(),
+    });
+  }),
+
+  // POST /api/v1/workspaces/:workspaceId/ideas/:id/promote
+  http.post(`${BASE}/:id/promote`, ({ params }) => {
+    const idea = mockIdeas.find((i) => i.id === params.id);
+    if (!idea) {
+      return HttpResponse.json(
+        { status: 404, code: 'NOT_FOUND', message: 'Idea not found' },
+        { status: 404 },
+      );
+    }
+    return HttpResponse.json({
+      ...idea,
+      status: 'promoted',
+      updated_at: new Date().toISOString(),
+    });
   }),
 ];

@@ -93,9 +93,9 @@ describe('Auth Integration: Registration flow', () => {
 
     // Override register handler to return 201
     server.use(
-      http.post('*/v1/auth/register', () => {
+      http.post('*/api/v1/auth/register', () => {
         return HttpResponse.json(
-          { access_token: 'new-reg-token', token_type: 'Bearer', expires_in: 3600 },
+          { access_token: 'new-reg-token', refresh_token: 'new-refresh-token', token_type: 'Bearer', expires_in: 3600 },
           { status: 201 },
         );
       }),
@@ -136,7 +136,7 @@ describe('Auth Integration: Registration flow', () => {
 
     // Override the register handler to return an error
     server.use(
-      http.post('*/v1/auth/register', () => {
+      http.post('*/api/v1/auth/register', () => {
         return HttpResponse.json(
           { status: 400, code: 'EMAIL_TAKEN', message: 'Email already in use' },
           { status: 400 },
@@ -188,7 +188,7 @@ describe('Auth Integration: Token refresh flow', () => {
         return HttpResponse.json({ message: 'success after refresh' });
       }),
       // Refresh succeeds
-      http.post('/api/auth/refresh', () => {
+      http.post('*/api/v1/auth/refresh', () => {
         return HttpResponse.json({
           access_token: 'new-refreshed-token',
           expires_in: 3600,
@@ -220,7 +220,7 @@ describe('Auth Integration: Token refresh flow', () => {
         );
       }),
       // Refresh also fails with 401
-      http.post('/api/auth/refresh', () => {
+      http.post('*/api/v1/auth/refresh', () => {
         return HttpResponse.json(
           { status: 401, code: 'REFRESH_EXPIRED', message: 'Refresh token expired' },
           { status: 401 },

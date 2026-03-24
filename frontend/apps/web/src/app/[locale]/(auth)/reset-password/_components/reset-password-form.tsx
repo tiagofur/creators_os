@@ -39,7 +39,7 @@ function ResetPasswordFormInner() {
 
   async function onSubmit(data: ResetPasswordFormInput) {
     try {
-      await apiClient.post('/v1/auth/reset-password', data);
+      await apiClient.post('/api/v1/auth/reset-password', data);
       router.push(`/${locale}/login?message=password_reset`);
     } catch {
       setError('root', { message: 'Reset failed. The link may have expired.' });

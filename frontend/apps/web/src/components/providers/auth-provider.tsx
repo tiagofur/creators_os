@@ -89,7 +89,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           setAccessToken(data.access_token);
 
           // Fetch current user
-          const user = await apiClient.get('/v1/auth/me');
+          const user = await apiClient.get('/api/v1/users/me');
           setUser(user as Parameters<typeof setUser>[0]);
 
           // Connect WebSocket and register gamification event handlers

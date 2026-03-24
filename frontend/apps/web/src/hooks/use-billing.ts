@@ -17,7 +17,7 @@ const BILLING_KEYS = {
 export function useSubscription() {
   return useQuery({
     queryKey: BILLING_KEYS.subscription(),
-    queryFn: () => apiClient.get<Subscription>('/v1/billing/subscription'),
+    queryFn: () => apiClient.get<Subscription>('/api/v1/billing/subscription'),
     ...BILLING_CACHE,
   });
 }
@@ -25,7 +25,7 @@ export function useSubscription() {
 export function useInvoices() {
   return useQuery({
     queryKey: BILLING_KEYS.invoices(),
-    queryFn: () => apiClient.get<Invoice[]>('/v1/billing/invoices'),
+    queryFn: () => apiClient.get<Invoice[]>('/api/v1/billing/invoices'),
     ...BILLING_CACHE,
   });
 }
@@ -33,7 +33,7 @@ export function useInvoices() {
 export function useUsage() {
   return useQuery({
     queryKey: BILLING_KEYS.usage(),
-    queryFn: () => apiClient.get<UsageSummary>('/v1/billing/usage'),
+    queryFn: () => apiClient.get<UsageSummary>('/api/v1/billing/usage'),
     ...BILLING_CACHE,
   });
 }
@@ -41,7 +41,7 @@ export function useUsage() {
 export function useCreateCheckoutSession() {
   return useMutation({
     mutationFn: ({ tier, billingPeriod }: { tier: SubscriptionTier; billingPeriod: BillingPeriod }) =>
-      apiClient.post<{ url: string }>('/v1/billing/checkout', { tier, billingPeriod }),
+      apiClient.post<{ url: string }>('/api/v1/billing/checkout', { tier, billingPeriod }),
     onSuccess: (data) => {
       window.location.href = data.url;
     },
@@ -53,7 +53,7 @@ export function useCreateCheckoutSession() {
 
 export function useCreatePortalSession() {
   return useMutation({
-    mutationFn: () => apiClient.post<{ url: string }>('/v1/billing/portal'),
+    mutationFn: () => apiClient.post<{ url: string }>('/api/v1/billing/portal'),
     onSuccess: (data) => {
       window.location.href = data.url;
     },
@@ -67,7 +67,7 @@ export function useCancelSubscription() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: () => apiClient.post<void>('/v1/billing/cancel'),
+    mutationFn: () => apiClient.post<void>('/api/v1/billing/cancel'),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: BILLING_KEYS.subscription() });
       toast.success('Your subscription will cancel at the end of the billing period.');
@@ -82,7 +82,7 @@ export function useReactivateSubscription() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: () => apiClient.post<void>('/v1/billing/reactivate'),
+    mutationFn: () => apiClient.post<void>('/api/v1/billing/reactivate'),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: BILLING_KEYS.subscription() });
       toast.success('Your subscription has been reactivated.');

@@ -64,7 +64,7 @@ export function CreateWorkspaceForm() {
 
   async function onSubmit(data: CreateWorkspaceInput) {
     try {
-      const workspace = await apiClient.post<Workspace>('/v1/workspaces', data);
+      const workspace = await apiClient.post<Workspace>('/api/v1/workspaces', data);
       addWorkspace(workspace);
       setActiveWorkspace(workspace);
       router.push(`/${locale}/dashboard`);

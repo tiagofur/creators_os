@@ -3,65 +3,50 @@ import {
   mockAiChatResponse,
   mockAiConversations,
   mockBrainstormResponse,
-  mockTitleLabResponse,
-  mockDescriptionResponse,
   mockScriptDoctorResponse,
-  mockRemixResponse,
-  mockHookResponse,
-  mockHashtagResponse,
   mockAiCredits,
 } from '../data';
 
-const BASE = '*/v1/ai';
+const BASE = '*/api/v1/workspaces/:workspaceId/ai';
 
 export const aiHandlers = [
-  // POST /v1/ai/chat
-  http.post(`${BASE}/chat`, () => {
-    return HttpResponse.json(mockAiChatResponse);
+  // POST /api/v1/workspaces/:workspaceId/ai/conversations
+  http.post(`${BASE}/conversations`, () => {
+    return HttpResponse.json(mockAiConversations[0], { status: 201 });
   }),
 
-  // GET /v1/ai/conversations
+  // GET /api/v1/workspaces/:workspaceId/ai/conversations
   http.get(`${BASE}/conversations`, () => {
     return HttpResponse.json(mockAiConversations);
   }),
 
-  // POST /v1/ai/brainstorm
+  // GET /api/v1/workspaces/:workspaceId/ai/conversations/:convId
+  http.get(`${BASE}/conversations/:convId`, () => {
+    return HttpResponse.json(mockAiConversations[0]);
+  }),
+
+  // DELETE /api/v1/workspaces/:workspaceId/ai/conversations/:convId
+  http.delete(`${BASE}/conversations/:convId`, () => {
+    return new HttpResponse(null, { status: 204 });
+  }),
+
+  // POST /api/v1/workspaces/:workspaceId/ai/conversations/:convId/messages
+  http.post(`${BASE}/conversations/:convId/messages`, () => {
+    return HttpResponse.json(mockAiChatResponse);
+  }),
+
+  // POST /api/v1/workspaces/:workspaceId/ai/brainstorm
   http.post(`${BASE}/brainstorm`, () => {
     return HttpResponse.json(mockBrainstormResponse);
   }),
 
-  // POST /v1/ai/title-lab
-  http.post(`${BASE}/title-lab`, () => {
-    return HttpResponse.json(mockTitleLabResponse);
-  }),
-
-  // POST /v1/ai/description
-  http.post(`${BASE}/description`, () => {
-    return HttpResponse.json(mockDescriptionResponse);
-  }),
-
-  // POST /v1/ai/script-doctor
-  http.post(`${BASE}/script-doctor`, () => {
+  // POST /api/v1/workspaces/:workspaceId/ai/script-generate
+  http.post(`${BASE}/script-generate`, () => {
     return HttpResponse.json(mockScriptDoctorResponse);
   }),
 
-  // POST /v1/ai/remix
-  http.post(`${BASE}/remix`, () => {
-    return HttpResponse.json(mockRemixResponse);
-  }),
-
-  // POST /v1/ai/hooks
-  http.post(`${BASE}/hooks`, () => {
-    return HttpResponse.json(mockHookResponse);
-  }),
-
-  // POST /v1/ai/hashtags
-  http.post(`${BASE}/hashtags`, () => {
-    return HttpResponse.json(mockHashtagResponse);
-  }),
-
-  // GET /v1/ai/credits
-  http.get(`${BASE}/credits`, () => {
+  // GET /api/v1/users/me/ai/credits
+  http.get('*/api/v1/users/me/ai/credits', () => {
     return HttpResponse.json(mockAiCredits);
   }),
 ];
