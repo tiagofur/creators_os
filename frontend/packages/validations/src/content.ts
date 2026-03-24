@@ -13,6 +13,7 @@ export const contentItemSchema = z.object({
   published_at: z.string().nullable(),
   thumbnail_url: z.string().nullable(),
   tags: z.array(z.string()),
+  metadata: z.record(z.unknown()).nullable().optional(),
   created_at: z.string(),
   updated_at: z.string(),
 });
@@ -35,6 +36,7 @@ export const updateContentSchema = z.object({
   scheduled_at: z.string().nullable().optional(),
   thumbnail_url: z.string().url().nullable().optional(),
   tags: z.array(z.string()).optional(),
+  metadata: z.record(z.unknown()).nullable().optional(),
 });
 
 export type ContentItemData = z.infer<typeof contentItemSchema>;

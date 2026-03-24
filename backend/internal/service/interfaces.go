@@ -22,6 +22,8 @@ type AIService interface {
 	GenerateScript(ctx context.Context, userID uuid.UUID, title, description string) (string, error)
 	// AnalyzeScript returns AI suggestions for improving the given script text.
 	AnalyzeScript(ctx context.Context, userID uuid.UUID, scriptText string) ([]domain.ScriptSuggestion, error)
+	// Atomize generates platform-specific micro-content variations from an existing content item.
+	Atomize(ctx context.Context, userID, workspaceID, contentID uuid.UUID) (*domain.AtomizeResponse, error)
 	// GetCreditBalance returns the current AI credit balance for the user.
 	GetCreditBalance(ctx context.Context, userID uuid.UUID) (int, error)
 }
@@ -71,7 +73,7 @@ type ContentService interface {
 	Create(ctx context.Context, workspaceID, createdBy uuid.UUID, title string, description *string, contentType domain.ContentType, platformTarget *domain.PlatformType) (*domain.Content, error)
 	GetByID(ctx context.Context, id uuid.UUID) (*domain.Content, error)
 	List(ctx context.Context, workspaceID uuid.UUID, filter domain.ContentFilter) ([]*domain.Content, error)
-	Update(ctx context.Context, id uuid.UUID, title *string, description *string, platformTarget *domain.PlatformType, dueDate *string, scheduledAt *string) (*domain.Content, error)
+	Update(ctx context.Context, id uuid.UUID, title *string, description *string, platformTarget *domain.PlatformType, dueDate *string, scheduledAt *string, metadata map[string]any) (*domain.Content, error)
 	Delete(ctx context.Context, id uuid.UUID) error
 	TransitionStatus(ctx context.Context, contentID uuid.UUID, to domain.ContentStatus) error
 	AddAssignment(ctx context.Context, contentID, userID uuid.UUID, role string) (*domain.ContentAssignment, error)

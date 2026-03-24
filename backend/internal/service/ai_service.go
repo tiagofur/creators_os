@@ -16,10 +16,11 @@ import (
 
 // aiService implements AIService.
 type aiService struct {
-	aiRouter *ai.Router
-	aiRepo   repository.AIRepository
-	userRepo repository.UserRepository
-	logger   *slog.Logger
+	aiRouter    *ai.Router
+	aiRepo      repository.AIRepository
+	userRepo    repository.UserRepository
+	contentRepo repository.ContentRepository
+	logger      *slog.Logger
 }
 
 // NewAIService creates a new AIService with the required dependencies.
@@ -27,16 +28,18 @@ func NewAIService(
 	aiRouter *ai.Router,
 	aiRepo repository.AIRepository,
 	userRepo repository.UserRepository,
+	contentRepo repository.ContentRepository,
 	logger *slog.Logger,
 ) AIService {
 	if logger == nil {
 		logger = slog.Default()
 	}
 	return &aiService{
-		aiRouter: aiRouter,
-		aiRepo:   aiRepo,
-		userRepo: userRepo,
-		logger:   logger,
+		aiRouter:    aiRouter,
+		aiRepo:      aiRepo,
+		userRepo:    userRepo,
+		contentRepo: contentRepo,
+		logger:      logger,
 	}
 }
 
@@ -240,6 +243,88 @@ Script:
 	}
 
 	return suggestions, nil
+}
+
+// Atomize takes a content item and generates platform-specific micro-content variations.
+func (s *aiService) Atomize(ctx context.Context, userID, workspaceID, contentID uuid.UUID) (*domain.AtomizeResponse, error) {
+	// Fetch the source content
+	content, err := s.contentRepo.GetByID(ctx, contentID)
+	if err != nil {
+		return nil, fmt.Errorf("ai_service: atomize: fetch content: %w", err)
+	}
+
+	description := ""
+	if content.Description != nil {
+		description = *content.Description
+	}
+
+	prompt := fmt.Sprintf(`You are a content repurposing expert. Take the following content and create platform-specific micro-content variations.
+
+Source Content:
+Title: %s
+Description/Script: %s
+Content Type: %s
+
+Generate variations for each of these platforms:
+1. Twitter/X Thread (3-5 tweets)
+2. Instagram Carousel (outline with slide-by-slide text)
+3. TikTok Script (short-form hook + body + CTA)
+4. LinkedIn Post (professional tone, storytelling)
+5. Short-form Video Script (YouTube Shorts / Reels, under 60 seconds)
+
+For each variation, return a JSON array of objects with these fields:
+- platform: the platform name (e.g. "twitter", "instagram", "tiktok", "linkedin", "short_video")
+- content_type: the format (e.g. "thread", "carousel", "script", "post", "short_script")
+- title: a catchy title for this variation
+- body: the full content text
+- hooks: an opening hook line (optional)
+- hashtags: an array of relevant hashtags (optional)
+
+Return ONLY a valid JSON array, no other text.`, content.Title, description, string(content.ContentType))
+
+	estimatedCost := s.aiRouter.EstimateTokens(prompt)
+	if estimatedCost < 1 {
+		estimatedCost = 1
+	}
+
+	if err := s.CheckAndDeductCredits(ctx, userID, estimatedCost); err != nil {
+		return nil, err
+	}
+
+	req := ai.CompletionRequest{
+		Messages: []ai.Message{
+			{Role: "user", Content: prompt},
+		},
+		SystemPrompt: "You are an expert content repurposing strategist for digital creators. You transform long-form content into platform-optimized micro-content. Always respond with valid JSON.",
+		MaxTokens:    2048,
+	}
+
+	resp, err := s.aiRouter.Complete(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("ai_service: atomize: %w", err)
+	}
+
+	var variations []domain.AtomizedContent
+	if err := parseJSON(resp.Content, &variations); err != nil {
+		s.logger.WarnContext(ctx, "failed to parse atomize response as JSON, returning raw",
+			"err", err,
+			"raw", resp.Content,
+		)
+		// Return a single catch-all variation if parsing fails
+		variations = []domain.AtomizedContent{
+			{
+				Platform:    "general",
+				ContentType: "post",
+				Title:       content.Title,
+				Body:        resp.Content,
+			},
+		}
+	}
+
+	return &domain.AtomizeResponse{
+		SourceTitle: content.Title,
+		Variations:  variations,
+	}, nil
 }
 
 // GetCreditBalance returns the AI credit balance for the given user.

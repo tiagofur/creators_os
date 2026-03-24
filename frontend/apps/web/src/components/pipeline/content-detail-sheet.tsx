@@ -158,7 +158,7 @@ export function ContentDetailSheet({ item, open, onClose }: ContentDetailSheetPr
             <Separator />
 
             {/* Stage checklist */}
-            <StageChecklist stage={item.pipeline_stage} />
+            <StageChecklist stage={item.pipeline_stage} contentItem={item} />
 
             <Separator />
 

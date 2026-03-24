@@ -35,6 +35,7 @@ type updateContentRequest struct {
 	PlatformTarget *domain.PlatformType `json:"platform_target"`
 	DueDate        *string              `json:"due_date"`
 	ScheduledAt    *string              `json:"scheduled_at"`
+	Metadata       map[string]any       `json:"metadata"`
 }
 
 type transitionStatusRequest struct {
@@ -154,7 +155,7 @@ func (h *ContentHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	content, err := h.contentSvc.Update(r.Context(), contentID, req.Title, req.Description, req.PlatformTarget, req.DueDate, req.ScheduledAt)
+	content, err := h.contentSvc.Update(r.Context(), contentID, req.Title, req.Description, req.PlatformTarget, req.DueDate, req.ScheduledAt, req.Metadata)
 	if err != nil {
 		Error(w, err)
 		return
