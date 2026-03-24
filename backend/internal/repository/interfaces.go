@@ -142,6 +142,7 @@ type AnalyticsRepository interface {
 	CreateGoal(ctx context.Context, goal *domain.AnalyticsGoal) (*domain.AnalyticsGoal, error)
 	UpdateGoal(ctx context.Context, goalID uuid.UUID, input domain.UpdateGoalInput) (*domain.AnalyticsGoal, error)
 	DeleteGoal(ctx context.Context, goalID uuid.UUID) error
+	GetBestPostingTimes(ctx context.Context, workspaceID uuid.UUID, platform string) (*domain.BestTimesResponse, error)
 }
 
 // GamificationRepository defines all persistence operations for gamification data.
@@ -172,6 +173,14 @@ type ContentTemplateRepository interface {
 	List(ctx context.Context, workspaceID uuid.UUID) ([]*domain.ContentTemplate, error)
 	Update(ctx context.Context, t *domain.ContentTemplate) (*domain.ContentTemplate, error)
 	Delete(ctx context.Context, id uuid.UUID) error
+}
+
+// ApprovalLinkRepository defines all persistence operations for approval links.
+type ApprovalLinkRepository interface {
+	Create(ctx context.Context, link *domain.ApprovalLink) (*domain.ApprovalLink, error)
+	GetByToken(ctx context.Context, token string) (*domain.ApprovalLink, error)
+	ListByContentID(ctx context.Context, contentID uuid.UUID) ([]*domain.ApprovalLink, error)
+	UpdateDecision(ctx context.Context, token string, status string, comment string) (*domain.ApprovalLink, error)
 }
 
 // SeriesRepository defines all persistence operations for series and episodes.

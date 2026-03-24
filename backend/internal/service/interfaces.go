@@ -82,6 +82,16 @@ type ContentService interface {
 	RemoveAssignment(ctx context.Context, contentID, userID uuid.UUID) error
 }
 
+// ContentTemplateService defines all content template management operations.
+type ContentTemplateService interface {
+	Create(ctx context.Context, workspaceID uuid.UUID, name string, description *string, contentType domain.ContentType, platformTarget *domain.PlatformType, defaultChecklist map[string]any, promptTemplate *string, metadata map[string]any) (*domain.ContentTemplate, error)
+	GetByID(ctx context.Context, id uuid.UUID) (*domain.ContentTemplate, error)
+	List(ctx context.Context, workspaceID uuid.UUID) ([]*domain.ContentTemplate, error)
+	Update(ctx context.Context, id uuid.UUID, name *string, description *string, contentType *domain.ContentType, platformTarget *domain.PlatformType, defaultChecklist map[string]any, promptTemplate *string, metadata map[string]any) (*domain.ContentTemplate, error)
+	Delete(ctx context.Context, id uuid.UUID) error
+	Instantiate(ctx context.Context, templateID, workspaceID, userID uuid.UUID, topic string, useAI bool) (*domain.Content, error)
+}
+
 // SeriesService defines all series management operations.
 type SeriesService interface {
 	Create(ctx context.Context, workspaceID, createdBy uuid.UUID, title string, description *string, platform *domain.PlatformType) (*domain.Series, error)
@@ -122,6 +132,7 @@ type AnalyticsService interface {
 	CreateGoal(ctx context.Context, workspaceID uuid.UUID, input domain.CreateGoalInput) (*domain.AnalyticsGoal, error)
 	UpdateGoal(ctx context.Context, goalID uuid.UUID, input domain.UpdateGoalInput) (*domain.AnalyticsGoal, error)
 	DeleteGoal(ctx context.Context, goalID uuid.UUID) error
+	GetBestPostingTimes(ctx context.Context, workspaceID uuid.UUID, platform string) (*domain.BestTimesResponse, error)
 }
 
 // GamificationService defines all gamification operations.
@@ -154,6 +165,14 @@ type BillingService interface {
 // SearchService defines the global full-text search operation.
 type SearchServiceInterface interface {
 	Search(ctx context.Context, workspaceID uuid.UUID, query string, types []domain.SearchResultType, limit, offset int) (*domain.SearchResponse, error)
+}
+
+// ApprovalService defines all approval link operations.
+type ApprovalService interface {
+	CreateApprovalLink(ctx context.Context, contentID, workspaceID uuid.UUID, reviewerName, reviewerEmail string, expiresIn time.Duration) (*domain.ApprovalLink, error)
+	GetApprovalByToken(ctx context.Context, token string) (*domain.ApprovalLink, *domain.Content, error)
+	SubmitDecision(ctx context.Context, token string, decision domain.ApprovalDecision) error
+	ListApprovalLinks(ctx context.Context, contentID uuid.UUID) ([]*domain.ApprovalLink, error)
 }
 
 // AuthService defines all authentication and session management operations.

@@ -115,3 +115,25 @@ type ContentFilter struct {
 type KanbanBoard struct {
 	Columns map[string][]*Content `json:"columns"`
 }
+
+// ApprovalLink represents a time-limited, token-authenticated public URL
+// that allows an external reviewer to approve or reject a content item.
+type ApprovalLink struct {
+	ID            uuid.UUID  `json:"id"`
+	ContentID     uuid.UUID  `json:"content_id"`
+	WorkspaceID   uuid.UUID  `json:"workspace_id"`
+	Token         string     `json:"token"`
+	ReviewerName  *string    `json:"reviewer_name"`
+	ReviewerEmail *string    `json:"reviewer_email"`
+	Status        string     `json:"status"` // "pending", "approved", "rejected"
+	Comment       *string    `json:"comment"`
+	ExpiresAt     time.Time  `json:"expires_at"`
+	DecidedAt     *time.Time `json:"decided_at,omitempty"`
+	CreatedAt     time.Time  `json:"created_at"`
+}
+
+// ApprovalDecision carries the reviewer's approve/reject decision.
+type ApprovalDecision struct {
+	Status  string `json:"status"`  // "approved" or "rejected"
+	Comment string `json:"comment"`
+}

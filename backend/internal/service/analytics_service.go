@@ -106,4 +106,8 @@ func (s *analyticsService) DeleteGoal(ctx context.Context, goalID uuid.UUID) err
 	return s.repo.DeleteGoal(ctx, goalID)
 }
 
+func (s *analyticsService) GetBestPostingTimes(ctx context.Context, workspaceID uuid.UUID, platform string) (*domain.BestTimesResponse, error) {
+	return s.repo.GetBestPostingTimes(ctx, workspaceID, platform)
+}
+
 var _ AnalyticsService = (*analyticsService)(nil)

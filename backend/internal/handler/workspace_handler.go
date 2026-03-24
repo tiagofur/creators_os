@@ -292,6 +292,45 @@ func (h *WorkspaceHandler) DeleteInvitation(w http.ResponseWriter, r *http.Reque
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// ---- Brand Kit Handlers ----
+
+// GetBrandKit GET /api/v1/workspaces/{workspaceId}/brand-kit
+func (h *WorkspaceHandler) GetBrandKit(w http.ResponseWriter, r *http.Request) {
+	member, ok := middleware.WorkspaceMemberFromContext(r.Context())
+	if !ok {
+		Error(w, domain.ErrUnauthorized)
+		return
+	}
+
+	kit, err := h.wsService.GetBrandKit(r.Context(), member.WorkspaceID)
+	if err != nil {
+		Error(w, err)
+		return
+	}
+	JSON(w, http.StatusOK, kit)
+}
+
+// UpdateBrandKit PUT /api/v1/workspaces/{workspaceId}/brand-kit
+func (h *WorkspaceHandler) UpdateBrandKit(w http.ResponseWriter, r *http.Request) {
+	member, ok := middleware.WorkspaceMemberFromContext(r.Context())
+	if !ok {
+		Error(w, domain.ErrUnauthorized)
+		return
+	}
+
+	var kit domain.BrandKit
+	if err := Decode(r, &kit); err != nil {
+		JSON(w, http.StatusBadRequest, domain.NewError("VALIDATION", "invalid request body", 400))
+		return
+	}
+
+	if err := h.wsService.UpdateBrandKit(r.Context(), member.WorkspaceID, &kit); err != nil {
+		Error(w, err)
+		return
+	}
+	JSON(w, http.StatusOK, kit)
+}
+
 // AcceptInvitation POST /api/v1/invitations/{token}/accept
 func (h *WorkspaceHandler) AcceptInvitation(w http.ResponseWriter, r *http.Request) {
 	claims, ok := middleware.UserClaimsFromContext(r.Context())

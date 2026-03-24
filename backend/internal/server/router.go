@@ -49,6 +49,7 @@ func NewRouter(
 	wsHandler *handler.WSHandler,
 	searchHandler *handler.SearchHandler,
 	auditHandler *handler.AuditHandler,
+	contentTemplateHandler *handler.ContentTemplateHandler,
 ) chi.Router {
 	r := chi.NewRouter()
 
@@ -120,6 +121,10 @@ func NewRouter(
 				// Delete workspace — owner only
 				r.With(middleware.RequireRole(domain.RoleOwner)).Delete("/", workspaceHandler.Delete)
 
+				// Brand kit
+				r.Get("/brand-kit", workspaceHandler.GetBrandKit)
+				r.With(middleware.RequireRole(domain.RoleAdmin)).Put("/brand-kit", workspaceHandler.UpdateBrandKit)
+
 				// Member management
 				r.Get("/members", workspaceHandler.ListMembers)
 				r.With(middleware.RequireRole(domain.RoleAdmin)).Put("/members/{userId}/role", workspaceHandler.UpdateMemberRole)
@@ -177,6 +182,20 @@ func NewRouter(
 								r.Delete("/", seriesHandler.DeleteEpisode)
 							})
 							r.Put("/schedule", seriesHandler.UpsertSchedule)
+						})
+					})
+				}
+
+				// Content Templates
+				if contentTemplateHandler != nil {
+					r.Route("/templates", func(r chi.Router) {
+						r.Post("/", contentTemplateHandler.Create)
+						r.Get("/", contentTemplateHandler.List)
+						r.Route("/{templateId}", func(r chi.Router) {
+							r.Get("/", contentTemplateHandler.Get)
+							r.Put("/", contentTemplateHandler.Update)
+							r.Delete("/", contentTemplateHandler.Delete)
+							r.Post("/instantiate", contentTemplateHandler.Instantiate)
 						})
 					})
 				}
