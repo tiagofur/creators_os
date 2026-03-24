@@ -6,6 +6,8 @@ import { Button, Avatar, AvatarImage, AvatarFallback } from '@ordo/ui';
 import { Upload, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { getInitials } from '@ordo/core';
+import { useUpload } from '@/hooks/use-upload';
+import { useWorkspaceStore } from '@ordo/stores';
 
 interface AvatarUploadProps {
   currentUrl?: string | null;
@@ -15,8 +17,9 @@ interface AvatarUploadProps {
 
 export function AvatarUpload({ currentUrl, name, onChange }: AvatarUploadProps) {
   const [preview, setPreview] = React.useState<string | null>(currentUrl ?? null);
-  const [uploading, setUploading] = React.useState(false);
   const fileRef = React.useRef<HTMLInputElement>(null);
+  const { upload, isUploading, progress } = useUpload();
+  const workspaceId = useWorkspaceStore((s) => s.activeWorkspace?.id) ?? '';
 
   async function handleFile(file: File) {
     if (!file.type.startsWith('image/')) {
@@ -28,32 +31,18 @@ export function AvatarUpload({ currentUrl, name, onChange }: AvatarUploadProps) 
     const objectUrl = URL.createObjectURL(file);
     setPreview(objectUrl);
 
-    setUploading(true);
     try {
-      // Request presigned URL from backend
-      const presignedRes = await fetch('/api/upload/avatar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fileName: file.name, contentType: file.type }),
+      const result = await upload(file, {
+        workspaceId,
+        maxFileSize: 5 * 1024 * 1024, // 5 MB for avatars
       });
-      if (!presignedRes.ok) throw new Error('Failed to get upload URL');
-      const { uploadUrl, publicUrl } = (await presignedRes.json()) as { uploadUrl: string; publicUrl: string };
-
-      // Upload directly to S3
-      const uploadRes = await fetch(uploadUrl, {
-        method: 'PUT',
-        headers: { 'Content-Type': file.type },
-        body: file,
-      });
-      if (!uploadRes.ok) throw new Error('Upload failed');
-
-      onChange(publicUrl);
+      onChange(result.objectKey);
       toast.success('Avatar updated.');
-    } catch {
-      toast.error('Failed to upload avatar. Please try again.');
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : 'Failed to upload avatar. Please try again.',
+      );
       setPreview(currentUrl ?? null);
-    } finally {
-      setUploading(false);
     }
   }
 
@@ -75,7 +64,7 @@ export function AvatarUpload({ currentUrl, name, onChange }: AvatarUploadProps) 
             type="button"
             variant="outline"
             size="sm"
-            loading={uploading}
+            loading={isUploading}
             onClick={() => fileRef.current?.click()}
             aria-label="Upload photo"
           >

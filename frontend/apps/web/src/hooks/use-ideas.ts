@@ -1,6 +1,7 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { apiClient } from '@/lib/api-client';
 import { queryKeys } from '@/lib/query-keys';
 import { IDEAS_CACHE } from '@/lib/query-config';
@@ -130,6 +131,57 @@ export function useChangeIdeaStatus() {
     onSettled: (_data, _err, { id }) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.ideas.detail(id) });
       queryClient.invalidateQueries({ queryKey: queryKeys.ideas.all() });
+    },
+  });
+}
+
+// POST /validate — request AI validation for an idea
+export function useRequestValidation(workspaceId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (ideaId: string) => ideasApi.requestValidation(workspaceId, ideaId),
+    onSuccess: (_data, ideaId) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.ideas.detail(ideaId) });
+      toast.success('Validation requested. Results will appear shortly.');
+    },
+    onError: () => {
+      toast.error('Failed to request validation. Please try again.');
+    },
+  });
+}
+
+// PUT /tags — set tags on an idea
+export function useSetIdeaTags(workspaceId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ ideaId, tags }: { ideaId: string; tags: string[] }) =>
+      ideasApi.setTags(workspaceId, ideaId, tags),
+    onSuccess: (updatedIdea) => {
+      queryClient.setQueryData<Idea>(queryKeys.ideas.detail(updatedIdea.id), updatedIdea);
+      queryClient.invalidateQueries({ queryKey: queryKeys.ideas.all() });
+      toast.success('Tags updated.');
+    },
+    onError: () => {
+      toast.error('Failed to update tags. Please try again.');
+    },
+  });
+}
+
+// POST /promote — promote idea to content
+export function usePromoteIdea(workspaceId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (ideaId: string) => ideasApi.promote(workspaceId, ideaId),
+    onSuccess: (_data, ideaId) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.ideas.detail(ideaId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.ideas.all() });
+      toast.success('Idea promoted to content successfully.');
+    },
+    onError: () => {
+      toast.error('Failed to promote idea. Please try again.');
     },
   });
 }

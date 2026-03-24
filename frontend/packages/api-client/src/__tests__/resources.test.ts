@@ -339,53 +339,53 @@ describe('createAnalyticsResource', () => {
 
   it('getPlatformMetrics calls correct URL', async () => {
     await analytics.getPlatformMetrics('ws-1', '30d');
-    expect(client.get).toHaveBeenCalledWith('/v1/workspaces/ws-1/analytics/platforms?period=30d');
+    expect(client.get).toHaveBeenCalledWith('/api/v1/workspaces/ws-1/analytics/overview?period=30d');
   });
 
   it('getConsistencyScore calls correct URL', async () => {
     await analytics.getConsistencyScore('ws-1');
-    expect(client.get).toHaveBeenCalledWith('/v1/workspaces/ws-1/analytics/consistency');
+    expect(client.get).toHaveBeenCalledWith('/api/v1/workspaces/ws-1/analytics/consistency');
   });
 
   it('getHeatmap calls correct URL', async () => {
     await analytics.getHeatmap('ws-1', 2024);
-    expect(client.get).toHaveBeenCalledWith('/v1/workspaces/ws-1/analytics/heatmap?year=2024');
+    expect(client.get).toHaveBeenCalledWith('/api/v1/workspaces/ws-1/analytics/heatmap?year=2024');
   });
 
   it('getPipelineVelocity calls correct URL', async () => {
     await analytics.getPipelineVelocity('ws-1');
-    expect(client.get).toHaveBeenCalledWith('/v1/workspaces/ws-1/analytics/velocity');
+    expect(client.get).toHaveBeenCalledWith('/api/v1/workspaces/ws-1/analytics/velocity');
   });
 
   it('getWeeklyReport calls correct URL', async () => {
     await analytics.getWeeklyReport('ws-1');
-    expect(client.get).toHaveBeenCalledWith('/v1/workspaces/ws-1/analytics/report/weekly');
+    expect(client.get).toHaveBeenCalledWith('/api/v1/workspaces/ws-1/analytics/reports/weekly');
   });
 
   it('getMonthlyReport calls correct URL', async () => {
     await analytics.getMonthlyReport('ws-1');
-    expect(client.get).toHaveBeenCalledWith('/v1/workspaces/ws-1/analytics/report/monthly');
+    expect(client.get).toHaveBeenCalledWith('/api/v1/workspaces/ws-1/analytics/reports/monthly');
   });
 
   it('listGoals calls correct URL', async () => {
     await analytics.listGoals('ws-1');
-    expect(client.get).toHaveBeenCalledWith('/v1/workspaces/ws-1/analytics/goals');
+    expect(client.get).toHaveBeenCalledWith('/api/v1/workspaces/ws-1/analytics/goals');
   });
 
   it('createGoal calls POST with body', async () => {
     const body = { metric: 'views', targetValue: 1000 };
     await analytics.createGoal('ws-1', body as any);
-    expect(client.post).toHaveBeenCalledWith('/v1/workspaces/ws-1/analytics/goals', body);
+    expect(client.post).toHaveBeenCalledWith('/api/v1/workspaces/ws-1/analytics/goals', body);
   });
 
   it('updateGoal calls PATCH with body', async () => {
     await analytics.updateGoal('ws-1', 'g-1', { targetValue: 2000 } as any);
-    expect(client.patch).toHaveBeenCalledWith('/v1/workspaces/ws-1/analytics/goals/g-1', { targetValue: 2000 });
+    expect(client.patch).toHaveBeenCalledWith('/api/v1/workspaces/ws-1/analytics/goals/g-1', { targetValue: 2000 });
   });
 
   it('deleteGoal calls DELETE', async () => {
     await analytics.deleteGoal('ws-1', 'g-1');
-    expect(client.delete).toHaveBeenCalledWith('/v1/workspaces/ws-1/analytics/goals/g-1');
+    expect(client.delete).toHaveBeenCalledWith('/api/v1/workspaces/ws-1/analytics/goals/g-1');
   });
 });
 
