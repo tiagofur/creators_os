@@ -4,10 +4,14 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 import { queryKeys } from '@/lib/query-keys';
 import { CONTENT_CACHE } from '@/lib/query-config';
-import type { ContentItem, PipelineStage, PaginatedResponse } from '@ordo/types';
+import { createContentResource } from '@ordo/api-client';
+import type { ContentItem, PaginatedResponse } from '@ordo/types';
+
+const contentApi = createContentResource(apiClient);
 
 export interface ContentFilters {
-  pipeline_stage?: PipelineStage;
+  status?: string;
+  pipeline_stage?: string;
   platform?: string;
   search?: string;
   assignee_id?: string;
@@ -20,19 +24,18 @@ export function useContentItems(workspaceId: string, filters?: ContentFilters) {
   return useQuery({
     queryKey: queryKeys.content.list(filters as Record<string, unknown>),
     queryFn: () => {
-      const params = new URLSearchParams();
-      params.set('workspace_id', workspaceId);
+      // Map legacy filter names to what the API resource expects
+      const apiFilters: Record<string, string | number | undefined> = {};
       if (filters) {
-        if (filters.pipeline_stage) params.set('pipeline_stage', filters.pipeline_stage);
-        if (filters.platform) params.set('platform', filters.platform);
-        if (filters.search) params.set('search', filters.search);
-        if (filters.assignee_id) params.set('assignee_id', filters.assignee_id);
-        if (filters.page) params.set('page', String(filters.page));
-        if (filters.limit) params.set('per_page', String(filters.limit));
+        // Prefer status over deprecated pipeline_stage
+        if (filters.status) apiFilters.status = filters.status;
+        else if (filters.pipeline_stage) apiFilters.status = filters.pipeline_stage;
+        if (filters.platform) apiFilters.platform = filters.platform;
+        if (filters.search) apiFilters.search = filters.search;
+        if (filters.page) apiFilters.page = filters.page;
+        if (filters.limit) apiFilters.per_page = filters.limit;
       }
-      return apiClient.get<PaginatedResponse<ContentItem>>(
-        `/v1/contents?${params.toString()}`,
-      );
+      return contentApi.list(workspaceId, apiFilters as Parameters<typeof contentApi.list>[1]);
     },
     enabled: Boolean(workspaceId),
     ...CONTENT_CACHE,
@@ -43,7 +46,7 @@ export function useContentItems(workspaceId: string, filters?: ContentFilters) {
 export function useContentItem(id: string) {
   return useQuery({
     queryKey: queryKeys.content.detail(id),
-    queryFn: () => apiClient.get<ContentItem>(`/v1/contents/${id}`),
+    queryFn: () => apiClient.get<ContentItem>(`/api/v1/contents/${id}`),
     enabled: Boolean(id),
     ...CONTENT_CACHE,
   });
@@ -57,13 +60,13 @@ export function useCreateContent() {
     mutationFn: (body: {
       title: string;
       workspace_id: string;
-      pipeline_stage?: PipelineStage;
+      pipeline_stage?: string;
       platform?: string;
       idea_id?: string;
       body?: string;
       tags?: string[];
       scheduled_at?: string;
-    }) => apiClient.post<ContentItem>('/v1/contents', body),
+    }) => apiClient.post<ContentItem>(`/api/v1/workspaces/${body.workspace_id}/contents`, body),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.content.all() });
     },
@@ -76,7 +79,7 @@ export function useUpdateContent() {
 
   return useMutation({
     mutationFn: ({ id, ...body }: Partial<ContentItem> & { id: string }) =>
-      apiClient.patch<ContentItem>(`/v1/contents/${id}`, body),
+      apiClient.patch<ContentItem>(`/api/v1/contents/${id}`, body),
     onMutate: async ({ id, ...body }) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.content.detail(id) });
       const previous = queryClient.getQueryData<ContentItem>(queryKeys.content.detail(id));
@@ -105,8 +108,8 @@ export function useMoveStage() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, stage }: { id: string; stage: PipelineStage }) =>
-      apiClient.patch<ContentItem>(`/v1/contents/${id}`, { pipeline_stage: stage }),
+    mutationFn: ({ id, stage }: { id: string; stage: string }) =>
+      apiClient.patch<ContentItem>(`/api/v1/contents/${id}`, { pipeline_stage: stage }),
     onMutate: async ({ id, stage }) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.content.detail(id) });
       const previous = queryClient.getQueryData<ContentItem>(queryKeys.content.detail(id));
@@ -116,7 +119,7 @@ export function useMoveStage() {
       if (previous) {
         queryClient.setQueryData<ContentItem>(queryKeys.content.detail(id), {
           ...previous,
-          pipeline_stage: stage,
+          pipeline_stage: stage as ContentItem['pipeline_stage'],
         });
       }
       return { previous, previousList };
@@ -141,7 +144,7 @@ export function useDeleteContent() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => apiClient.delete<void>(`/v1/contents/${id}`),
+    mutationFn: (id: string) => apiClient.delete<void>(`/api/v1/contents/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.content.all() });
     },

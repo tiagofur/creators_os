@@ -4,7 +4,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 import { queryKeys } from '@/lib/query-keys';
 import { IDEAS_CACHE } from '@/lib/query-config';
+import { createIdeasResource } from '@ordo/api-client';
 import type { Idea, IdeaStatus, PaginatedResponse } from '@ordo/types';
+
+const ideasApi = createIdeasResource(apiClient);
 
 export interface IdeaFilters {
   status?: IdeaStatus;
@@ -20,21 +23,16 @@ export function useIdeas(workspaceId: string, filters?: IdeaFilters) {
   return useQuery({
     queryKey: queryKeys.ideas.list(filters as Record<string, unknown>),
     queryFn: () => {
-      const params = new URLSearchParams();
-      params.set('workspace_id', workspaceId);
+      const apiFilters: Record<string, unknown> = {};
       if (filters) {
-        if (filters.status) params.set('status', filters.status);
-        if (filters.stage) params.set('stage', filters.stage);
-        if (filters.search) params.set('search', filters.search);
-        if (filters.page) params.set('page', String(filters.page));
-        if (filters.limit) params.set('per_page', String(filters.limit));
-        if (filters.tags?.length) {
-          filters.tags.forEach((tag) => params.append('tags', tag));
-        }
+        if (filters.status) apiFilters.status = filters.status;
+        if (filters.stage) apiFilters.stage = filters.stage;
+        if (filters.search) apiFilters.search = filters.search;
+        if (filters.page) apiFilters.page = filters.page;
+        if (filters.limit) apiFilters.per_page = filters.limit;
+        if (filters.tags?.length) apiFilters.tags = filters.tags;
       }
-      return apiClient.get<PaginatedResponse<Idea>>(
-        `/v1/ideas?${params.toString()}`,
-      );
+      return ideasApi.list(workspaceId, apiFilters as Parameters<typeof ideasApi.list>[1]);
     },
     enabled: Boolean(workspaceId),
     ...IDEAS_CACHE,
@@ -45,7 +43,7 @@ export function useIdeas(workspaceId: string, filters?: IdeaFilters) {
 export function useIdea(id: string) {
   return useQuery({
     queryKey: queryKeys.ideas.detail(id),
-    queryFn: () => apiClient.get<Idea>(`/v1/ideas/${id}`),
+    queryFn: () => apiClient.get<Idea>(`/api/v1/ideas/${id}`),
     enabled: Boolean(id),
     ...IDEAS_CACHE,
   });
@@ -57,7 +55,7 @@ export function useCreateIdea() {
 
   return useMutation({
     mutationFn: (body: { title: string; description?: string; tags?: string[]; workspace_id: string }) =>
-      apiClient.post<Idea>('/v1/ideas', body),
+      apiClient.post<Idea>(`/api/v1/workspaces/${body.workspace_id}/ideas`, body),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.ideas.all() });
     },
@@ -70,7 +68,7 @@ export function useUpdateIdea() {
 
   return useMutation({
     mutationFn: ({ id, ...body }: Partial<Idea> & { id: string }) =>
-      apiClient.patch<Idea>(`/v1/ideas/${id}`, body),
+      apiClient.patch<Idea>(`/api/v1/ideas/${id}`, body),
     onMutate: async ({ id, ...body }) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.ideas.detail(id) });
       const previous = queryClient.getQueryData<Idea>(queryKeys.ideas.detail(id));
@@ -99,7 +97,7 @@ export function useDeleteIdea() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => apiClient.delete<void>(`/v1/ideas/${id}`),
+    mutationFn: (id: string) => apiClient.delete<void>(`/api/v1/ideas/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.ideas.all() });
     },
@@ -112,7 +110,7 @@ export function useChangeIdeaStatus() {
 
   return useMutation({
     mutationFn: ({ id, status }: { id: string; status: IdeaStatus }) =>
-      apiClient.patch<Idea>(`/v1/ideas/${id}`, { status }),
+      apiClient.patch<Idea>(`/api/v1/ideas/${id}`, { status }),
     onMutate: async ({ id, status }) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.ideas.detail(id) });
       const previous = queryClient.getQueryData<Idea>(queryKeys.ideas.detail(id));

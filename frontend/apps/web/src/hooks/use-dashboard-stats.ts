@@ -1,19 +1,58 @@
 'use client';
 
-import { useIdeas } from '@/hooks/use-ideas';
-import { useContentItems } from '@/hooks/use-content';
-import { useTeamMembers } from '@/hooks/use-team';
-import { useConsistencyScore } from '@/hooks/use-analytics';
+import { useQuery } from '@tanstack/react-query';
+import { apiClient } from '@/lib/api-client';
+import { queryKeys } from '@/lib/query-keys';
+import { IDEAS_CACHE, CONTENT_CACHE, WORKSPACE_CACHE, ANALYTICS_CACHE } from '@/lib/query-config';
+import {
+  createIdeasResource,
+  createContentResource,
+  createAnalyticsResource,
+} from '@ordo/api-client';
+import type { PaginatedResponse, Idea, ContentItem, WorkspaceMember, ConsistencyScore } from '@ordo/types';
+
+const ideasApi = createIdeasResource(apiClient);
+const contentApi = createContentResource(apiClient);
+const analyticsApi = createAnalyticsResource(apiClient);
 
 export function useDashboardStats(workspaceId: string) {
-  const ideas = useIdeas(workspaceId, { limit: 1 });
-  const allContent = useContentItems(workspaceId, { limit: 1 });
-  const publishedContent = useContentItems(workspaceId, {
-    pipeline_stage: 'publishing' as const,
-    limit: 1,
+  const ideas = useQuery({
+    queryKey: queryKeys.ideas.list({ _dashboard: true, per_page: 1 }),
+    queryFn: () => ideasApi.list(workspaceId, { per_page: 1 }),
+    enabled: Boolean(workspaceId),
+    ...IDEAS_CACHE,
   });
-  const teamMembers = useTeamMembers(workspaceId);
-  const consistency = useConsistencyScore(workspaceId);
+
+  const allContent = useQuery({
+    queryKey: queryKeys.content.list({ _dashboard: true, per_page: 1 }),
+    queryFn: () => contentApi.list(workspaceId, { per_page: 1 }),
+    enabled: Boolean(workspaceId),
+    ...CONTENT_CACHE,
+  });
+
+  const publishedContent = useQuery({
+    queryKey: queryKeys.content.list({ _dashboard: true, status: 'published', per_page: 1 }),
+    queryFn: () => contentApi.list(workspaceId, { status: 'published', per_page: 1 }),
+    enabled: Boolean(workspaceId),
+    ...CONTENT_CACHE,
+  });
+
+  const teamMembers = useQuery({
+    queryKey: queryKeys.workspaces.members(workspaceId),
+    queryFn: () =>
+      apiClient.get<WorkspaceMember[]>(
+        `/api/v1/workspaces/${workspaceId}/members`,
+      ),
+    enabled: Boolean(workspaceId),
+    ...WORKSPACE_CACHE,
+  });
+
+  const consistency = useQuery({
+    queryKey: queryKeys.analytics.consistency(workspaceId),
+    queryFn: () => analyticsApi.getConsistencyScore(workspaceId),
+    enabled: Boolean(workspaceId),
+    ...ANALYTICS_CACHE,
+  });
 
   const isLoading =
     ideas.isLoading ||

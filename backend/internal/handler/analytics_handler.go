@@ -237,7 +237,7 @@ func (h *AnalyticsHandler) CreateGoal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var input domain.CreateGoalInput
-	if err := DecodeJSON(r, &input); err != nil {
+	if err := Decode(r, &input); err != nil {
 		JSON(w, http.StatusBadRequest, domain.NewError("VALIDATION", err.Error(), 400))
 		return
 	}
@@ -266,7 +266,7 @@ func (h *AnalyticsHandler) UpdateGoal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var input domain.UpdateGoalInput
-	if err := DecodeJSON(r, &input); err != nil {
+	if err := Decode(r, &input); err != nil {
 		JSON(w, http.StatusBadRequest, domain.NewError("VALIDATION", err.Error(), 400))
 		return
 	}
