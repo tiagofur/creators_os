@@ -6,14 +6,16 @@ import { useContentItems } from '@/hooks/use-content';
 import { useWorkspaceStore } from '@ordo/stores';
 import type { ContentItem } from '@ordo/types';
 
-const statusColors: Record<ContentItem['status'], string> = {
-  draft: 'secondary',
+const statusColors: Record<string, string> = {
+  idea: 'secondary',
+  scripting: 'secondary',
+  recording: 'default',
+  editing: 'default',
   review: 'warning',
-  approved: 'success',
   scheduled: 'default',
   published: 'success',
   archived: 'secondary',
-} as Record<string, string>;
+};
 
 export function RecentActivity() {
   const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspace?.id) ?? '';

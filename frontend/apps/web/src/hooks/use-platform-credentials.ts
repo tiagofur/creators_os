@@ -24,7 +24,7 @@ export function usePlatformCredentials(workspaceId: string) {
     queryKey: credentialKeys.list(workspaceId),
     queryFn: () =>
       apiClient.get<PlatformCredential[]>(
-        `/v1/workspaces/${workspaceId}/platform-credentials`,
+        `/api/v1/workspaces/${workspaceId}/platform-credentials`,
       ),
     enabled: Boolean(workspaceId),
     ...PLATFORM_CREDENTIALS_CACHE,
@@ -43,7 +43,7 @@ export function useDisconnectPlatform() {
       platform: Platform;
     }) =>
       apiClient.delete<void>(
-        `/v1/workspaces/${workspaceId}/platform-credentials/${platform}`,
+        `/api/v1/workspaces/${workspaceId}/platform-credentials/${platform}`,
       ),
     onSuccess: (_data, { workspaceId }) => {
       queryClient.invalidateQueries({

@@ -124,3 +124,179 @@ func (h *AnalyticsHandler) TriggerSync(w http.ResponseWriter, r *http.Request) {
 	}
 	JSON(w, http.StatusAccepted, map[string]string{"message": "sync queued"})
 }
+
+// GET /api/v1/workspaces/{workspaceId}/analytics/consistency
+func (h *AnalyticsHandler) GetConsistencyScore(w http.ResponseWriter, r *http.Request) {
+	member, ok := middleware.WorkspaceMemberFromContext(r.Context())
+	if !ok {
+		Error(w, domain.ErrUnauthorized)
+		return
+	}
+
+	score, err := h.svc.GetConsistencyScore(r.Context(), member.WorkspaceID)
+	if err != nil {
+		Error(w, err)
+		return
+	}
+	JSON(w, http.StatusOK, score)
+}
+
+// GET /api/v1/workspaces/{workspaceId}/analytics/heatmap?year=2026
+func (h *AnalyticsHandler) GetHeatmap(w http.ResponseWriter, r *http.Request) {
+	member, ok := middleware.WorkspaceMemberFromContext(r.Context())
+	if !ok {
+		Error(w, domain.ErrUnauthorized)
+		return
+	}
+
+	year := time.Now().Year()
+	if yearStr := r.URL.Query().Get("year"); yearStr != "" {
+		if n, err := strconv.Atoi(yearStr); err == nil && n > 2000 && n < 3000 {
+			year = n
+		}
+	}
+
+	heatmap, err := h.svc.GetHeatmap(r.Context(), member.WorkspaceID, year)
+	if err != nil {
+		Error(w, err)
+		return
+	}
+	JSON(w, http.StatusOK, heatmap)
+}
+
+// GET /api/v1/workspaces/{workspaceId}/analytics/velocity
+func (h *AnalyticsHandler) GetPipelineVelocity(w http.ResponseWriter, r *http.Request) {
+	member, ok := middleware.WorkspaceMemberFromContext(r.Context())
+	if !ok {
+		Error(w, domain.ErrUnauthorized)
+		return
+	}
+
+	velocity, err := h.svc.GetPipelineVelocity(r.Context(), member.WorkspaceID)
+	if err != nil {
+		Error(w, err)
+		return
+	}
+	JSON(w, http.StatusOK, velocity)
+}
+
+// GET /api/v1/workspaces/{workspaceId}/analytics/reports/weekly
+func (h *AnalyticsHandler) GetWeeklyReport(w http.ResponseWriter, r *http.Request) {
+	member, ok := middleware.WorkspaceMemberFromContext(r.Context())
+	if !ok {
+		Error(w, domain.ErrUnauthorized)
+		return
+	}
+
+	report, err := h.svc.GetWeeklyReport(r.Context(), member.WorkspaceID)
+	if err != nil {
+		Error(w, err)
+		return
+	}
+	JSON(w, http.StatusOK, report)
+}
+
+// GET /api/v1/workspaces/{workspaceId}/analytics/reports/monthly
+func (h *AnalyticsHandler) GetMonthlyReport(w http.ResponseWriter, r *http.Request) {
+	member, ok := middleware.WorkspaceMemberFromContext(r.Context())
+	if !ok {
+		Error(w, domain.ErrUnauthorized)
+		return
+	}
+
+	report, err := h.svc.GetMonthlyReport(r.Context(), member.WorkspaceID)
+	if err != nil {
+		Error(w, err)
+		return
+	}
+	JSON(w, http.StatusOK, report)
+}
+
+// GET /api/v1/workspaces/{workspaceId}/analytics/goals
+func (h *AnalyticsHandler) ListGoals(w http.ResponseWriter, r *http.Request) {
+	member, ok := middleware.WorkspaceMemberFromContext(r.Context())
+	if !ok {
+		Error(w, domain.ErrUnauthorized)
+		return
+	}
+
+	goals, err := h.svc.ListGoals(r.Context(), member.WorkspaceID)
+	if err != nil {
+		Error(w, err)
+		return
+	}
+	JSON(w, http.StatusOK, goals)
+}
+
+// POST /api/v1/workspaces/{workspaceId}/analytics/goals
+func (h *AnalyticsHandler) CreateGoal(w http.ResponseWriter, r *http.Request) {
+	member, ok := middleware.WorkspaceMemberFromContext(r.Context())
+	if !ok {
+		Error(w, domain.ErrUnauthorized)
+		return
+	}
+
+	var input domain.CreateGoalInput
+	if err := Decode(r, &input); err != nil {
+		JSON(w, http.StatusBadRequest, domain.NewError("VALIDATION", err.Error(), 400))
+		return
+	}
+
+	goal, err := h.svc.CreateGoal(r.Context(), member.WorkspaceID, input)
+	if err != nil {
+		Error(w, err)
+		return
+	}
+	JSON(w, http.StatusCreated, goal)
+}
+
+// PATCH /api/v1/workspaces/{workspaceId}/analytics/goals/{goalId}
+func (h *AnalyticsHandler) UpdateGoal(w http.ResponseWriter, r *http.Request) {
+	_, ok := middleware.WorkspaceMemberFromContext(r.Context())
+	if !ok {
+		Error(w, domain.ErrUnauthorized)
+		return
+	}
+
+	goalIDStr := chi.URLParam(r, "goalId")
+	goalID, err := uuid.Parse(goalIDStr)
+	if err != nil {
+		JSON(w, http.StatusBadRequest, domain.NewError("VALIDATION", "invalid goalId", 400))
+		return
+	}
+
+	var input domain.UpdateGoalInput
+	if err := Decode(r, &input); err != nil {
+		JSON(w, http.StatusBadRequest, domain.NewError("VALIDATION", err.Error(), 400))
+		return
+	}
+
+	goal, err := h.svc.UpdateGoal(r.Context(), goalID, input)
+	if err != nil {
+		Error(w, err)
+		return
+	}
+	JSON(w, http.StatusOK, goal)
+}
+
+// DELETE /api/v1/workspaces/{workspaceId}/analytics/goals/{goalId}
+func (h *AnalyticsHandler) DeleteGoal(w http.ResponseWriter, r *http.Request) {
+	_, ok := middleware.WorkspaceMemberFromContext(r.Context())
+	if !ok {
+		Error(w, domain.ErrUnauthorized)
+		return
+	}
+
+	goalIDStr := chi.URLParam(r, "goalId")
+	goalID, err := uuid.Parse(goalIDStr)
+	if err != nil {
+		JSON(w, http.StatusBadRequest, domain.NewError("VALIDATION", "invalid goalId", 400))
+		return
+	}
+
+	if err := h.svc.DeleteGoal(r.Context(), goalID); err != nil {
+		Error(w, err)
+		return
+	}
+	JSON(w, http.StatusNoContent, nil)
+}

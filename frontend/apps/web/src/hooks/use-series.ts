@@ -11,7 +11,7 @@ export function useSeries(workspaceId: string) {
   return useQuery({
     queryKey: queryKeys.series.list(),
     queryFn: () =>
-      apiClient.get<Series[]>(`/v1/series?workspace_id=${workspaceId}`),
+      apiClient.get<Series[]>(`/api/v1/series?workspace_id=${workspaceId}`),
     enabled: Boolean(workspaceId),
     ...SERIES_CACHE,
   });
@@ -21,7 +21,7 @@ export function useSeries(workspaceId: string) {
 export function useSerie(id: string) {
   return useQuery({
     queryKey: queryKeys.series.detail(id),
-    queryFn: () => apiClient.get<Series>(`/v1/series/${id}`),
+    queryFn: () => apiClient.get<Series>(`/api/v1/series/${id}`),
     enabled: Boolean(id),
     ...SERIES_CACHE,
   });
@@ -37,7 +37,7 @@ export function useCreateSeries() {
       workspace_id: string;
       description?: string;
       cover_url?: string;
-    }) => apiClient.post<Series>('/v1/series', body),
+    }) => apiClient.post<Series>('/api/v1/series', body),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.series.all() });
     },
@@ -50,7 +50,7 @@ export function useUpdateSeries() {
 
   return useMutation({
     mutationFn: ({ id, ...body }: Partial<Series> & { id: string }) =>
-      apiClient.patch<Series>(`/v1/series/${id}`, body),
+      apiClient.put<Series>(`/api/v1/series/${id}`, body),
     onSuccess: (_data, { id }) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.series.detail(id) });
       queryClient.invalidateQueries({ queryKey: queryKeys.series.all() });
@@ -63,7 +63,7 @@ export function useDeleteSeries() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => apiClient.delete<void>(`/v1/series/${id}`),
+    mutationFn: (id: string) => apiClient.delete<void>(`/api/v1/series/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.series.all() });
     },

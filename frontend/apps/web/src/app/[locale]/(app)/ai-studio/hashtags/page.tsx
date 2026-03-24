@@ -15,7 +15,7 @@ export default function HashtagsPage() {
 
   const { mutate, isPending } = useMutation({
     mutationFn: (payload: HashtagRequest) =>
-      apiClient.post<HashtagResponse>('/v1/ai/hashtags', payload),
+      apiClient.post<HashtagResponse>('/api/v1/ai/hashtags', payload),
     onSuccess: (data) => {
       trackEvent('ai_credit_used', { tool: 'hashtags', creditsUsed: 1 });
       setResult(data);

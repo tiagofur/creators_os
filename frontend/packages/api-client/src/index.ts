@@ -12,5 +12,10 @@ export {
   createAnalyticsResource,
   createGamificationResource,
   createSponsorshipsResource,
+  createSeriesResource,
+  createPublishingResource,
+  createRemixResource,
+  createUploadsResource,
+  createAuditLogsResource,
 } from './resources/index';
-export type { IdeaFilters, ContentFilters, DealFilters } from './resources/index';
+export type { IdeaFilters, ContentFilters, CalendarFilters, AuditLogFilters } from './resources/index';

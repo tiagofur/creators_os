@@ -8,19 +8,19 @@ export function createNotificationsResource(client: OrdoApiClient) {
       if (params?.unread !== undefined) search.set('unread', String(params.unread));
       if (params?.page !== undefined) search.set('page', String(params.page));
       const query = search.toString();
-      return client.get<AppNotification[]>(`/v1/notifications${query ? `?${query}` : ''}`);
+      return client.get<AppNotification[]>(`/api/v1/notifications${query ? `?${query}` : ''}`);
     },
 
     getUnreadCount(): Promise<{ count: number }> {
-      return client.get<{ count: number }>('/v1/notifications/count');
+      return client.get<{ count: number }>('/api/v1/notifications/count');
     },
 
     markAsRead(id: string): Promise<void> {
-      return client.patch<void>(`/v1/notifications/${id}`, { read: true });
+      return client.patch<void>(`/api/v1/notifications/${id}`, { read: true });
     },
 
     markAllAsRead(): Promise<void> {
-      return client.post<void>('/v1/notifications/mark-all-read');
+      return client.post<void>('/api/v1/notifications/mark-all-read');
     },
   };
 }

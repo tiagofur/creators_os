@@ -25,7 +25,7 @@ export function ChatInterface() {
 
   const { data: conversations } = useQuery<AiConversation[]>({
     queryKey: queryKeys.ai.conversations(),
-    queryFn: () => apiClient.get<AiConversation[]>('/v1/ai/conversations'),
+    queryFn: () => apiClient.get<AiConversation[]>('/api/v1/ai/conversations'),
     staleTime: 30_000,
   });
 

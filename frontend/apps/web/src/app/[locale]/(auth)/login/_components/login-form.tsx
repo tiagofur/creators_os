@@ -38,10 +38,10 @@ export function LoginForm() {
 
   async function onSubmit(data: LoginInput) {
     try {
-      const tokens = await apiClient.post<AuthTokens>('/v1/auth/login', data);
+      const tokens = await apiClient.post<AuthTokens>('/api/v1/auth/login', data);
       setAccessToken(tokens.access_token);
 
-      const user = await apiClient.get('/v1/auth/me');
+      const user = await apiClient.get('/api/v1/users/me');
       setUser(user as Parameters<typeof setUser>[0]);
 
       router.push(`/${locale}/dashboard`);

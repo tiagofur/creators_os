@@ -37,7 +37,7 @@ export function createApiClient(config: ApiClientConfig) {
 
     refreshPromise = (async () => {
       try {
-        const response = await fetch('/api/auth/refresh', {
+        const response = await fetch('/api/v1/auth/refresh', {
           method: 'POST',
           credentials: 'include',
         });

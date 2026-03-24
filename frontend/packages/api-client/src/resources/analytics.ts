@@ -11,65 +11,96 @@ import type {
 
 export function createAnalyticsResource(client: OrdoApiClient) {
   return {
+    getOverview(workspaceId: string): Promise<PlatformMetrics[]> {
+      return client.get<PlatformMetrics[]>(
+        `/api/v1/workspaces/${workspaceId}/analytics/overview`,
+      );
+    },
+
+    getContentAnalytics(workspaceId: string, contentId: string): Promise<ConsistencyScore> {
+      return client.get<ConsistencyScore>(
+        `/api/v1/workspaces/${workspaceId}/analytics/content/${contentId}`,
+      );
+    },
+
+    getPlatformAnalytics(workspaceId: string, platform: string): Promise<PlatformMetrics> {
+      return client.get<PlatformMetrics>(
+        `/api/v1/workspaces/${workspaceId}/analytics/platform/${platform}`,
+      );
+    },
+
     getPlatformMetrics(workspaceId: string, period: string): Promise<PlatformMetrics[]> {
       return client.get<PlatformMetrics[]>(
-        `/v1/workspaces/${workspaceId}/analytics/platforms?period=${period}`,
+        `/api/v1/workspaces/${workspaceId}/analytics/overview?period=${encodeURIComponent(period)}`,
       );
     },
 
     getConsistencyScore(workspaceId: string): Promise<ConsistencyScore> {
       return client.get<ConsistencyScore>(
-        `/v1/workspaces/${workspaceId}/analytics/consistency`,
+        `/api/v1/workspaces/${workspaceId}/analytics/consistency`,
       );
     },
 
     getHeatmap(workspaceId: string, year: number): Promise<HeatmapDay[]> {
       return client.get<HeatmapDay[]>(
-        `/v1/workspaces/${workspaceId}/analytics/heatmap?year=${year}`,
+        `/api/v1/workspaces/${workspaceId}/analytics/heatmap?year=${year}`,
       );
     },
 
     getPipelineVelocity(workspaceId: string): Promise<PipelineVelocity[]> {
       return client.get<PipelineVelocity[]>(
-        `/v1/workspaces/${workspaceId}/analytics/velocity`,
+        `/api/v1/workspaces/${workspaceId}/analytics/velocity`,
       );
     },
 
     getWeeklyReport(workspaceId: string): Promise<WeeklyReport> {
       return client.get<WeeklyReport>(
-        `/v1/workspaces/${workspaceId}/analytics/report/weekly`,
+        `/api/v1/workspaces/${workspaceId}/analytics/reports/weekly`,
       );
     },
 
     getMonthlyReport(workspaceId: string): Promise<MonthlyReport> {
       return client.get<MonthlyReport>(
-        `/v1/workspaces/${workspaceId}/analytics/report/monthly`,
+        `/api/v1/workspaces/${workspaceId}/analytics/reports/monthly`,
       );
     },
 
     listGoals(workspaceId: string): Promise<AnalyticsGoal[]> {
       return client.get<AnalyticsGoal[]>(
-        `/v1/workspaces/${workspaceId}/analytics/goals`,
+        `/api/v1/workspaces/${workspaceId}/analytics/goals`,
       );
     },
 
-    createGoal(workspaceId: string, body: Omit<AnalyticsGoal, 'id' | 'workspaceId' | 'currentValue' | 'status' | 'createdAt'>): Promise<AnalyticsGoal> {
+    createGoal(
+      workspaceId: string,
+      body: Omit<AnalyticsGoal, 'id' | 'workspaceId' | 'currentValue' | 'status' | 'createdAt'>,
+    ): Promise<AnalyticsGoal> {
       return client.post<AnalyticsGoal>(
-        `/v1/workspaces/${workspaceId}/analytics/goals`,
+        `/api/v1/workspaces/${workspaceId}/analytics/goals`,
         body,
       );
     },
 
-    updateGoal(workspaceId: string, goalId: string, body: Partial<AnalyticsGoal>): Promise<AnalyticsGoal> {
+    updateGoal(
+      workspaceId: string,
+      goalId: string,
+      body: Partial<Pick<AnalyticsGoal, 'title' | 'targetValue' | 'deadline' | 'status'>>,
+    ): Promise<AnalyticsGoal> {
       return client.patch<AnalyticsGoal>(
-        `/v1/workspaces/${workspaceId}/analytics/goals/${goalId}`,
+        `/api/v1/workspaces/${workspaceId}/analytics/goals/${goalId}`,
         body,
       );
     },
 
     deleteGoal(workspaceId: string, goalId: string): Promise<void> {
       return client.delete<void>(
-        `/v1/workspaces/${workspaceId}/analytics/goals/${goalId}`,
+        `/api/v1/workspaces/${workspaceId}/analytics/goals/${goalId}`,
+      );
+    },
+
+    triggerSync(workspaceId: string): Promise<void> {
+      return client.post<void>(
+        `/api/v1/workspaces/${workspaceId}/analytics/sync`,
       );
     },
   };

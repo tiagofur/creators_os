@@ -18,6 +18,7 @@ import {
   useToast,
 } from '@ordo/ui';
 import { useChangeIdeaStatus, useDeleteIdea } from '@/hooks/use-ideas';
+import { useWorkspaceStore } from '@ordo/stores';
 import type { Idea } from '@ordo/types';
 
 interface GraveyardListProps {
@@ -27,8 +28,9 @@ interface GraveyardListProps {
 
 export function GraveyardList({ ideas, isLoading }: GraveyardListProps) {
   const [deleteTarget, setDeleteTarget] = React.useState<string | null>(null);
-  const { mutate: changeStatus } = useChangeIdeaStatus();
-  const { mutateAsync: deleteIdea, isPending: isDeleting } = useDeleteIdea();
+  const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspace?.id) ?? '';
+  const { mutate: changeStatus } = useChangeIdeaStatus(activeWorkspaceId);
+  const { mutateAsync: deleteIdea, isPending: isDeleting } = useDeleteIdea(activeWorkspaceId);
   const { toast } = useToast();
 
   const handleResurrect = (id: string) => {

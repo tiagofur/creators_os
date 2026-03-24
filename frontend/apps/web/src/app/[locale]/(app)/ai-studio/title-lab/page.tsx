@@ -18,7 +18,7 @@ export default function TitleLabPage() {
 
   const { mutate, isPending } = useMutation({
     mutationFn: (payload: TitleLabRequest) =>
-      apiClient.post<TitleLabResponse>('/v1/ai/title-lab', payload),
+      apiClient.post<TitleLabResponse>('/api/v1/ai/title-lab', payload),
     onSuccess: (data) => {
       trackEvent('ai_credit_used', { tool: 'title_lab', creditsUsed: 1 });
       setTitles(data.titles);

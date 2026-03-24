@@ -1,6 +1,6 @@
 import { http, HttpResponse } from 'msw';
 
-const BASE = '*/v1/team';
+const BASE = '*/api/v1/team';
 
 interface TeamMember {
   id: string;
@@ -31,12 +31,12 @@ const mockTeamMembers: TeamMember[] = [
 ];
 
 export const teamHandlers = [
-  // GET /v1/team
+  // GET /api/v1/team
   http.get(BASE, () => {
     return HttpResponse.json(mockTeamMembers);
   }),
 
-  // POST /v1/team
+  // POST /api/v1/team
   http.post(BASE, async ({ request }) => {
     const body = (await request.json()) as Record<string, unknown>;
     return HttpResponse.json({
@@ -47,7 +47,7 @@ export const teamHandlers = [
     }, { status: 201 });
   }),
 
-  // DELETE /v1/team/:id
+  // DELETE /api/v1/team/:id
   http.delete(`${BASE}/:id`, () => {
     return new HttpResponse(null, { status: 204 });
   }),

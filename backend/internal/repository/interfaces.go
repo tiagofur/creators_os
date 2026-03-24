@@ -133,6 +133,15 @@ type AnalyticsRepository interface {
 	GetOverview(ctx context.Context, workspaceID uuid.UUID) (*domain.AnalyticsOverview, error)
 	GetContentAnalytics(ctx context.Context, contentID uuid.UUID, from, to time.Time) ([]*domain.ContentAnalyticsSummary, error)
 	GetPlatformAnalytics(ctx context.Context, workspaceID uuid.UUID, platform domain.PlatformType, limit int) ([]*domain.PlatformAnalytics, error)
+	GetConsistencyScore(ctx context.Context, workspaceID uuid.UUID) (*domain.ConsistencyScore, error)
+	GetHeatmap(ctx context.Context, workspaceID uuid.UUID, year int) ([]*domain.HeatmapDay, error)
+	GetPipelineVelocity(ctx context.Context, workspaceID uuid.UUID) ([]*domain.PipelineVelocity, error)
+	GetWeeklyReport(ctx context.Context, workspaceID uuid.UUID) (*domain.WeeklyReport, error)
+	GetMonthlyReport(ctx context.Context, workspaceID uuid.UUID) (*domain.MonthlyReport, error)
+	ListGoals(ctx context.Context, workspaceID uuid.UUID) ([]*domain.AnalyticsGoal, error)
+	CreateGoal(ctx context.Context, goal *domain.AnalyticsGoal) (*domain.AnalyticsGoal, error)
+	UpdateGoal(ctx context.Context, goalID uuid.UUID, input domain.UpdateGoalInput) (*domain.AnalyticsGoal, error)
+	DeleteGoal(ctx context.Context, goalID uuid.UUID) error
 }
 
 // GamificationRepository defines all persistence operations for gamification data.

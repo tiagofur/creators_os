@@ -10,45 +10,55 @@ import {
   mockAnalyticsGoal,
 } from '../data';
 
-const BASE = '*/v1/workspaces/:workspaceId/analytics';
+const BASE = '*/api/v1/workspaces/:workspaceId/analytics';
 
 export const analyticsHandlers = [
-  // GET /v1/workspaces/:workspaceId/analytics/platforms
-  http.get(`${BASE}/platforms`, () => {
+  // GET /api/v1/workspaces/:workspaceId/analytics/overview
+  http.get(`${BASE}/overview`, () => {
     return HttpResponse.json(mockPlatformMetrics);
   }),
 
-  // GET /v1/workspaces/:workspaceId/analytics/consistency
+  // GET /api/v1/workspaces/:workspaceId/analytics/content/:contentId
+  http.get(`${BASE}/content/:contentId`, () => {
+    return HttpResponse.json(mockConsistencyScore);
+  }),
+
+  // GET /api/v1/workspaces/:workspaceId/analytics/platform/:platform
+  http.get(`${BASE}/platform/:platform`, () => {
+    return HttpResponse.json(mockPlatformMetrics[0] ?? {});
+  }),
+
+  // GET /api/v1/workspaces/:workspaceId/analytics/consistency
   http.get(`${BASE}/consistency`, () => {
     return HttpResponse.json(mockConsistencyScore);
   }),
 
-  // GET /v1/workspaces/:workspaceId/analytics/heatmap
+  // GET /api/v1/workspaces/:workspaceId/analytics/heatmap
   http.get(`${BASE}/heatmap`, () => {
     return HttpResponse.json(mockHeatmapDays);
   }),
 
-  // GET /v1/workspaces/:workspaceId/analytics/velocity
+  // GET /api/v1/workspaces/:workspaceId/analytics/velocity
   http.get(`${BASE}/velocity`, () => {
     return HttpResponse.json(mockPipelineVelocity);
   }),
 
-  // GET /v1/workspaces/:workspaceId/analytics/report/weekly
-  http.get(`${BASE}/report/weekly`, () => {
+  // GET /api/v1/workspaces/:workspaceId/analytics/reports/weekly
+  http.get(`${BASE}/reports/weekly`, () => {
     return HttpResponse.json(mockWeeklyReport);
   }),
 
-  // GET /v1/workspaces/:workspaceId/analytics/report/monthly
-  http.get(`${BASE}/report/monthly`, () => {
+  // GET /api/v1/workspaces/:workspaceId/analytics/reports/monthly
+  http.get(`${BASE}/reports/monthly`, () => {
     return HttpResponse.json(mockMonthlyReport);
   }),
 
-  // GET /v1/workspaces/:workspaceId/analytics/goals
+  // GET /api/v1/workspaces/:workspaceId/analytics/goals
   http.get(`${BASE}/goals`, () => {
     return HttpResponse.json(mockAnalyticsGoals);
   }),
 
-  // POST /v1/workspaces/:workspaceId/analytics/goals
+  // POST /api/v1/workspaces/:workspaceId/analytics/goals
   http.post(`${BASE}/goals`, async ({ params, request }) => {
     const body = (await request.json()) as Record<string, unknown>;
     return HttpResponse.json({
@@ -62,7 +72,7 @@ export const analyticsHandlers = [
     }, { status: 201 });
   }),
 
-  // PATCH /v1/workspaces/:workspaceId/analytics/goals/:goalId
+  // PATCH /api/v1/workspaces/:workspaceId/analytics/goals/:goalId
   http.patch(`${BASE}/goals/:goalId`, async ({ request }) => {
     const body = (await request.json()) as Record<string, unknown>;
     return HttpResponse.json({
@@ -71,8 +81,13 @@ export const analyticsHandlers = [
     });
   }),
 
-  // DELETE /v1/workspaces/:workspaceId/analytics/goals/:goalId
+  // DELETE /api/v1/workspaces/:workspaceId/analytics/goals/:goalId
   http.delete(`${BASE}/goals/:goalId`, () => {
     return new HttpResponse(null, { status: 204 });
+  }),
+
+  // POST /api/v1/workspaces/:workspaceId/analytics/sync
+  http.post(`${BASE}/sync`, () => {
+    return new HttpResponse(null, { status: 202 });
   }),
 ];

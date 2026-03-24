@@ -43,7 +43,7 @@ export function ProfileForm() {
 
   async function onSubmit(data: ProfileFormValues) {
     try {
-      await apiClient.patch('/v1/users/me', { ...data, avatarUrl });
+      await apiClient.put('/api/v1/users/me', { ...data, avatarUrl });
       toast.success('Profile saved.');
     } catch {
       toast.error('Failed to save profile. Please try again.');
@@ -57,7 +57,7 @@ export function ProfileForm() {
     }
     setDeleting(true);
     try {
-      await apiClient.delete('/v1/users/me');
+      await apiClient.delete('/api/v1/users/me');
       window.location.href = '/';
     } catch {
       toast.error('Failed to delete account. Please contact support.');

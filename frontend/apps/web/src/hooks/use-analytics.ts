@@ -5,15 +5,41 @@ import { apiClient } from '@/lib/api-client';
 import { queryKeys } from '@/lib/query-keys';
 import { ANALYTICS_CACHE } from '@/lib/query-config';
 import { createAnalyticsResource } from '@ordo/api-client';
-import type { AnalyticsGoal } from '@ordo/types';
 
 const analyticsApi = createAnalyticsResource(apiClient);
+
+export function useAnalyticsOverview(workspaceId: string) {
+  return useQuery({
+    queryKey: queryKeys.analytics.overview(workspaceId),
+    queryFn: () => analyticsApi.getOverview(workspaceId),
+    enabled: Boolean(workspaceId),
+    ...ANALYTICS_CACHE,
+  });
+}
 
 export function usePlatformMetrics(workspaceId: string, period: string) {
   return useQuery({
     queryKey: queryKeys.analytics.platforms(workspaceId, period),
     queryFn: () => analyticsApi.getPlatformMetrics(workspaceId, period),
     enabled: Boolean(workspaceId),
+    ...ANALYTICS_CACHE,
+  });
+}
+
+export function useContentAnalytics(workspaceId: string, contentId: string) {
+  return useQuery({
+    queryKey: queryKeys.analytics.content(contentId),
+    queryFn: () => analyticsApi.getContentAnalytics(workspaceId, contentId),
+    enabled: Boolean(workspaceId) && Boolean(contentId),
+    ...ANALYTICS_CACHE,
+  });
+}
+
+export function usePlatformAnalytics(workspaceId: string, platform: string) {
+  return useQuery({
+    queryKey: queryKeys.analytics.platforms(workspaceId, platform),
+    queryFn: () => analyticsApi.getPlatformAnalytics(workspaceId, platform),
+    enabled: Boolean(workspaceId) && Boolean(platform),
     ...ANALYTICS_CACHE,
   });
 }
@@ -80,7 +106,7 @@ export function useCreateGoal() {
       body,
     }: {
       workspaceId: string;
-      body: Omit<AnalyticsGoal, 'id' | 'workspaceId' | 'currentValue' | 'status' | 'createdAt'>;
+      body: Parameters<typeof analyticsApi.createGoal>[1];
     }) => analyticsApi.createGoal(workspaceId, body),
     onSuccess: (_data, { workspaceId }) => {
       void queryClient.invalidateQueries({
@@ -100,7 +126,7 @@ export function useUpdateGoal() {
     }: {
       workspaceId: string;
       goalId: string;
-      body: Partial<AnalyticsGoal>;
+      body: Parameters<typeof analyticsApi.updateGoal>[2];
     }) => analyticsApi.updateGoal(workspaceId, goalId, body),
     onSuccess: (_data, { workspaceId }) => {
       void queryClient.invalidateQueries({
@@ -113,11 +139,29 @@ export function useUpdateGoal() {
 export function useDeleteGoal() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ workspaceId, goalId }: { workspaceId: string; goalId: string }) =>
-      analyticsApi.deleteGoal(workspaceId, goalId),
+    mutationFn: ({
+      workspaceId,
+      goalId,
+    }: {
+      workspaceId: string;
+      goalId: string;
+    }) => analyticsApi.deleteGoal(workspaceId, goalId),
     onSuccess: (_data, { workspaceId }) => {
       void queryClient.invalidateQueries({
         queryKey: queryKeys.analytics.goals(workspaceId),
+      });
+    },
+  });
+}
+
+export function useTriggerAnalyticsSync() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ workspaceId }: { workspaceId: string }) =>
+      analyticsApi.triggerSync(workspaceId),
+    onSuccess: (_data, { workspaceId }) => {
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.analytics.overview(workspaceId),
       });
     },
   });

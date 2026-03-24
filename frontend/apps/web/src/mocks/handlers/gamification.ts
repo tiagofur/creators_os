@@ -1,16 +1,21 @@
 import { http, HttpResponse } from 'msw';
 import { mockGamificationProfile, mockAchievements } from '../data';
 
-const BASE = '*/v1/users';
+const BASE = '*/api/v1/workspaces/:workspaceId/gamification';
 
 export const gamificationHandlers = [
-  // GET /v1/users/:userId/gamification
-  http.get(`${BASE}/:userId/gamification`, () => {
+  // GET /api/v1/workspaces/:workspaceId/gamification/leaderboard
+  http.get(`${BASE}/leaderboard`, () => {
+    return HttpResponse.json([mockGamificationProfile]);
+  }),
+
+  // GET /api/v1/workspaces/:workspaceId/gamification/my-stats
+  http.get(`${BASE}/my-stats`, () => {
     return HttpResponse.json(mockGamificationProfile);
   }),
 
-  // GET /v1/users/:userId/achievements
-  http.get(`${BASE}/:userId/achievements`, () => {
+  // GET /api/v1/workspaces/:workspaceId/gamification/achievements
+  http.get(`${BASE}/achievements`, () => {
     return HttpResponse.json(mockAchievements);
   }),
 ];

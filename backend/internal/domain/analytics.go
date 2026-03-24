@@ -34,3 +34,79 @@ type AnalyticsOverview struct {
 	TotalEngagement int64
 	ByPlatform      map[string]*PlatformAnalytics
 }
+
+// ConsistencyScore holds a workspace's publishing consistency metrics.
+type ConsistencyScore struct {
+	Score              int    `json:"score"`
+	Streak             int    `json:"streak"`
+	LongestStreak      int    `json:"longestStreak"`
+	PublishedThisMonth int    `json:"publishedThisMonth"`
+	TargetPerMonth     int    `json:"targetPerMonth"`
+	Level              string `json:"level"`
+}
+
+// HeatmapDay represents publishing activity for a single day.
+type HeatmapDay struct {
+	Date  string `json:"date"`
+	Count int    `json:"count"`
+	Score int    `json:"score"`
+}
+
+// PipelineVelocity represents average time spent in each pipeline stage.
+type PipelineVelocity struct {
+	Stage          string  `json:"stage"`
+	AvgDaysInStage float64 `json:"avgDaysInStage"`
+	ItemCount      int     `json:"itemCount"`
+}
+
+// WeeklyReport holds a summary of activity for a single week.
+type WeeklyReport struct {
+	WeekStart        string `json:"weekStart"`
+	WeekEnd          string `json:"weekEnd"`
+	Published        int    `json:"published"`
+	IdeasCaptured    int    `json:"ideasCaptured"`
+	AICreditsUsed    int    `json:"aiCreditsUsed"`
+	TopPlatform      string `json:"topPlatform"`
+	ConsistencyScore int    `json:"consistencyScore"`
+}
+
+// MonthlyReport holds a summary of activity for a single month.
+type MonthlyReport struct {
+	MonthStart       string  `json:"monthStart"`
+	MonthEnd         string  `json:"monthEnd"`
+	Published        int     `json:"published"`
+	IdeasCaptured    int     `json:"ideasCaptured"`
+	AICreditsUsed    int     `json:"aiCreditsUsed"`
+	TopPlatform      string  `json:"topPlatform"`
+	ConsistencyScore int     `json:"consistencyScore"`
+	TotalIncome      float64 `json:"totalIncome"`
+}
+
+// AnalyticsGoal represents a user-defined creator goal.
+type AnalyticsGoal struct {
+	ID           uuid.UUID `json:"id"`
+	WorkspaceID  uuid.UUID `json:"workspaceId"`
+	Title        string    `json:"title"`
+	MetricType   string    `json:"metricType"`
+	TargetValue  int       `json:"targetValue"`
+	CurrentValue int       `json:"currentValue"`
+	Deadline     *string   `json:"deadline,omitempty"`
+	Status       string    `json:"status"`
+	CreatedAt    time.Time `json:"createdAt"`
+}
+
+// CreateGoalInput holds the fields needed to create a new goal.
+type CreateGoalInput struct {
+	Title       string  `json:"title"`
+	MetricType  string  `json:"metricType"`
+	TargetValue int     `json:"targetValue"`
+	Deadline    *string `json:"deadline,omitempty"`
+}
+
+// UpdateGoalInput holds the fields that can be updated on a goal.
+type UpdateGoalInput struct {
+	Title       *string `json:"title,omitempty"`
+	TargetValue *int    `json:"targetValue,omitempty"`
+	Deadline    *string `json:"deadline,omitempty"`
+	Status      *string `json:"status,omitempty"`
+}

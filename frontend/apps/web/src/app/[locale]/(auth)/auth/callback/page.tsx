@@ -33,13 +33,12 @@ function OAuthCallbackInner() {
 
     async function exchangeCode() {
       try {
-        const tokens = await apiClient.post<AuthTokens>(
-          `/v1/auth/oauth/${provider}/callback`,
-          { code, state },
+        const tokens = await apiClient.get<AuthTokens>(
+          `/api/v1/auth/oauth/${provider}/callback?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`,
         );
         setAccessToken(tokens.access_token);
 
-        const user = await apiClient.get('/v1/auth/me');
+        const user = await apiClient.get('/api/v1/users/me');
         setUser(user as Parameters<typeof setUser>[0]);
 
         router.replace(`/${locale}/dashboard`);

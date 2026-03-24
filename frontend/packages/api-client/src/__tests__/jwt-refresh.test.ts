@@ -58,8 +58,8 @@ describe('JWT refresh interceptor', () => {
     // 3 fetch calls: original, refresh, retry
     expect(mockFetch).toHaveBeenCalledTimes(3);
 
-    // Refresh call should POST to /api/auth/refresh
-    expect(mockFetch.mock.calls[1]![0]).toBe('/api/auth/refresh');
+    // Refresh call should POST to /api/v1/auth/refresh
+    expect(mockFetch.mock.calls[1]![0]).toBe('/api/v1/auth/refresh');
     expect((mockFetch.mock.calls[1]![1] as RequestInit).method).toBe('POST');
 
     // onUnauthorized should NOT be called
@@ -92,9 +92,9 @@ describe('JWT refresh interceptor', () => {
     expect(r1).toEqual({ id: 'a' });
     expect(r2).toEqual({ id: 'b' });
 
-    // Only ONE refresh call to /api/auth/refresh
+    // Only ONE refresh call to /api/v1/auth/refresh
     const refreshCalls = mockFetch.mock.calls.filter(
-      (call) => call[0] === '/api/auth/refresh',
+      (call) => call[0] === '/api/v1/auth/refresh',
     );
     expect(refreshCalls).toHaveLength(1);
 
@@ -156,7 +156,7 @@ describe('JWT refresh interceptor', () => {
 
     // Should NOT call refresh a second time
     const refreshCalls = mockFetch.mock.calls.filter(
-      (call) => call[0] === '/api/auth/refresh',
+      (call) => call[0] === '/api/v1/auth/refresh',
     );
     expect(refreshCalls).toHaveLength(1);
   });

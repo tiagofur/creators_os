@@ -15,7 +15,7 @@ const TEAM_KEYS = {
 export function useTeamMembers(workspaceId: string) {
   return useQuery({
     queryKey: TEAM_KEYS.members(workspaceId),
-    queryFn: () => apiClient.get<WorkspaceMember[]>(`/v1/workspaces/${workspaceId}/members`),
+    queryFn: () => apiClient.get<WorkspaceMember[]>(`/api/v1/workspaces/${workspaceId}/members`),
     enabled: Boolean(workspaceId),
     ...WORKSPACE_CACHE,
   });
@@ -26,7 +26,7 @@ export function useInviteMember(workspaceId: string) {
 
   return useMutation({
     mutationFn: (body: { email: string; role: string }) =>
-      apiClient.post<WorkspaceInvitation>(`/v1/workspaces/${workspaceId}/invitations`, body),
+      apiClient.post<WorkspaceInvitation>(`/api/v1/workspaces/${workspaceId}/invitations`, body),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: TEAM_KEYS.invitations(workspaceId) });
       toast.success('Invitation sent successfully.');
@@ -42,7 +42,7 @@ export function useUpdateMemberRole(workspaceId: string) {
 
   return useMutation({
     mutationFn: ({ userId, role }: { userId: string; role: string }) =>
-      apiClient.patch<WorkspaceMember>(`/v1/workspaces/${workspaceId}/members/${userId}/role`, { role }),
+      apiClient.put<WorkspaceMember>(`/api/v1/workspaces/${workspaceId}/members/${userId}/role`, { role }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: TEAM_KEYS.members(workspaceId) });
       toast.success('Member role updated.');
@@ -58,13 +58,38 @@ export function useRemoveMember(workspaceId: string) {
 
   return useMutation({
     mutationFn: (userId: string) =>
-      apiClient.delete<void>(`/v1/workspaces/${workspaceId}/members/${userId}`),
+      apiClient.delete<void>(`/api/v1/workspaces/${workspaceId}/members/${userId}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: TEAM_KEYS.members(workspaceId) });
       toast.success('Member removed from workspace.');
     },
     onError: () => {
       toast.error('Failed to remove member. Please try again.');
+    },
+  });
+}
+
+export function useListInvitations(workspaceId: string) {
+  return useQuery({
+    queryKey: TEAM_KEYS.invitations(workspaceId),
+    queryFn: () => apiClient.get<WorkspaceInvitation[]>(`/api/v1/workspaces/${workspaceId}/invitations`),
+    enabled: Boolean(workspaceId),
+    ...WORKSPACE_CACHE,
+  });
+}
+
+export function useDeleteInvitation(workspaceId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (invitationId: string) =>
+      apiClient.delete<void>(`/api/v1/workspaces/${workspaceId}/invitations/${invitationId}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: TEAM_KEYS.invitations(workspaceId) });
+      toast.success('Invitation cancelled.');
+    },
+    onError: () => {
+      toast.error('Failed to cancel invitation. Please try again.');
     },
   });
 }

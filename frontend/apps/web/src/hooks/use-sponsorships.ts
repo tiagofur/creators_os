@@ -5,106 +5,31 @@ import { apiClient } from '@/lib/api-client';
 import { queryKeys } from '@/lib/query-keys';
 import { SPONSORSHIPS_CACHE } from '@/lib/query-config';
 import { createSponsorshipsResource } from '@ordo/api-client';
-import type { BrandContact, SponsorshipDeal, DealStage } from '@ordo/types';
-import type { DealFilters } from '@ordo/api-client';
+import type { SponsorshipDeal } from '@ordo/types';
 
 const sponsorshipsApi = createSponsorshipsResource(apiClient);
 
-// --- Brand contacts ---
+// --- Sponsorships CRUD ---
 
-export function useBrandContacts(workspaceId: string) {
+export function useSponsorships(workspaceId: string) {
   return useQuery({
-    queryKey: queryKeys.sponsorships.brands(workspaceId),
-    queryFn: () => sponsorshipsApi.listBrands(workspaceId),
+    queryKey: queryKeys.sponsorships.deals(workspaceId),
+    queryFn: () => sponsorshipsApi.list(workspaceId),
     enabled: Boolean(workspaceId),
     ...SPONSORSHIPS_CACHE,
   });
 }
 
-export function useBrandContact(workspaceId: string, id: string) {
-  return useQuery({
-    queryKey: queryKeys.sponsorships.brand(id),
-    queryFn: () => sponsorshipsApi.getBrand(workspaceId, id),
-    enabled: Boolean(workspaceId) && Boolean(id),
-    ...SPONSORSHIPS_CACHE,
-  });
-}
-
-export function useCreateBrandContact() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({
-      workspaceId,
-      body,
-    }: {
-      workspaceId: string;
-      body: Omit<BrandContact, 'id' | 'workspaceId' | 'createdAt'>;
-    }) => sponsorshipsApi.createBrand(workspaceId, body),
-    onSuccess: (_data, { workspaceId }) => {
-      void queryClient.invalidateQueries({
-        queryKey: queryKeys.sponsorships.brands(workspaceId),
-      });
-    },
-  });
-}
-
-export function useUpdateBrandContact() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({
-      workspaceId,
-      brandId,
-      body,
-    }: {
-      workspaceId: string;
-      brandId: string;
-      body: Partial<Omit<BrandContact, 'id' | 'workspaceId' | 'createdAt'>>;
-    }) => sponsorshipsApi.updateBrand(workspaceId, brandId, body),
-    onSuccess: (_data, { workspaceId, brandId }) => {
-      void queryClient.invalidateQueries({
-        queryKey: queryKeys.sponsorships.brands(workspaceId),
-      });
-      void queryClient.invalidateQueries({
-        queryKey: queryKeys.sponsorships.brand(brandId),
-      });
-    },
-  });
-}
-
-export function useDeleteBrandContact() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({ workspaceId, brandId }: { workspaceId: string; brandId: string }) =>
-      sponsorshipsApi.deleteBrand(workspaceId, brandId),
-    onSuccess: (_data, { workspaceId }) => {
-      void queryClient.invalidateQueries({
-        queryKey: queryKeys.sponsorships.brands(workspaceId),
-      });
-    },
-  });
-}
-
-// --- Deals ---
-
-export function useSponsorshipDeals(workspaceId: string, filters?: DealFilters) {
-  return useQuery({
-    queryKey: queryKeys.sponsorships.deals(workspaceId, filters as Record<string, unknown>),
-    queryFn: () => sponsorshipsApi.listDeals(workspaceId, filters),
-    enabled: Boolean(workspaceId),
-    ...SPONSORSHIPS_CACHE,
-  });
-}
-
-export function useSponsorshipDeal(workspaceId: string, id: string) {
+export function useSponsorship(workspaceId: string, id: string) {
   return useQuery({
     queryKey: queryKeys.sponsorships.deal(id),
-    queryFn: () => sponsorshipsApi.getDeal(workspaceId, id),
+    queryFn: () => sponsorshipsApi.get(workspaceId, id),
     enabled: Boolean(workspaceId) && Boolean(id),
     ...SPONSORSHIPS_CACHE,
   });
 }
 
-export function useCreateDeal() {
+export function useCreateSponsorship() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({
@@ -112,8 +37,8 @@ export function useCreateDeal() {
       body,
     }: {
       workspaceId: string;
-      body: Omit<SponsorshipDeal, 'id' | 'workspaceId' | 'brandContact' | 'createdAt' | 'updatedAt'>;
-    }) => sponsorshipsApi.createDeal(workspaceId, body),
+      body: Omit<SponsorshipDeal, 'id' | 'workspaceId' | 'createdAt' | 'updatedAt'>;
+    }) => sponsorshipsApi.create(workspaceId, body),
     onSuccess: (_data, { workspaceId }) => {
       void queryClient.invalidateQueries({
         queryKey: queryKeys.sponsorships.deals(workspaceId),
@@ -122,80 +47,34 @@ export function useCreateDeal() {
   });
 }
 
-export function useUpdateDeal() {
+export function useUpdateSponsorship() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({
       workspaceId,
-      dealId,
+      id,
       body,
     }: {
       workspaceId: string;
-      dealId: string;
-      body: Partial<Omit<SponsorshipDeal, 'id' | 'workspaceId' | 'brandContact' | 'createdAt' | 'updatedAt'>>;
-    }) => sponsorshipsApi.updateDeal(workspaceId, dealId, body),
-    onSuccess: (_data, { workspaceId, dealId }) => {
+      id: string;
+      body: Partial<Omit<SponsorshipDeal, 'id' | 'workspaceId' | 'createdAt' | 'updatedAt'>>;
+    }) => sponsorshipsApi.update(workspaceId, id, body),
+    onSuccess: (_data, { workspaceId, id }) => {
       void queryClient.invalidateQueries({
         queryKey: queryKeys.sponsorships.deals(workspaceId),
       });
       void queryClient.invalidateQueries({
-        queryKey: queryKeys.sponsorships.deal(dealId),
+        queryKey: queryKeys.sponsorships.deal(id),
       });
     },
   });
 }
 
-export function useMoveDealStage() {
+export function useDeleteSponsorship() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({
-      workspaceId,
-      dealId,
-      stage,
-    }: {
-      workspaceId: string;
-      dealId: string;
-      stage: DealStage;
-    }) => sponsorshipsApi.moveDealStage(workspaceId, dealId, stage),
-    onMutate: async ({ workspaceId, dealId, stage }) => {
-      await queryClient.cancelQueries({
-        queryKey: queryKeys.sponsorships.deals(workspaceId),
-      });
-      const previousDeals = queryClient.getQueryData<SponsorshipDeal[]>(
-        queryKeys.sponsorships.deals(workspaceId),
-      );
-      if (previousDeals) {
-        queryClient.setQueryData<SponsorshipDeal[]>(
-          queryKeys.sponsorships.deals(workspaceId),
-          previousDeals.map((d) => (d.id === dealId ? { ...d, stage } : d)),
-        );
-      }
-      return { previousDeals };
-    },
-    onError: (_err, { workspaceId }, context) => {
-      if (context?.previousDeals) {
-        queryClient.setQueryData(
-          queryKeys.sponsorships.deals(workspaceId),
-          context.previousDeals,
-        );
-      }
-    },
-    onSettled: (_data, _err, { workspaceId, dealId }) => {
-      void queryClient.invalidateQueries({
-        queryKey: queryKeys.sponsorships.deals(workspaceId),
-      });
-      void queryClient.invalidateQueries({
-        queryKey: queryKeys.sponsorships.deal(dealId),
-      });
-    },
-  });
-}
-
-export function useDeleteDeal() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({ workspaceId, dealId }: { workspaceId: string; dealId: string }) =>
-      sponsorshipsApi.deleteDeal(workspaceId, dealId),
+    mutationFn: ({ workspaceId, id }: { workspaceId: string; id: string }) =>
+      sponsorshipsApi.delete(workspaceId, id),
     onSuccess: (_data, { workspaceId }) => {
       void queryClient.invalidateQueries({
         queryKey: queryKeys.sponsorships.deals(workspaceId),
@@ -204,43 +83,31 @@ export function useDeleteDeal() {
   });
 }
 
-// --- Income ---
+// --- Messages ---
 
-export function useIncomeEntries(workspaceId: string) {
+export function useSponsorshipMessages(workspaceId: string, sponsorshipId: string) {
   return useQuery({
-    queryKey: queryKeys.sponsorships.income(workspaceId),
-    queryFn: () => sponsorshipsApi.listIncome(workspaceId),
-    enabled: Boolean(workspaceId),
-    ...SPONSORSHIPS_CACHE,
+    queryKey: [...queryKeys.sponsorships.deal(sponsorshipId), 'messages'],
+    queryFn: () => sponsorshipsApi.listMessages(workspaceId, sponsorshipId),
+    enabled: Boolean(workspaceId) && Boolean(sponsorshipId),
   });
 }
 
-export function useAddIncome() {
+export function useAddSponsorshipMessage() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({
       workspaceId,
+      sponsorshipId,
       body,
     }: {
       workspaceId: string;
-      body: Omit<import('@ordo/types').IncomeEntry, 'id'>;
-    }) => sponsorshipsApi.addIncome(workspaceId, body),
-    onSuccess: (_data, { workspaceId }) => {
+      sponsorshipId: string;
+      body: unknown;
+    }) => sponsorshipsApi.addMessage(workspaceId, sponsorshipId, body),
+    onSuccess: (_data, { sponsorshipId }) => {
       void queryClient.invalidateQueries({
-        queryKey: queryKeys.sponsorships.income(workspaceId),
-      });
-    },
-  });
-}
-
-export function useDeleteIncome() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({ workspaceId, incomeId }: { workspaceId: string; incomeId: string }) =>
-      sponsorshipsApi.deleteIncome(workspaceId, incomeId),
-    onSuccess: (_data, { workspaceId }) => {
-      void queryClient.invalidateQueries({
-        queryKey: queryKeys.sponsorships.income(workspaceId),
+        queryKey: [...queryKeys.sponsorships.deal(sponsorshipId), 'messages'],
       });
     },
   });

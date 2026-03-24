@@ -27,7 +27,7 @@ const PREFS_KEY = ['notification-preferences'] as const;
 export function useNotificationPreferences() {
   return useQuery({
     queryKey: PREFS_KEY,
-    queryFn: () => apiClient.get<NotificationPreferences>('/v1/notifications/preferences'),
+    queryFn: () => apiClient.get<NotificationPreferences>('/api/v1/notifications/preferences'),
     ...NOTIFICATION_PREFS_CACHE,
   });
 }
@@ -37,7 +37,7 @@ export function useUpdateNotificationPreferences() {
 
   return useMutation({
     mutationFn: (prefs: Partial<NotificationPreferences>) =>
-      apiClient.patch<NotificationPreferences>('/v1/notifications/preferences', prefs),
+      apiClient.patch<NotificationPreferences>('/api/v1/notifications/preferences', prefs),
     onSuccess: (data) => {
       queryClient.setQueryData(PREFS_KEY, data);
     },

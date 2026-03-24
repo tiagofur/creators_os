@@ -2,9 +2,11 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log/slog"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/ordo/creators-os/internal/ai"
@@ -177,6 +179,69 @@ func (s *aiService) GenerateScript(ctx context.Context, userID uuid.UUID, title,
 	return resp.Content, nil
 }
 
+// AnalyzeScript returns AI-generated suggestions for improving a script.
+func (s *aiService) AnalyzeScript(ctx context.Context, userID uuid.UUID, scriptText string) ([]domain.ScriptSuggestion, error) {
+	prompt := fmt.Sprintf(`Analyze the following script and provide improvement suggestions. For each suggestion, return a JSON array of objects with these fields:
+- id: a unique string id (e.g. "sug_01", "sug_02")
+- type: one of "hook", "clarity", "cta", "pacing", "engagement"
+- affected_text: the exact text from the script that should be improved
+- suggested_improvement: your improved version of that text
+
+Focus on:
+1. Hook quality - Is the opening compelling enough to stop the scroll?
+2. Clarity - Are there confusing or wordy sections?
+3. CTA - Is the call-to-action clear and compelling?
+4. Pacing - Does the script maintain good rhythm and energy?
+5. Engagement - Are there missed opportunities for audience engagement?
+
+Return ONLY a JSON array, no other text.
+
+Script:
+%s`, scriptText)
+
+	estimatedCost := s.aiRouter.EstimateTokens(prompt)
+	if estimatedCost < 1 {
+		estimatedCost = 1
+	}
+
+	if err := s.CheckAndDeductCredits(ctx, userID, estimatedCost); err != nil {
+		return nil, err
+	}
+
+	req := ai.CompletionRequest{
+		Messages: []ai.Message{
+			{Role: "user", Content: prompt},
+		},
+		SystemPrompt: "You are an expert script doctor for digital content creators. You analyze scripts for YouTube videos, podcasts, and other digital content, providing specific, actionable improvement suggestions. Always respond with valid JSON.",
+		MaxTokens:    2048,
+	}
+
+	resp, err := s.aiRouter.Complete(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("ai_service: analyze script: %w", err)
+	}
+
+	// Parse the JSON response into suggestions
+	var suggestions []domain.ScriptSuggestion
+	if err := parseJSON(resp.Content, &suggestions); err != nil {
+		s.logger.WarnContext(ctx, "failed to parse script doctor response as JSON, returning raw",
+			"err", err,
+			"raw", resp.Content,
+		)
+		// Return a single catch-all suggestion if parsing fails
+		suggestions = []domain.ScriptSuggestion{
+			{
+				ID:                   "sug_01",
+				Type:                 "clarity",
+				AffectedText:         truncate(scriptText, 100),
+				SuggestedImprovement: resp.Content,
+			},
+		}
+	}
+
+	return suggestions, nil
+}
+
 // GetCreditBalance returns the AI credit balance for the given user.
 func (s *aiService) GetCreditBalance(ctx context.Context, userID uuid.UUID) (int, error) {
 	return s.userRepo.GetAICreditsBalance(ctx, userID)
@@ -198,6 +263,30 @@ func (cw *capturingWriter) Flush() {
 	if f, ok := cw.underlying.(interface{ Flush() }); ok {
 		f.Flush()
 	}
+}
+
+// parseJSON attempts to parse a JSON string, stripping markdown code fences if present.
+func parseJSON(raw string, v any) error {
+	content := strings.TrimSpace(raw)
+	// Strip markdown code fences if the LLM wrapped the response
+	if strings.HasPrefix(content, "```") {
+		lines := strings.Split(content, "\n")
+		// Remove first and last lines (``` markers)
+		if len(lines) > 2 {
+			lines = lines[1 : len(lines)-1]
+		}
+		content = strings.Join(lines, "\n")
+		content = strings.TrimSpace(content)
+	}
+	return json.Unmarshal([]byte(content), v)
+}
+
+// truncate returns the first n characters of s, appending "..." if truncated.
+func truncate(s string, n int) string {
+	if len(s) <= n {
+		return s
+	}
+	return s[:n] + "..."
 }
 
 // Ensure aiService implements AIService at compile time.

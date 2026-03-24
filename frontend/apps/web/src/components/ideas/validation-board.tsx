@@ -4,6 +4,7 @@ import * as React from 'react';
 import { cn } from '@ordo/core';
 import { Badge, Button, Card, CardContent, Skeleton } from '@ordo/ui';
 import { useChangeIdeaStatus } from '@/hooks/use-ideas';
+import { useWorkspaceStore } from '@ordo/stores';
 import { useToast } from '@ordo/ui';
 import type { Idea } from '@ordo/types';
 
@@ -74,7 +75,8 @@ function IdeaBoardCard({
 }
 
 export function ValidationBoard({ ideas, isLoading }: ValidationBoardProps) {
-  const { mutate: changeStatus } = useChangeIdeaStatus();
+  const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspace?.id) ?? '';
+  const { mutate: changeStatus } = useChangeIdeaStatus(activeWorkspaceId);
   const { toast } = useToast();
 
   const inboxIdeas = ideas.filter((i) => i.status === 'inbox');

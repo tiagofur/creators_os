@@ -15,8 +15,8 @@ interface IdeaResultCardProps {
 
 export function IdeaResultCard({ idea, onRegenerate }: IdeaResultCardProps) {
   const { toast } = useToast();
-  const { mutateAsync: createIdea, isPending } = useCreateIdea();
-  const workspaceId = useWorkspaceStore((s) => s.activeWorkspace?.id);
+  const workspaceId = useWorkspaceStore((s) => s.activeWorkspace?.id) ?? '';
+  const { mutateAsync: createIdea, isPending } = useCreateIdea(workspaceId);
 
   const handleSave = async () => {
     if (!workspaceId) return;
@@ -24,7 +24,6 @@ export function IdeaResultCard({ idea, onRegenerate }: IdeaResultCardProps) {
       await createIdea({
         title: idea.title,
         description: idea.description,
-        workspace_id: workspaceId,
       });
       toast({ title: 'Idea saved!' });
     } catch {

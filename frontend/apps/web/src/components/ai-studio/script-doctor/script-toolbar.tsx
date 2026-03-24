@@ -11,6 +11,7 @@ import {
   List,
   ListOrdered,
   Minus,
+  Sparkles,
 } from 'lucide-react';
 import { Button } from '@ordo/ui';
 import { cn } from '@ordo/core';
@@ -44,9 +45,19 @@ interface ScriptToolbarProps {
   editor: Editor;
   onToggleAiPanel: () => void;
   aiPanelOpen: boolean;
+  onAnalyze: () => void;
+  isAnalyzing: boolean;
+  hasSuggestions: boolean;
 }
 
-export function ScriptToolbar({ editor, onToggleAiPanel, aiPanelOpen }: ScriptToolbarProps) {
+export function ScriptToolbar({
+  editor,
+  onToggleAiPanel,
+  aiPanelOpen,
+  onAnalyze,
+  isAnalyzing,
+  hasSuggestions,
+}: ScriptToolbarProps) {
   return (
     <div className="flex items-center gap-1 border-b px-3 py-1.5 bg-muted/20 flex-wrap">
       <ToolbarButton
@@ -120,10 +131,26 @@ export function ScriptToolbar({ editor, onToggleAiPanel, aiPanelOpen }: ScriptTo
 
       <Button
         size="sm"
+        variant="default"
+        onClick={onAnalyze}
+        disabled={isAnalyzing}
+        loading={isAnalyzing}
+        leftIcon={<Sparkles className="h-3.5 w-3.5" />}
+      >
+        Analyze Script
+      </Button>
+
+      <Button
+        size="sm"
         variant={aiPanelOpen ? 'secondary' : 'outline'}
         onClick={onToggleAiPanel}
       >
-        AI Suggestions
+        {aiPanelOpen ? 'Hide Panel' : 'Show Panel'}
+        {hasSuggestions && !aiPanelOpen && (
+          <span className="ml-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+            !
+          </span>
+        )}
       </Button>
     </div>
   );

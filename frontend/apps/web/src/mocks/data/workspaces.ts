@@ -6,6 +6,7 @@ export const mockWorkspace: Workspace = {
   name: 'Tech Tutorials',
   slug: 'tech-tutorials',
   logo_url: null,
+  avatar_url: null,
   timezone: 'America/Los_Angeles',
   owner_id: mockUser.id,
   created_at: '2024-06-15T11:00:00.000Z',
@@ -17,6 +18,7 @@ export const mockWorkspace2: Workspace = {
   name: 'Vlog Channel',
   slug: 'vlog-channel',
   logo_url: 'https://example.com/vlog-logo.png',
+  avatar_url: 'https://example.com/vlog-logo.png',
   timezone: 'America/New_York',
   owner_id: mockUser.id,
   created_at: '2024-09-01T08:00:00.000Z',
@@ -30,6 +32,8 @@ export const mockWorkspaceMember: WorkspaceMember = {
   workspace_id: mockWorkspace.id,
   user_id: mockUser.id,
   role: 'owner',
+  user_email: 'creator@example.com',
+  user_name: 'Alex Rivera',
   invited_by: null,
   joined_at: '2024-06-15T11:00:00.000Z',
 };
@@ -39,6 +43,8 @@ export const mockWorkspaceMember2: WorkspaceMember = {
   workspace_id: mockWorkspace.id,
   user_id: 'usr_02HQCOLLABORATOR',
   role: 'editor',
+  user_email: 'jordan@example.com',
+  user_name: 'Jordan Lee',
   invited_by: mockUser.id,
   joined_at: '2024-08-20T14:00:00.000Z',
 };
@@ -51,6 +57,7 @@ export const mockWorkspaceMembers: WorkspaceMember[] = [
 export const mockWorkspaceInvitation: WorkspaceInvitation = {
   id: 'inv_01HQINV123456789',
   workspace_id: mockWorkspace.id,
+  invited_by: mockUser.id,
   email: 'collab@example.com',
   role: 'editor',
   token: 'invite-token-xyz789',

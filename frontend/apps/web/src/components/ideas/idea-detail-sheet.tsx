@@ -36,10 +36,10 @@ interface IdeaDetailSheetProps {
 
 export function IdeaDetailSheet({ idea, open, onClose }: IdeaDetailSheetProps) {
   const [deleteOpen, setDeleteOpen] = React.useState(false);
-  const { mutateAsync: deleteIdea, isPending: isDeleting } = useDeleteIdea();
-  const { mutate: changeStatus } = useChangeIdeaStatus();
-  const { mutateAsync: createContent } = useCreateContent();
   const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspace?.id) ?? '';
+  const { mutateAsync: deleteIdea, isPending: isDeleting } = useDeleteIdea(activeWorkspaceId);
+  const { mutate: changeStatus } = useChangeIdeaStatus(activeWorkspaceId);
+  const { mutateAsync: createContent } = useCreateContent();
   const { toast } = useToast();
 
   const handleStatusChange = (status: string) => {

@@ -20,8 +20,8 @@ export function IdeasPageClient() {
 
   const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspace?.id) ?? '';
   const { data, isLoading } = useIdeas(activeWorkspaceId, filters);
-  const { mutate: deleteIdea } = useDeleteIdea();
-  const { mutate: changeStatus } = useChangeIdeaStatus();
+  const { mutate: deleteIdea } = useDeleteIdea(activeWorkspaceId);
+  const { mutate: changeStatus } = useChangeIdeaStatus(activeWorkspaceId);
 
   const ideas = React.useMemo(() => {
     const list = data?.data ?? [];

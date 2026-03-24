@@ -1,11 +1,10 @@
 import { http, HttpResponse } from 'msw';
-import { mockContents, mockContent1, mockSeries, mockSeries1 } from '../data';
+import { mockContents, mockContent1 } from '../data';
 
-const BASE = '*/v1/contents';
-const SERIES_BASE = '*/v1/series';
+const BASE = '*/api/v1/workspaces/:workspaceId/contents';
 
 export const contentsHandlers = [
-  // GET /v1/contents
+  // GET /api/v1/workspaces/:workspaceId/contents
   http.get(BASE, () => {
     return HttpResponse.json({
       data: mockContents,
@@ -18,7 +17,7 @@ export const contentsHandlers = [
     });
   }),
 
-  // GET /v1/contents/:id
+  // GET /api/v1/workspaces/:workspaceId/contents/:id
   http.get(`${BASE}/:id`, ({ params }) => {
     const item = mockContents.find((c) => c.id === params.id);
     if (!item) {
@@ -30,7 +29,7 @@ export const contentsHandlers = [
     return HttpResponse.json(item);
   }),
 
-  // POST /v1/contents
+  // POST /api/v1/workspaces/:workspaceId/contents
   http.post(BASE, async ({ request }) => {
     const body = (await request.json()) as Record<string, unknown>;
     const newContent = {
@@ -48,8 +47,8 @@ export const contentsHandlers = [
     return HttpResponse.json(newContent, { status: 201 });
   }),
 
-  // PATCH /v1/contents/:id
-  http.patch(`${BASE}/:id`, async ({ params, request }) => {
+  // PUT /api/v1/workspaces/:workspaceId/contents/:id
+  http.put(`${BASE}/:id`, async ({ params, request }) => {
     const item = mockContents.find((c) => c.id === params.id);
     if (!item) {
       return HttpResponse.json(
@@ -65,71 +64,35 @@ export const contentsHandlers = [
     });
   }),
 
-  // DELETE /v1/contents/:id
+  // DELETE /api/v1/workspaces/:workspaceId/contents/:id
   http.delete(`${BASE}/:id`, () => {
     return new HttpResponse(null, { status: 204 });
   }),
-];
 
-export const seriesHandlers = [
-  // GET /v1/series
-  http.get(SERIES_BASE, () => {
-    return HttpResponse.json({
-      data: mockSeries,
-      meta: {
-        page: 1,
-        per_page: 20,
-        total: mockSeries.length,
-        total_pages: 1,
-      },
-    });
-  }),
-
-  // GET /v1/series/:id
-  http.get(`${SERIES_BASE}/:id`, ({ params }) => {
-    const series = mockSeries.find((s) => s.id === params.id);
-    if (!series) {
+  // PUT /api/v1/workspaces/:workspaceId/contents/:id/status
+  http.put(`${BASE}/:id/status`, async ({ params, request }) => {
+    const item = mockContents.find((c) => c.id === params.id);
+    if (!item) {
       return HttpResponse.json(
-        { status: 404, code: 'NOT_FOUND', message: 'Series not found' },
-        { status: 404 },
-      );
-    }
-    return HttpResponse.json(series);
-  }),
-
-  // POST /v1/series
-  http.post(SERIES_BASE, async ({ request }) => {
-    const body = (await request.json()) as Record<string, unknown>;
-    const newSeries = {
-      ...mockSeries1,
-      id: `ser_new_${Date.now()}`,
-      ...body,
-      content_ids: [],
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    };
-    return HttpResponse.json(newSeries, { status: 201 });
-  }),
-
-  // PATCH /v1/series/:id
-  http.patch(`${SERIES_BASE}/:id`, async ({ params, request }) => {
-    const series = mockSeries.find((s) => s.id === params.id);
-    if (!series) {
-      return HttpResponse.json(
-        { status: 404, code: 'NOT_FOUND', message: 'Series not found' },
+        { status: 404, code: 'NOT_FOUND', message: 'Content not found' },
         { status: 404 },
       );
     }
     const body = (await request.json()) as Record<string, unknown>;
     return HttpResponse.json({
-      ...series,
-      ...body,
+      ...item,
+      status: body.status,
       updated_at: new Date().toISOString(),
     });
   }),
 
-  // DELETE /v1/series/:id
-  http.delete(`${SERIES_BASE}/:id`, () => {
+  // POST /api/v1/workspaces/:workspaceId/contents/:contentId/assignments
+  http.post(`${BASE}/:contentId/assignments`, () => {
+    return new HttpResponse(null, { status: 201 });
+  }),
+
+  // DELETE /api/v1/workspaces/:workspaceId/contents/:contentId/assignments/:userId
+  http.delete(`${BASE}/:contentId/assignments/:userId`, () => {
     return new HttpResponse(null, { status: 204 });
   }),
 ];

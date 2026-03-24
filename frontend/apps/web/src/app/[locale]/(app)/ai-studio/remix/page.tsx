@@ -19,7 +19,7 @@ export default function RemixPage() {
 
   const { mutate: runRemix, isPending: isRemixing } = useMutation({
     mutationFn: (payload: RemixRequest) =>
-      apiClient.post<RemixResponse>('/v1/ai/remix', payload),
+      apiClient.post<RemixResponse>('/api/v1/ai/remix', payload),
     onSuccess: (data) => {
       trackEvent('ai_credit_used', { tool: 'remix', creditsUsed: 1 });
       setVariants(data.variants);
@@ -32,7 +32,7 @@ export default function RemixPage() {
 
   const { mutate: runHooks, isPending: isGeneratingHooks } = useMutation({
     mutationFn: (payload: HookRequest) =>
-      apiClient.post<HookResponse>('/v1/ai/hooks', payload),
+      apiClient.post<HookResponse>('/api/v1/ai/hooks', payload),
     onSuccess: (data) => {
       trackEvent('ai_credit_used', { tool: 'hook_generator', creditsUsed: 1 });
       setHooks(data.hooks);

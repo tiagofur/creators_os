@@ -25,7 +25,7 @@ export interface IdeaFilters {
 
 export function createIdeasResource(client: OrdoApiClient) {
   return {
-    list(filters?: IdeaFilters): Promise<PaginatedResponse<Idea>> {
+    list(workspaceId: string, filters?: IdeaFilters): Promise<PaginatedResponse<Idea>> {
       const params = new URLSearchParams();
       if (filters) {
         Object.entries(filters).forEach(([key, value]) => {
@@ -40,29 +40,37 @@ export function createIdeasResource(client: OrdoApiClient) {
       }
       const query = params.toString();
       return client.get<PaginatedResponse<Idea>>(
-        `/v1/ideas${query ? `?${query}` : ''}`,
+        `/api/v1/workspaces/${workspaceId}/ideas${query ? `?${query}` : ''}`,
         paginatedIdeasSchema,
       );
     },
 
-    get(id: string): Promise<Idea> {
-      return client.get<Idea>(`/v1/ideas/${id}`, ideaSchema);
+    get(workspaceId: string, id: string): Promise<Idea> {
+      return client.get<Idea>(`/api/v1/workspaces/${workspaceId}/ideas/${id}`, ideaSchema);
     },
 
-    create(body: CreateIdeaInput): Promise<Idea> {
-      return client.post<Idea>('/v1/ideas', body, ideaSchema);
+    create(workspaceId: string, body: CreateIdeaInput): Promise<Idea> {
+      return client.post<Idea>(`/api/v1/workspaces/${workspaceId}/ideas`, body, ideaSchema);
     },
 
-    update(id: string, body: UpdateIdeaInput): Promise<Idea> {
-      return client.patch<Idea>(`/v1/ideas/${id}`, body, ideaSchema);
+    update(workspaceId: string, id: string, body: UpdateIdeaInput): Promise<Idea> {
+      return client.put<Idea>(`/api/v1/workspaces/${workspaceId}/ideas/${id}`, body, ideaSchema);
     },
 
-    delete(id: string): Promise<void> {
-      return client.delete<void>(`/v1/ideas/${id}`);
+    delete(workspaceId: string, id: string): Promise<void> {
+      return client.delete<void>(`/api/v1/workspaces/${workspaceId}/ideas/${id}`);
     },
 
-    changeStatus(id: string, status: IdeaStatus): Promise<Idea> {
-      return client.patch<Idea>(`/v1/ideas/${id}`, { status }, ideaSchema);
+    requestValidation(workspaceId: string, id: string): Promise<void> {
+      return client.post<void>(`/api/v1/workspaces/${workspaceId}/ideas/${id}/validate`);
+    },
+
+    setTags(workspaceId: string, id: string, tags: string[]): Promise<Idea> {
+      return client.put<Idea>(`/api/v1/workspaces/${workspaceId}/ideas/${id}/tags`, { tags }, ideaSchema);
+    },
+
+    promote(workspaceId: string, id: string): Promise<Idea> {
+      return client.post<Idea>(`/api/v1/workspaces/${workspaceId}/ideas/${id}/promote`, undefined, ideaSchema);
     },
   };
 }

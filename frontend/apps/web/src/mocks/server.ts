@@ -9,7 +9,7 @@ import { handlers } from './handlers';
  *
  *   // Override a handler for error testing:
  *   server.use(
- *     http.get('*\/v1/ideas', () => {
+ *     http.get('*\/api/v1/workspaces/:workspaceId/ideas', () => {
  *       return HttpResponse.json(
  *         { status: 500, code: 'INTERNAL_ERROR', message: 'Server error' },
  *         { status: 500 },

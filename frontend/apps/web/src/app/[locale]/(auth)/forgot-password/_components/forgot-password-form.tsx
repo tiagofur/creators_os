@@ -34,7 +34,7 @@ export function ForgotPasswordForm() {
 
   async function onSubmit(data: ForgotPasswordInput) {
     try {
-      await apiClient.post('/v1/auth/forgot-password', data);
+      await apiClient.post('/api/v1/auth/forgot-password', data);
       setSent(true);
     } catch {
       setError('root', { message: 'Failed to send reset link. Please try again.' });

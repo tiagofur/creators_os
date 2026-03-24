@@ -236,6 +236,15 @@ func NewRouter(
 				if analyticsHandler != nil {
 					r.Route("/analytics", func(r chi.Router) {
 						r.Get("/overview", analyticsHandler.GetOverview)
+						r.Get("/consistency", analyticsHandler.GetConsistencyScore)
+						r.Get("/heatmap", analyticsHandler.GetHeatmap)
+						r.Get("/velocity", analyticsHandler.GetPipelineVelocity)
+						r.Get("/reports/weekly", analyticsHandler.GetWeeklyReport)
+						r.Get("/reports/monthly", analyticsHandler.GetMonthlyReport)
+						r.Get("/goals", analyticsHandler.ListGoals)
+						r.Post("/goals", analyticsHandler.CreateGoal)
+						r.Patch("/goals/{goalId}", analyticsHandler.UpdateGoal)
+						r.Delete("/goals/{goalId}", analyticsHandler.DeleteGoal)
 						r.Get("/content/{contentId}", analyticsHandler.GetContentAnalytics)
 						r.Get("/platform/{platform}", analyticsHandler.GetPlatformAnalytics)
 						r.With(middleware.TieredRateLimiter(redisClient, cfg.AppEnv, "analytics_sync", middleware.DefaultTierLimits["analytics_sync"])).Post("/sync", analyticsHandler.TriggerSync)
