@@ -4,12 +4,14 @@ import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { Button, Skeleton } from '@ordo/ui';
 import { useIdea } from '@/hooks/use-ideas';
+import { useWorkspaceStore } from '@ordo/stores';
 import { IdeaDetailSheet } from '@/components/ideas/idea-detail-sheet';
 
 export default function IdeaDetailPage() {
   const params = useParams<{ id: string; locale: string }>();
   const router = useRouter();
-  const { data: idea, isLoading } = useIdea(params.id);
+  const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspace?.id) ?? '';
+  const { data: idea, isLoading } = useIdea(activeWorkspaceId, params.id);
 
   if (isLoading) {
     return (

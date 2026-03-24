@@ -27,8 +27,8 @@ export function RemixResultCard({ variant }: RemixResultCardProps) {
   const [isEditing, setIsEditing] = React.useState(false);
   const [editedContent, setEditedContent] = React.useState(variant.content);
   const [copied, setCopied] = React.useState(false);
-  const { mutateAsync: createIdea, isPending: isSaving } = useCreateIdea();
-  const workspaceId = useWorkspaceStore((s) => s.activeWorkspace?.id);
+  const workspaceId = useWorkspaceStore((s) => s.activeWorkspace?.id) ?? '';
+  const { mutateAsync: createIdea, isPending: isSaving } = useCreateIdea(workspaceId);
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(editedContent);
@@ -43,7 +43,6 @@ export function RemixResultCard({ variant }: RemixResultCardProps) {
       await createIdea({
         title: `${PLATFORM_LABELS[variant.platform]} Remix`,
         description: editedContent.slice(0, 500),
-        workspace_id: workspaceId,
       });
       toast({ title: 'Saved as idea!' });
     } catch {

@@ -6,7 +6,7 @@ import { apiClient } from '@/lib/api-client';
 import { queryKeys } from '@/lib/query-keys';
 import { IDEAS_CACHE } from '@/lib/query-config';
 import { createIdeasResource } from '@ordo/api-client';
-import type { Idea, IdeaStatus, PaginatedResponse } from '@ordo/types';
+import type { Idea, IdeaStatus } from '@ordo/types';
 
 const ideasApi = createIdeasResource(apiClient);
 
@@ -41,35 +41,39 @@ export function useIdeas(workspaceId: string, filters?: IdeaFilters) {
 }
 
 // GET single idea
-export function useIdea(id: string) {
+export function useIdea(workspaceId: string, id: string) {
   return useQuery({
     queryKey: queryKeys.ideas.detail(id),
-    queryFn: () => apiClient.get<Idea>(`/api/v1/ideas/${id}`),
-    enabled: Boolean(id),
+    queryFn: () => ideasApi.get(workspaceId, id),
+    enabled: Boolean(workspaceId) && Boolean(id),
     ...IDEAS_CACHE,
   });
 }
 
 // POST create idea
-export function useCreateIdea() {
+export function useCreateIdea(workspaceId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (body: { title: string; description?: string; tags?: string[]; workspace_id: string }) =>
-      apiClient.post<Idea>(`/api/v1/workspaces/${body.workspace_id}/ideas`, body),
+    mutationFn: (body: { title: string; description?: string; tags?: string[] }) =>
+      ideasApi.create(workspaceId, body as Parameters<typeof ideasApi.create>[1]),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.ideas.all() });
+      toast.success('Idea created.');
+    },
+    onError: () => {
+      toast.error('Failed to create idea. Please try again.');
     },
   });
 }
 
-// PATCH update idea (optimistic)
-export function useUpdateIdea() {
+// PUT update idea (optimistic)
+export function useUpdateIdea(workspaceId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({ id, ...body }: Partial<Idea> & { id: string }) =>
-      apiClient.patch<Idea>(`/api/v1/ideas/${id}`, body),
+      ideasApi.update(workspaceId, id, body as Parameters<typeof ideasApi.update>[2]),
     onMutate: async ({ id, ...body }) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.ideas.detail(id) });
       const previous = queryClient.getQueryData<Idea>(queryKeys.ideas.detail(id));
@@ -85,6 +89,7 @@ export function useUpdateIdea() {
       if (context?.previous) {
         queryClient.setQueryData(queryKeys.ideas.detail(id), context.previous);
       }
+      toast.error('Failed to update idea. Please try again.');
     },
     onSettled: (_data, _err, { id }) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.ideas.detail(id) });
@@ -93,25 +98,29 @@ export function useUpdateIdea() {
   });
 }
 
-// DELETE idea (optimistic removal)
-export function useDeleteIdea() {
+// DELETE idea
+export function useDeleteIdea(workspaceId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => apiClient.delete<void>(`/api/v1/ideas/${id}`),
+    mutationFn: (id: string) => ideasApi.delete(workspaceId, id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.ideas.all() });
+      toast.success('Idea deleted.');
+    },
+    onError: () => {
+      toast.error('Failed to delete idea. Please try again.');
     },
   });
 }
 
-// PATCH /status — change idea status (optimistic)
-export function useChangeIdeaStatus() {
+// PUT /status — change idea status (optimistic)
+export function useChangeIdeaStatus(workspaceId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({ id, status }: { id: string; status: IdeaStatus }) =>
-      apiClient.patch<Idea>(`/api/v1/ideas/${id}`, { status }),
+      ideasApi.update(workspaceId, id, { status } as Parameters<typeof ideasApi.update>[2]),
     onMutate: async ({ id, status }) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.ideas.detail(id) });
       const previous = queryClient.getQueryData<Idea>(queryKeys.ideas.detail(id));
@@ -127,6 +136,7 @@ export function useChangeIdeaStatus() {
       if (context?.previous) {
         queryClient.setQueryData(queryKeys.ideas.detail(id), context.previous);
       }
+      toast.error('Failed to update status. Please try again.');
     },
     onSettled: (_data, _err, { id }) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.ideas.detail(id) });

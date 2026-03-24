@@ -46,7 +46,7 @@ export function QuickCaptureModal({ open, onClose }: QuickCaptureModalProps) {
   const [text, setText] = React.useState('');
   const [selectedPlatforms, setSelectedPlatforms] = React.useState<Platform[]>([]);
   const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspace?.id) ?? '';
-  const { mutateAsync, isPending } = useCreateIdea();
+  const { mutateAsync, isPending } = useCreateIdea(activeWorkspaceId);
   const { toast } = useToast();
 
   const togglePlatform = (platform: Platform) => {
@@ -65,7 +65,6 @@ export function QuickCaptureModal({ open, onClose }: QuickCaptureModalProps) {
       await mutateAsync({
         title: text.trim(),
         tags: selectedPlatforms,
-        workspace_id: activeWorkspaceId,
       });
       trackEvent('idea_captured', { source: 'quick_capture' });
       toast({ title: 'Idea captured!', variant: 'default' });
