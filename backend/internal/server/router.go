@@ -205,6 +205,7 @@ func NewRouter(
 						})
 						r.Post("/brainstorm", aiHandler.Brainstorm)
 						r.Post("/script-generate", aiHandler.GenerateScript)
+						r.Post("/atomize", aiHandler.Atomize)
 					})
 				}
 

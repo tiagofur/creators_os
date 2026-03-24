@@ -84,7 +84,7 @@ func main() {
 
 	// --- AI providers ---
 	aiRouter := provideAIRouter(cfg)
-	aiSvc := provideAIService(aiRouter, aiRepo, userRepo, log)
+	aiSvc := provideAIService(aiRouter, aiRepo, userRepo, contentRepo, log)
 	remixSvc := provideRemixService(remixRepo, contentRepo, asynqClient, log)
 
 	// --- WebSocket Hub ---

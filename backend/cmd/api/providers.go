@@ -384,9 +384,10 @@ func provideAIService(
 	aiRouter *ai.Router,
 	aiRepo repository.AIRepository,
 	userRepo repository.UserRepository,
+	contentRepo repository.ContentRepository,
 	logger *slog.Logger,
 ) service.AIService {
-	return service.NewAIService(aiRouter, aiRepo, userRepo, logger)
+	return service.NewAIService(aiRouter, aiRepo, userRepo, contentRepo, logger)
 }
 
 // provideRemixService creates the RemixService.
