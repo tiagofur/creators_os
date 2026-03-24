@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { label: 'Profile', href: 'profile' },
   { label: 'Workspace', href: 'workspace' },
   { label: 'Team', href: 'team' },
+  { label: 'Brand Kit', href: 'brand-kit' },
   { label: 'Integrations', href: 'integrations' },
   { label: 'Notifications', href: 'notifications' },
   { label: 'Billing', href: 'billing' },
