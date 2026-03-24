@@ -154,6 +154,15 @@ export function useDeleteGoal() {
   });
 }
 
+export function useBestPostingTimes(workspaceId: string, platform?: string) {
+  return useQuery({
+    queryKey: queryKeys.analytics.bestTimes(workspaceId, platform),
+    queryFn: () => analyticsApi.getBestPostingTimes(workspaceId, platform),
+    enabled: Boolean(workspaceId),
+    ...ANALYTICS_CACHE,
+  });
+}
+
 export function useTriggerAnalyticsSync() {
   const queryClient = useQueryClient();
   return useMutation({

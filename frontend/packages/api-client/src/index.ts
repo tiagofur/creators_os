@@ -17,5 +17,6 @@ export {
   createRemixResource,
   createUploadsResource,
   createAuditLogsResource,
+  createTemplatesResource,
 } from './resources/index';
 export type { IdeaFilters, ContentFilters, CalendarFilters, AuditLogFilters } from './resources/index';

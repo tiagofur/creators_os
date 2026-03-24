@@ -19,6 +19,7 @@ export const queryKeys = {
     list: (filters?: Record<string, unknown>) =>
       filters ? ['content', 'list', filters] as const : ['content', 'list'] as const,
     detail: (id: string) => ['content', id] as const,
+    approvalLinks: (contentId: string) => ['content', contentId, 'approval-links'] as const,
   },
   series: {
     all: () => ['series'] as const,
@@ -42,6 +43,8 @@ export const queryKeys = {
       ['analytics', 'report', 'monthly', workspaceId] as const,
     goals: (workspaceId: string) =>
       ['analytics', 'goals', workspaceId] as const,
+    bestTimes: (workspaceId: string, platform?: string) =>
+      ['analytics', 'best-times', workspaceId, platform ?? 'all'] as const,
   },
   gamification: {
     profile: (userId: string) => ['gamification', 'profile', userId] as const,

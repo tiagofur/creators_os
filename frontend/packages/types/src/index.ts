@@ -5,6 +5,7 @@ export type {
   WorkspaceMember,
   WorkspaceRole,
   WorkspaceInvitation,
+  BrandKit,
 } from './workspace';
 export type { Idea, IdeaStatus, IdeaStage, IdeaValidationScore } from './idea';
 export type {
@@ -18,6 +19,9 @@ export type {
   ContentType,
   PlatformType,
   PipelineStage,
+  ApprovalLink,
+  ApprovalStatus,
+  CreateApprovalLinkInput,
 } from './content';
 export type {
   AuthTokens,
@@ -73,6 +77,8 @@ export type {
   WeeklyReport,
   MonthlyReport,
   AnalyticsGoal,
+  PostingTimeSlot,
+  BestTimesResponse,
 } from './analytics';
 export type {
   CreatorLevel,

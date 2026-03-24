@@ -51,6 +51,20 @@ export interface MonthlyReport {
   totalIncome: number;
 }
 
+export interface PostingTimeSlot {
+  day_of_week: number;
+  hour: number;
+  avg_engagement: number;
+  post_count: number;
+  confidence: string;
+}
+
+export interface BestTimesResponse {
+  platform: string;
+  slots: PostingTimeSlot[];
+  message?: string;
+}
+
 export interface AnalyticsGoal {
   id: string;
   workspaceId: string;

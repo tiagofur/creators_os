@@ -3,6 +3,7 @@ import type {
   Workspace,
   WorkspaceMember,
   WorkspaceInvitation,
+  BrandKit,
   PaginatedResponse,
 } from '@ordo/types';
 import type { CreateWorkspaceInput, UpdateWorkspaceInput, InviteMemberInput } from '@ordo/validations';
@@ -55,6 +56,14 @@ export function createWorkspacesResource(client: OrdoApiClient) {
 
     acceptInvitation(token: string): Promise<void> {
       return client.post<void>(`/api/v1/invitations/${token}/accept`);
+    },
+
+    getBrandKit(workspaceId: string): Promise<BrandKit> {
+      return client.get<BrandKit>(`/api/v1/workspaces/${workspaceId}/brand-kit`);
+    },
+
+    updateBrandKit(workspaceId: string, data: BrandKit): Promise<BrandKit> {
+      return client.put<BrandKit>(`/api/v1/workspaces/${workspaceId}/brand-kit`, data);
     },
   };
 }

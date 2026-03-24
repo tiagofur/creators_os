@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { format, isPast } from 'date-fns';
-import { Trash2, Split } from 'lucide-react';
+import { Trash2, Split, SendHorizontal } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
 import {
   Sheet,
@@ -29,6 +29,7 @@ import { useUpdateContent, useDeleteContent } from '@/hooks/use-content';
 import { StageChecklist } from './stage-checklist';
 import { TimeTracker } from './time-tracker';
 import { AtomizeResultsDialog } from '@/components/ai-studio/atomize-results';
+import { ApprovalLinkDialog } from './approval-link-dialog';
 import { apiClient } from '@/lib/api-client';
 import { useWorkspaceStore } from '@ordo/stores';
 import type { ContentItem, PipelineStage, AtomizeResponse, AtomizedContent } from '@ordo/types';
@@ -50,6 +51,7 @@ interface ContentDetailSheetProps {
 
 export function ContentDetailSheet({ item, open, onClose }: ContentDetailSheetProps) {
   const [deleteOpen, setDeleteOpen] = React.useState(false);
+  const [approvalOpen, setApprovalOpen] = React.useState(false);
   const [atomizeOpen, setAtomizeOpen] = React.useState(false);
   const [atomizeVariations, setAtomizeVariations] = React.useState<AtomizedContent[]>([]);
   const [atomizeSourceTitle, setAtomizeSourceTitle] = React.useState('');
@@ -60,7 +62,7 @@ export function ContentDetailSheet({ item, open, onClose }: ContentDetailSheetPr
 
   const { mutate: runAtomize, isPending: isAtomizing } = useMutation({
     mutationFn: () =>
-      apiClient.ai.atomize(workspaceId, item.id),
+      apiClient.post<AtomizeResponse>(`/api/v1/workspaces/${workspaceId}/ai/atomize`, { content_id: item.id }),
     onSuccess: (data: AtomizeResponse) => {
       setAtomizeSourceTitle(data.source_title);
       setAtomizeVariations(data.variations);
@@ -214,6 +216,16 @@ export function ContentDetailSheet({ item, open, onClose }: ContentDetailSheetPr
 
             <Separator />
 
+            {/* Request Approval */}
+            <Button
+              variant="outline"
+              leftIcon={<SendHorizontal className="h-4 w-4" />}
+              onClick={() => setApprovalOpen(true)}
+              className="w-full"
+            >
+              Request Approval
+            </Button>
+
             {/* Atomize */}
             <Button
               variant="outline"
@@ -269,6 +281,14 @@ export function ContentDetailSheet({ item, open, onClose }: ContentDetailSheetPr
         sourceTitle={atomizeSourceTitle}
         variations={atomizeVariations}
         isLoading={isAtomizing}
+      />
+
+      {/* Approval link dialog */}
+      <ApprovalLinkDialog
+        contentId={item.id}
+        contentTitle={item.title}
+        open={approvalOpen}
+        onClose={() => setApprovalOpen(false)}
       />
     </>
   );

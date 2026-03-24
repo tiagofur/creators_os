@@ -74,7 +74,7 @@ func setupTestEnv(t *testing.T) *testEnv {
 	authSvc := service.NewAuthService(userRepo, sessionRepo, jwtManager, asynqClient, nil, nil)
 	wsSvc := service.NewWorkspaceService(wsRepo, invRepo, userRepo, asynqClient, nil)
 	searchSvc := service.NewSearchService(searchRepo)
-	aiSvc := service.NewAIService(nil, aiRepo, userRepo, nil, nil)
+	aiSvc := service.NewAIService(nil, aiRepo, userRepo, nil, nil, nil)
 
 	// --- Handlers ---
 	authHnd := handler.NewAuthHandler(authSvc, jwtManager, nil)

@@ -162,7 +162,7 @@ func (s *contentTemplateService) Instantiate(ctx context.Context, templateID, wo
 	var description *string
 	if useAI && tmpl.PromptTemplate != nil && s.aiSvc != nil {
 		prompt := strings.ReplaceAll(*tmpl.PromptTemplate, "{{topic}}", topic)
-		script, aiErr := s.aiSvc.GenerateScript(ctx, userID, title, prompt)
+		script, aiErr := s.aiSvc.GenerateScript(ctx, userID, workspaceID, title, prompt)
 		if aiErr != nil {
 			s.logger.WarnContext(ctx, "AI script generation failed, creating content without AI pre-fill",
 				"template_id", templateID,

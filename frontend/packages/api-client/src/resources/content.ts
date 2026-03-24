@@ -1,5 +1,5 @@
 import type { OrdoApiClient } from '../client';
-import type { ContentItem, PipelineStage, PaginatedResponse } from '@ordo/types';
+import type { ContentItem, PipelineStage, PaginatedResponse, ApprovalLink, CreateApprovalLinkInput } from '@ordo/types';
 import type { CreateContentInput, UpdateContentInput } from '@ordo/validations';
 import { contentItemSchema } from '@ordo/validations';
 import { z } from 'zod';
@@ -65,6 +65,14 @@ export function createContentResource(client: OrdoApiClient) {
 
     removeAssignment(workspaceId: string, contentId: string, userId: string): Promise<void> {
       return client.delete<void>(`/api/v1/workspaces/${workspaceId}/contents/${contentId}/assignments/${userId}`);
+    },
+
+    createApprovalLink(workspaceId: string, contentId: string, data: CreateApprovalLinkInput): Promise<ApprovalLink> {
+      return client.post<ApprovalLink>(`/api/v1/workspaces/${workspaceId}/contents/${contentId}/approval-links`, data);
+    },
+
+    listApprovalLinks(workspaceId: string, contentId: string): Promise<ApprovalLink[]> {
+      return client.get<ApprovalLink[]>(`/api/v1/workspaces/${workspaceId}/contents/${contentId}/approval-links`);
     },
   };
 }
