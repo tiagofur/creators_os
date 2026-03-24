@@ -25,7 +25,7 @@ export interface ContentFilters {
 
 export function createContentResource(client: OrdoApiClient) {
   return {
-    list(filters?: ContentFilters): Promise<PaginatedResponse<ContentItem>> {
+    list(workspaceId: string, filters?: ContentFilters): Promise<PaginatedResponse<ContentItem>> {
       const params = new URLSearchParams();
       if (filters) {
         Object.entries(filters).forEach(([key, value]) => {
@@ -34,29 +34,37 @@ export function createContentResource(client: OrdoApiClient) {
       }
       const query = params.toString();
       return client.get<PaginatedResponse<ContentItem>>(
-        `/v1/contents${query ? `?${query}` : ''}`,
+        `/api/v1/workspaces/${workspaceId}/contents${query ? `?${query}` : ''}`,
         paginatedContentSchema,
       );
     },
 
-    get(id: string): Promise<ContentItem> {
-      return client.get<ContentItem>(`/v1/contents/${id}`, contentItemSchema);
+    get(workspaceId: string, id: string): Promise<ContentItem> {
+      return client.get<ContentItem>(`/api/v1/workspaces/${workspaceId}/contents/${id}`, contentItemSchema);
     },
 
-    create(body: CreateContentInput): Promise<ContentItem> {
-      return client.post<ContentItem>('/v1/contents', body, contentItemSchema);
+    create(workspaceId: string, body: CreateContentInput): Promise<ContentItem> {
+      return client.post<ContentItem>(`/api/v1/workspaces/${workspaceId}/contents`, body, contentItemSchema);
     },
 
-    update(id: string, body: UpdateContentInput): Promise<ContentItem> {
-      return client.patch<ContentItem>(`/v1/contents/${id}`, body, contentItemSchema);
+    update(workspaceId: string, id: string, body: UpdateContentInput): Promise<ContentItem> {
+      return client.put<ContentItem>(`/api/v1/workspaces/${workspaceId}/contents/${id}`, body, contentItemSchema);
     },
 
-    delete(id: string): Promise<void> {
-      return client.delete<void>(`/v1/contents/${id}`);
+    delete(workspaceId: string, id: string): Promise<void> {
+      return client.delete<void>(`/api/v1/workspaces/${workspaceId}/contents/${id}`);
     },
 
-    moveStage(id: string, pipeline_stage: PipelineStage): Promise<ContentItem> {
-      return client.patch<ContentItem>(`/v1/contents/${id}`, { pipeline_stage }, contentItemSchema);
+    transitionStatus(workspaceId: string, id: string, status: string): Promise<ContentItem> {
+      return client.put<ContentItem>(`/api/v1/workspaces/${workspaceId}/contents/${id}/status`, { status }, contentItemSchema);
+    },
+
+    addAssignment(workspaceId: string, contentId: string, userId: string): Promise<void> {
+      return client.post<void>(`/api/v1/workspaces/${workspaceId}/contents/${contentId}/assignments`, { userId });
+    },
+
+    removeAssignment(workspaceId: string, contentId: string, userId: string): Promise<void> {
+      return client.delete<void>(`/api/v1/workspaces/${workspaceId}/contents/${contentId}/assignments/${userId}`);
     },
   };
 }

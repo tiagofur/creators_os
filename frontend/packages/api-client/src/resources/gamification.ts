@@ -3,12 +3,16 @@ import type { Achievement, GamificationProfile } from '@ordo/types';
 
 export function createGamificationResource(client: OrdoApiClient) {
   return {
-    getProfile(userId: string): Promise<GamificationProfile> {
-      return client.get<GamificationProfile>(`/v1/users/${userId}/gamification`);
+    getLeaderboard(workspaceId: string): Promise<GamificationProfile[]> {
+      return client.get<GamificationProfile[]>(`/api/v1/workspaces/${workspaceId}/gamification/leaderboard`);
     },
 
-    getAchievements(userId: string): Promise<Achievement[]> {
-      return client.get<Achievement[]>(`/v1/users/${userId}/achievements`);
+    getMyStats(workspaceId: string): Promise<GamificationProfile> {
+      return client.get<GamificationProfile>(`/api/v1/workspaces/${workspaceId}/gamification/my-stats`);
+    },
+
+    getAchievements(workspaceId: string): Promise<Achievement[]> {
+      return client.get<Achievement[]>(`/api/v1/workspaces/${workspaceId}/gamification/achievements`);
     },
   };
 }

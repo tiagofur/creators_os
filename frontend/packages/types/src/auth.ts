@@ -2,8 +2,10 @@ export type OAuthProvider = 'google' | 'github';
 
 export interface AuthTokens {
   access_token: string;
-  token_type: 'Bearer';
-  expires_in: number;
+  refresh_token: string;
+  expires_in: number; // seconds
+  /** @deprecated Backend does not return token_type */
+  token_type?: 'Bearer';
 }
 
 export interface LoginRequest {

@@ -3,9 +3,9 @@ import type { SearchResult } from '@ordo/types';
 
 export function createSearchResource(client: OrdoApiClient) {
   return {
-    search(query: string, workspaceId: string): Promise<SearchResult[]> {
-      const params = new URLSearchParams({ q: query, workspace: workspaceId });
-      return client.get<SearchResult[]>(`/v1/search?${params.toString()}`);
+    search(workspaceId: string, query: string): Promise<SearchResult[]> {
+      const params = new URLSearchParams({ q: query });
+      return client.get<SearchResult[]>(`/api/v1/workspaces/${workspaceId}/search?${params.toString()}`);
     },
   };
 }

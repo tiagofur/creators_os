@@ -22,44 +22,36 @@ import type {
 
 export function createAiResource(client: OrdoApiClient) {
   return {
-    chat(payload: AiChatRequest): Promise<AiChatResponse> {
-      return client.post<AiChatResponse>('/v1/ai/chat', payload);
+    createConversation(workspaceId: string, payload: AiChatRequest): Promise<AiConversation> {
+      return client.post<AiConversation>(`/api/v1/workspaces/${workspaceId}/ai/conversations`, payload);
     },
 
-    getConversations(): Promise<AiConversation[]> {
-      return client.get<AiConversation[]>('/v1/ai/conversations');
+    getConversations(workspaceId: string): Promise<AiConversation[]> {
+      return client.get<AiConversation[]>(`/api/v1/workspaces/${workspaceId}/ai/conversations`);
     },
 
-    brainstorm(payload: BrainstormRequest): Promise<BrainstormResponse> {
-      return client.post<BrainstormResponse>('/v1/ai/brainstorm', payload);
+    getConversation(workspaceId: string, convId: string): Promise<AiConversation> {
+      return client.get<AiConversation>(`/api/v1/workspaces/${workspaceId}/ai/conversations/${convId}`);
     },
 
-    titleLab(payload: TitleLabRequest): Promise<TitleLabResponse> {
-      return client.post<TitleLabResponse>('/v1/ai/title-lab', payload);
+    deleteConversation(workspaceId: string, convId: string): Promise<void> {
+      return client.delete<void>(`/api/v1/workspaces/${workspaceId}/ai/conversations/${convId}`);
     },
 
-    description(payload: DescriptionRequest): Promise<DescriptionResponse> {
-      return client.post<DescriptionResponse>('/v1/ai/description', payload);
+    sendMessage(workspaceId: string, convId: string, payload: AiChatRequest): Promise<AiChatResponse> {
+      return client.post<AiChatResponse>(`/api/v1/workspaces/${workspaceId}/ai/conversations/${convId}/messages`, payload);
     },
 
-    scriptDoctor(payload: ScriptDoctorRequest): Promise<ScriptDoctorResponse> {
-      return client.post<ScriptDoctorResponse>('/v1/ai/script-doctor', payload);
+    brainstorm(workspaceId: string, payload: BrainstormRequest): Promise<BrainstormResponse> {
+      return client.post<BrainstormResponse>(`/api/v1/workspaces/${workspaceId}/ai/brainstorm`, payload);
     },
 
-    remix(payload: RemixRequest): Promise<RemixResponse> {
-      return client.post<RemixResponse>('/v1/ai/remix', payload);
-    },
-
-    hooks(payload: HookRequest): Promise<HookResponse> {
-      return client.post<HookResponse>('/v1/ai/hooks', payload);
-    },
-
-    hashtags(payload: HashtagRequest): Promise<HashtagResponse> {
-      return client.post<HashtagResponse>('/v1/ai/hashtags', payload);
+    generateScript(workspaceId: string, payload: ScriptDoctorRequest): Promise<ScriptDoctorResponse> {
+      return client.post<ScriptDoctorResponse>(`/api/v1/workspaces/${workspaceId}/ai/script-generate`, payload);
     },
 
     getCredits(): Promise<AiCredits> {
-      return client.get<AiCredits>('/v1/ai/credits');
+      return client.get<AiCredits>('/api/v1/users/me/ai/credits');
     },
   };
 }

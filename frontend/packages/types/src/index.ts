@@ -1,16 +1,22 @@
 export type { UUID, Timestamp, PaginationMeta, SortOrder } from './common';
-export type { User, UserProfile, UserTier } from './user';
+export type { User, UserProfile, UserSession, SubscriptionTier, UserTier } from './user';
 export type {
   Workspace,
   WorkspaceMember,
   WorkspaceRole,
   WorkspaceInvitation,
 } from './workspace';
-export type { Idea, IdeaStatus, IdeaStage } from './idea';
+export type { Idea, IdeaStatus, IdeaStage, IdeaValidationScore } from './idea';
 export type {
   ContentItem,
+  ContentAssignment,
+  KanbanBoard,
   Series,
+  SeriesEpisode,
+  SeriesPublishingSchedule,
   ContentStatus,
+  ContentType,
+  PlatformType,
   PipelineStage,
 } from './content';
 export type {
@@ -77,7 +83,7 @@ export type {
   IncomeEntry,
 } from './sponsorship';
 export type {
-  SubscriptionTier,
+  SubscriptionTier as BillingSubscriptionTier,
   SubscriptionStatus,
   Subscription,
   Invoice,
@@ -86,4 +92,11 @@ export type {
 } from './billing';
 export { TIER_LIMITS, TIER_PRICES } from './billing';
 export type { AppNotification } from './notification';
-export type { SearchResultType, SearchResult } from './search';
+export type { SearchResultType, SearchResult, SearchResponse } from './search';
+export type {
+  PlatformCredential,
+  ScheduledPost,
+  ScheduledPostStatus,
+} from './publishing';
+export type { RemixJob, RemixJobStatus } from './remix';
+export type { ActivityLogEntry } from './audit';
