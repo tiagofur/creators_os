@@ -1,6 +1,6 @@
 'use client';
 
-import { Search, Plus, Kanban, List } from 'lucide-react';
+import { Search, Plus, Kanban, List, FileText } from 'lucide-react';
 import {
   Button,
   Input,
@@ -17,8 +17,10 @@ import {
 } from '@ordo/ui';
 import * as React from 'react';
 import { ContentForm, type ContentFormValues } from './content-form';
+import { TemplatePicker } from './template-picker';
 import { useCreateContent } from '@/hooks/use-content';
 import { useWorkspaceStore } from '@ordo/stores';
+import type { ContentTemplate } from '@ordo/types';
 
 export type PipelineViewMode = 'board' | 'list';
 
@@ -29,6 +31,8 @@ interface PipelineToolbarProps {
   onPlatformChange: (v: string) => void;
   viewMode: PipelineViewMode;
   onViewModeChange: (v: PipelineViewMode) => void;
+  templates?: ContentTemplate[];
+  onInstantiateTemplate?: (templateId: string, topic: string, useAI: boolean) => Promise<void>;
 }
 
 export function PipelineToolbar({
@@ -38,8 +42,11 @@ export function PipelineToolbar({
   onPlatformChange,
   viewMode,
   onViewModeChange,
+  templates = [],
+  onInstantiateTemplate,
 }: PipelineToolbarProps) {
   const [addOpen, setAddOpen] = React.useState(false);
+  const [templatePickerOpen, setTemplatePickerOpen] = React.useState(false);
   const { mutateAsync: createContent, isPending } = useCreateContent();
   const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspace?.id) ?? '';
   const { toast } = useToast();
@@ -115,6 +122,18 @@ export function PipelineToolbar({
           </Button>
         </div>
 
+        {/* Start from template */}
+        {templates.length > 0 && onInstantiateTemplate && (
+          <Button
+            size="sm"
+            variant="outline"
+            leftIcon={<FileText className="h-4 w-4" />}
+            onClick={() => setTemplatePickerOpen(true)}
+          >
+            From template
+          </Button>
+        )}
+
         {/* Add content */}
         <Button
           size="sm"
@@ -138,6 +157,19 @@ export function PipelineToolbar({
           />
         </DialogContent>
       </Dialog>
+
+      {/* Template picker dialog */}
+      {onInstantiateTemplate && (
+        <TemplatePicker
+          open={templatePickerOpen}
+          onOpenChange={setTemplatePickerOpen}
+          templates={templates}
+          onSelectTemplate={async (templateId, topic, useAI) => {
+            await onInstantiateTemplate(templateId, topic, useAI);
+            toast({ title: 'Content created from template!' });
+          }}
+        />
+      )}
     </>
   );
 }

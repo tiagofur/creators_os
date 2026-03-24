@@ -50,6 +50,7 @@ func NewRouter(
 	searchHandler *handler.SearchHandler,
 	auditHandler *handler.AuditHandler,
 	contentTemplateHandler *handler.ContentTemplateHandler,
+	approvalHandler *handler.ApprovalHandler,
 ) chi.Router {
 	r := chi.NewRouter()
 
@@ -81,6 +82,14 @@ func NewRouter(
 			w.WriteHeader(http.StatusOK)
 			_, _ = w.Write([]byte(`{"message":"pong"}`))
 		})
+
+		// Public review routes — NO authentication required
+		if approvalHandler != nil {
+			r.Route("/review/{token}", func(r chi.Router) {
+				r.Get("/", approvalHandler.GetReview)
+				r.Post("/decision", approvalHandler.SubmitDecision)
+			})
+		}
 
 		// Auth routes — rate limited at 5 req/min
 		r.Route("/auth", func(r chi.Router) {
@@ -163,6 +172,11 @@ func NewRouter(
 							r.Put("/status", contentHandler.TransitionStatus)
 							r.Post("/assignments", contentHandler.AddAssignment)
 							r.Delete("/assignments/{userId}", contentHandler.RemoveAssignment)
+							// Approval links — authenticated
+							if approvalHandler != nil {
+								r.Post("/approval-links", approvalHandler.CreateLink)
+								r.Get("/approval-links", approvalHandler.ListLinks)
+							}
 						})
 					})
 				}
@@ -251,6 +265,7 @@ func NewRouter(
 						r.Delete("/schedule/{id}", publishingHandler.CancelScheduledPost)
 					})
 				}
+						r.Get("/best-times", analyticsHandler.GetBestPostingTimes)
 
 				// Analytics routes
 				if analyticsHandler != nil {

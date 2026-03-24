@@ -279,6 +279,24 @@ func (h *AnalyticsHandler) UpdateGoal(w http.ResponseWriter, r *http.Request) {
 	JSON(w, http.StatusOK, goal)
 }
 
+// GET /api/v1/workspaces/{workspaceId}/analytics/best-times?platform={platform}
+func (h *AnalyticsHandler) GetBestPostingTimes(w http.ResponseWriter, r *http.Request) {
+	member, ok := middleware.WorkspaceMemberFromContext(r.Context())
+	if !ok {
+		Error(w, domain.ErrUnauthorized)
+		return
+	}
+
+	platform := r.URL.Query().Get("platform")
+
+	result, err := h.svc.GetBestPostingTimes(r.Context(), member.WorkspaceID, platform)
+	if err != nil {
+		Error(w, err)
+		return
+	}
+	JSON(w, http.StatusOK, result)
+}
+
 // DELETE /api/v1/workspaces/{workspaceId}/analytics/goals/{goalId}
 func (h *AnalyticsHandler) DeleteGoal(w http.ResponseWriter, r *http.Request) {
 	_, ok := middleware.WorkspaceMemberFromContext(r.Context())

@@ -14,6 +14,7 @@ export { createPublishingResource } from './publishing';
 export { createRemixResource } from './remix';
 export { createUploadsResource } from './uploads';
 export { createAuditLogsResource } from './audit-logs';
+export { createTemplatesResource } from './templates';
 export type { IdeaFilters } from './ideas';
 export type { ContentFilters } from './content';
 export type { BillingPeriod } from './billing';

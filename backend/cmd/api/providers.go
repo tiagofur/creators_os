@@ -251,11 +251,12 @@ func provideRouter(
 	searchHandler *handler.SearchHandler,
 	auditHandler *handler.AuditHandler,
 	contentTemplateHandler *handler.ContentTemplateHandler,
+	approvalHandler *handler.ApprovalHandler,
 ) *server.Server {
 	router := server.NewRouter(cfg, redisClient, healthHandler, authHandler, userHandler, workspaceHandler, jwtManager, wsRepo,
 		ideaHandler, contentHandler, seriesHandler, uploadHandler, aiHandler, remixHandler,
 		publishingHandler, analyticsHandler, gamificationHandler, sponsorshipHandler, billingHandler, wsHandler,
-		searchHandler, auditHandler, contentTemplateHandler)
+		searchHandler, auditHandler, contentTemplateHandler, approvalHandler)
 	return server.NewServer(cfg.ServerPort, router)
 }
 
@@ -386,9 +387,10 @@ func provideAIService(
 	aiRepo repository.AIRepository,
 	userRepo repository.UserRepository,
 	contentRepo repository.ContentRepository,
+	wsRepo repository.WorkspaceRepository,
 	logger *slog.Logger,
 ) service.AIService {
-	return service.NewAIService(aiRouter, aiRepo, userRepo, contentRepo, logger)
+	return service.NewAIService(aiRouter, aiRepo, userRepo, contentRepo, wsRepo, logger)
 }
 
 // provideRemixService creates the RemixService.
@@ -452,4 +454,23 @@ func provideContentTemplateService(
 // provideContentTemplateHandler creates the content template HTTP handler.
 func provideContentTemplateHandler(templateSvc service.ContentTemplateService) *handler.ContentTemplateHandler {
 	return handler.NewContentTemplateHandler(templateSvc)
+}
+
+// provideApprovalLinkRepository creates the ApprovalLinkRepository.
+func provideApprovalLinkRepository(db *pgxpool.Pool) repository.ApprovalLinkRepository {
+	return repository.NewApprovalLinkRepository(db)
+}
+
+// provideApprovalService creates the ApprovalService.
+func provideApprovalService(
+	approvalRepo repository.ApprovalLinkRepository,
+	contentRepo repository.ContentRepository,
+	logger *slog.Logger,
+) service.ApprovalService {
+	return service.NewApprovalService(approvalRepo, contentRepo, logger)
+}
+
+// provideApprovalHandler creates the approval HTTP handler.
+func provideApprovalHandler(approvalSvc service.ApprovalService) *handler.ApprovalHandler {
+	return handler.NewApprovalHandler(approvalSvc)
 }

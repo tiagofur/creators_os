@@ -69,6 +69,7 @@ func main() {
 	ideaRepo, contentRepo, seriesRepo := provideContentRepositories(db)
 	aiRepo, remixRepo := provideAIRepositories(db)
 	publishingRepo, analyticsRepo, gamificationRepo, sponsorshipRepo := providePublishingRepositories(db)
+	contentTemplateRepo := provideContentTemplateRepository(db)
 
 	// --- Services ---
 	authSvc := provideAuthService(userRepo, sessionRepo, jwtManager, asynqClient, oauthManager, log)
@@ -84,8 +85,9 @@ func main() {
 
 	// --- AI providers ---
 	aiRouter := provideAIRouter(cfg)
-	aiSvc := provideAIService(aiRouter, aiRepo, userRepo, contentRepo, log)
+	aiSvc := provideAIService(aiRouter, aiRepo, userRepo, contentRepo, wsRepo, log)
 	remixSvc := provideRemixService(remixRepo, contentRepo, asynqClient, log)
+	contentTemplateSvc := provideContentTemplateService(contentTemplateRepo, contentRepo, aiSvc, log)
 
 	// --- WebSocket Hub ---
 	wsHub := provideWSHub()
@@ -122,6 +124,10 @@ func main() {
 	wsHandlerHTTP := provideWSHandler(wsHub, jwtManager)
 	searchHandler := provideSearchHandler(db)
 	auditHandler := provideAuditHandler(db)
+	contentTemplateHandler := provideContentTemplateHandler(contentTemplateSvc)
+	approvalRepo := provideApprovalLinkRepository(db)
+	approvalSvc := provideApprovalService(approvalRepo, contentRepo, log)
+	approvalHandler := provideApprovalHandler(approvalSvc)
 
 	// --- Asynq Worker ---
 	worker := job.NewWorker(redisClient, log)
@@ -189,7 +195,7 @@ func main() {
 	apiServer := provideRouter(cfg, redisClient, healthHandler, authHandler, userHandler, workspaceHandler, jwtManager, wsRepo,
 		ideaHandler, contentHandler, seriesHandler, uploadHandler, aiHandler, remixHandler,
 		publishingHandler, analyticsHandler, gamificationHandler, sponsorshipHandler, billingHandler, wsHandlerHTTP,
-		searchHandler, auditHandler)
+		searchHandler, auditHandler, contentTemplateHandler, approvalHandler)
 
 	// Start API server in background
 	serverErr := make(chan error, 1)

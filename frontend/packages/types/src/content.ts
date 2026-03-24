@@ -58,6 +58,67 @@ export interface KanbanBoard {
   columns: Record<string, ContentItem[]>;
 }
 
+export interface ContentTemplate {
+  id: UUID;
+  workspace_id: UUID;
+  name: string;
+  description?: string | null;
+  content_type: ContentType;
+  platform_target?: PlatformType | null;
+  default_checklist?: Record<string, unknown> | null;
+  prompt_template?: string | null;
+  metadata?: Record<string, unknown> | null;
+  created_at: Timestamp;
+  updated_at: Timestamp;
+}
+
+export interface CreateTemplateInput {
+  name: string;
+  description?: string;
+  content_type: ContentType;
+  platform_target?: PlatformType;
+  default_checklist?: Record<string, unknown>;
+  prompt_template?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface UpdateTemplateInput {
+  name?: string;
+  description?: string;
+  content_type?: ContentType;
+  platform_target?: PlatformType;
+  default_checklist?: Record<string, unknown>;
+  prompt_template?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface InstantiateTemplateInput {
+  topic: string;
+  use_ai: boolean;
+}
+
+export type ApprovalStatus = 'pending' | 'approved' | 'rejected';
+
+export interface ApprovalLink {
+  id: UUID;
+  content_id: UUID;
+  workspace_id?: UUID;
+  token: string;
+  reviewer_name?: string;
+  reviewer_email?: string;
+  status: ApprovalStatus;
+  comment?: string;
+  expires_at: Timestamp;
+  decided_at?: Timestamp;
+  created_at: Timestamp;
+}
+
+export interface CreateApprovalLinkInput {
+  reviewer_name?: string;
+  reviewer_email?: string;
+  expires_in_hours?: number;
+}
+
 export interface Series {
   id: UUID;
   workspace_id: UUID;

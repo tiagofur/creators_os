@@ -20,6 +20,16 @@ export interface Workspace {
   timezone?: string;
 }
 
+export interface BrandKit {
+  voice: string;
+  tone: string;
+  style_rules: string;
+  boilerplate_intro: string;
+  boilerplate_outro: string;
+  keywords: string[];
+  anti_keywords: string[];
+}
+
 export interface WorkspaceMember {
   id: UUID;
   workspace_id: UUID;

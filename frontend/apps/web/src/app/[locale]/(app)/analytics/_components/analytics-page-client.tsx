@@ -4,7 +4,8 @@ import * as React from 'react';
 import dynamic from 'next/dynamic';
 import { useWorkspaceStore } from '@ordo/stores';
 import { Skeleton } from '@ordo/ui';
-import { usePlatformMetrics, usePipelineVelocity, useHeatmap } from '@/hooks/use-analytics';
+import { usePlatformMetrics, usePipelineVelocity, useHeatmap, useBestPostingTimes } from '@/hooks/use-analytics';
+import { BestTimesHeatmap } from '@/components/analytics/best-times-heatmap';
 import { AnalyticsHeader, type AnalyticsPeriod } from './analytics-header';
 import { PlatformMetricsGrid } from './platform-metrics-grid';
 import { AnalyticsSkeleton } from './analytics-skeleton';
@@ -34,6 +35,7 @@ const PublishingTrendChart = dynamic(
 
 export function AnalyticsPageClient() {
   const [period, setPeriod] = React.useState<AnalyticsPeriod>('30d');
+  const [bestTimesPlatform, setBestTimesPlatform] = React.useState('');
   const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspace?.id) ?? '';
   const currentYear = new Date().getFullYear();
 
@@ -43,6 +45,10 @@ export function AnalyticsPageClient() {
   );
   const { data: velocityData, isLoading: velocityLoading } = usePipelineVelocity(activeWorkspaceId);
   const { data: heatmapData, isLoading: heatmapLoading } = useHeatmap(activeWorkspaceId, currentYear);
+  const { data: bestTimesData, isLoading: bestTimesLoading } = useBestPostingTimes(
+    activeWorkspaceId,
+    bestTimesPlatform || undefined,
+  );
 
   const isLoading = platformLoading || velocityLoading || heatmapLoading;
 
@@ -61,6 +67,13 @@ export function AnalyticsPageClient() {
               <PipelineVelocityChart data={velocityData ?? []} />
               <PublishingTrendChart data={heatmapData ?? []} />
             </div>
+
+            <BestTimesHeatmap
+              data={bestTimesData}
+              isLoading={bestTimesLoading}
+              platform={bestTimesPlatform}
+              onPlatformChange={setBestTimesPlatform}
+            />
           </>
         )}
       </div>

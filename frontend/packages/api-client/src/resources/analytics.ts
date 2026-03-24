@@ -7,6 +7,7 @@ import type {
   WeeklyReport,
   MonthlyReport,
   AnalyticsGoal,
+  BestTimesResponse,
 } from '@ordo/types';
 
 export function createAnalyticsResource(client: OrdoApiClient) {
@@ -101,6 +102,13 @@ export function createAnalyticsResource(client: OrdoApiClient) {
     triggerSync(workspaceId: string): Promise<void> {
       return client.post<void>(
         `/api/v1/workspaces/${workspaceId}/analytics/sync`,
+      );
+    },
+
+    getBestPostingTimes(workspaceId: string, platform?: string): Promise<BestTimesResponse> {
+      const params = platform ? `?platform=${encodeURIComponent(platform)}` : '';
+      return client.get<BestTimesResponse>(
+        `/api/v1/workspaces/${workspaceId}/analytics/best-times${params}`,
       );
     },
   };
