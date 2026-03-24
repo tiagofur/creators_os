@@ -21,8 +21,8 @@ export function BrainstormerResults({
   onRegenerate,
 }: BrainstormerResultsProps) {
   const { toast } = useToast();
-  const { mutateAsync: createIdea, isPending: isSavingAll } = useCreateIdea();
-  const workspaceId = useWorkspaceStore((s) => s.activeWorkspace?.id);
+  const workspaceId = useWorkspaceStore((s) => s.activeWorkspace?.id) ?? '';
+  const { mutateAsync: createIdea, isPending: isSavingAll } = useCreateIdea(workspaceId);
 
   const handleSaveAll = async () => {
     if (!workspaceId) return;
@@ -32,7 +32,6 @@ export function BrainstormerResults({
           createIdea({
             title: idea.title,
             description: idea.description,
-            workspace_id: workspaceId,
           }),
         ),
       );
