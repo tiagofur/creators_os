@@ -133,7 +133,7 @@ func main() {
 	// Notification tasks
 	mux.HandleFunc(tasks.TypeAssignmentNotification, tasks.HandleAssignmentNotificationTask)
 	// Idea validation task
-	ideaValidationHandler := &tasks.IdeaValidationHandler{IdeaRepo: ideaRepo}
+	ideaValidationHandler := &tasks.IdeaValidationHandler{IdeaRepo: ideaRepo, AIRouter: aiRouter}
 	mux.HandleFunc(tasks.TypeIdeaValidation, ideaValidationHandler.HandleIdeaValidationTask)
 	// Remix worker
 	mux.HandleFunc(tasks.TypeRemixAnalysis, tasks.MakeHandleRemixAnalysisTask(remixRepo, aiRouter))
